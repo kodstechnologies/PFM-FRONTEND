@@ -18,6 +18,9 @@ import UserPrivacyPolicy from '../pages/privacyPolicy/UserPrivacyPolicy';
 import DeliveryPartnerPrivacyPolicy from '../pages/privacyPolicy/DeliveryPartnerPrivacyPolicy';
 import UserTermsAndCondition from '../pages/privacyPolicy/UserTermsAndCondition';
 import DeliveryPartnerTermsAndCondition from '../pages/privacyPolicy/DeliveryPartnerTermsAndCondition';
+import DeleteAccount from '../pages/privacyPolicy/DeleteAcount';
+import { Layout } from 'lucide-react';
+import LayoutPage from '../pages/privacyPolicy/LayoutPage';
 
 const DeliveryPartner = lazy(() => import('../pages/Manager/DeliveryPartner'));
 const AddPartner = lazy(() => import('../pages/Manager/DeliveryPartner/AddPartner'));
@@ -92,7 +95,18 @@ export const commonRoutes: AppRoute[] = [
     path: '/delivery-partner/terms-and-condition',
     element: <DeliveryPartnerTermsAndCondition />,
     layout: 'blank'
+  },
+  {
+    path: '/delete-account',
+    element: <DeleteAccount />,
+    layout: 'blank'
+  },
+  {
+    path: '/landing-page',
+    element: <LayoutPage />,
+    layout: 'blank', // Custom prop used by your app to apply a specific layout or no layout
   }
+
   ,
   // store role ===========================================================
   {
