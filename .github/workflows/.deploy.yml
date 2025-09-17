@@ -1,9 +1,7 @@
-name: Node.js CI
+name: Deploy PFM Frontend to EC2
 
 on:
   push:
-    branches: [ "main" ]
-  pull_request:
     branches: [ "main" ]
 
 jobs:
@@ -15,7 +13,8 @@ jobs:
         node-version: [18.x]
 
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout Code
+      uses: actions/checkout@v4
 
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v3
@@ -23,23 +22,24 @@ jobs:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
 
-    - run: npm ci
+    - name: Install Dependencies
+      run: npm ci
 
-    # 🛠️ Fix directory ownership before build to avoid EACCES
     - name: Fix permissions before build
       run: |
         sudo chown -R $USER:$USER .
         sudo chmod -R u+rwX,go+rX .
 
-    # ⭐ Inject env from GitHub Secrets here
+    # ⭐ Build React frontend with env variable
     - name: Build React frontend
       run: NODE_OPTIONS="--max-old-space-size=3072" npm run build
       env:
         VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
 
-    - name: Serve React build with PM2
+    # 🚀 Deploy and serve with PM2
+    - name: Deploy React build with PM2
       run: |
         sudo npm install -g pm2
         pm2 delete pfm-frontend || true
-        pm2 serve build 8080 --name pfm-frontend --watch
+        pm2 serve dist 8080 --name pfm-frontend --watch
         pm2 save
