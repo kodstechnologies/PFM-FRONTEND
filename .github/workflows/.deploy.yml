@@ -31,8 +31,11 @@ jobs:
         sudo chown -R $USER:$USER .
         sudo chmod -R u+rwX,go+rX .
 
+    # ⭐ Inject env from GitHub Secrets here
     - name: Build React frontend
       run: NODE_OPTIONS="--max-old-space-size=3072" npm run build
+      env:
+        VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
 
     - name: Serve React build with PM2
       run: |
