@@ -34,15 +34,17 @@ function App({ children }: PropsWithChildren) {
 
         // Run connection test after a short delay to ensure app is fully loaded
         const timer = setTimeout(testConnections, 1000);
-        
+
         return () => clearTimeout(timer);
     }, []);
 
+    console.log(import.meta.env.VITE_API_BASE_URL, "updated .. 18-09-2025");
+
+
     return (
         <div
-            className={`${(store.getState().themeConfig.sidebar && 'toggle-sidebar') || ''} ${themeConfig.menu} ${themeConfig.layout} ${
-                themeConfig.rtlClass
-            } main-section antialiased relative font-nunito text-sm font-normal`}
+            className={`${(store.getState().themeConfig.sidebar && 'toggle-sidebar') || ''} ${themeConfig.menu} ${themeConfig.layout} ${themeConfig.rtlClass
+                } main-section antialiased relative font-nunito text-sm font-normal`}
         >
             {children}
         </div>
