@@ -35,6 +35,9 @@ jobs:
         echo "${{ secrets.PFM_ENV }}" > .env
         cat .env
 
+    - name: Verify .env
+        run: cat .env
+
     # ⭐ Build React frontend with env variable
     - name: Build React frontend
       run: NODE_OPTIONS="--max-old-space-size=3072" npm run build
