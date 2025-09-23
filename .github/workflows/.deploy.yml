@@ -9,33 +9,34 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout Code
-      uses: actions/checkout@v4
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: 20
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
 
-    - name: Install dependencies
-      run: |
-        cd PFM-BACKEND
-        npm install --production
+      - name: Install dependencies
+        run: |
+          cd PFM-BACKEND
+          npm install --production
 
-    - name: Build project (if applicable)
-      run: |
-        cd PFM-BACKEND
-        npm run build || true
+      - name: Build project (optional)
+        run: |
+          cd PFM-BACKEND
+          npm run build || true
 
-    - name: Update .env on EC2
-      uses: appleboy/ssh-action@v0.1.7
-      with:
-        host: ${{ secrets.EC2_HOST }}
-        username: ubuntu
-        key: ${{ secrets.EC2_SSH_KEY }}
-        port: 22
-        script: |
-          cat > /home/ubuntu/PFM-BACKEND/.env <<'EOF'
+      - name: Update .env on EC2
+        uses: appleboy/ssh-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_KEY }}
+          port: 22
+          script: |
+            cd /home/ubuntu/PFM-BACKEND
+            cat > .env <<'EOF'
 PORT=8000
 NODE_ENV=development
 MONGODB_URI=${{ secrets.MONGODB_URI }}
@@ -56,15 +57,15 @@ CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET }}
 AWS_S3_BUCKET=${{ secrets.AWS_S3_BUCKET }}
 EOF
 
-    - name: Restart PM2 on EC2
-      uses: appleboy/ssh-action@v0.1.7
-      with:
-        host: ${{ secrets.EC2_HOST }}
-        username: ubuntu
-        key: ${{ secrets.EC2_SSH_KEY }}
-        port: 22
-        script: |
-          cd /home/ubuntu/PFM-BACKEND
-          pm2 stop pfm-backend || true
-          pm2 start server.js --name pfm-backend
-          pm2 save
+      - name: Restart PM2 on EC2
+        uses: appleboy/ssh-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_KEY }}
+          port: 22
+          script: |
+            cd /home/ubuntu/PFM-BACKEND
+            pm2 stop pfm-backend || true
+            pm2 start server.js --name pfm-backend
+            pm2 save
