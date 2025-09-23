@@ -1,54 +1,106 @@
-name: Deploy PFM Frontend to EC2
+name: Deploy PFM Fullstack to EC2
 
 on:
   push:
     branches: [ "main" ]
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
 
     strategy:
       matrix:
-        node-version: [18.x]
+        node-version: [20.x]
+
+    env:
+      # Backend secrets
+      PORT: ${{ secrets.PORT }}
+      NODE_ENV: ${{ secrets.NODE_ENV }}
+      MONGODB_URI: ${{ secrets.MONGODB_URI }}
+      MONGODB_DB_NAME: ${{ secrets.MONGODB_DB_NAME }}
+      ACCESS_TOKEN_SECRET: ${{ secrets.ACCESS_TOKEN_SECRET }}
+      REFRESH_TOKEN_SECRET: ${{ secrets.REFRESH_TOKEN_SECRET }}
+      ACCESS_TOKEN_VALIDATION_TIME: ${{ secrets.ACCESS_TOKEN_VALIDATION_TIME }}
+      REFRESH_TOKEN_VALIDATION_TIME: ${{ secrets.REFRESH_TOKEN_VALIDATION_TIME }}
+      FIREBASE_TYPE: ${{ secrets.FIREBASE_TYPE }}
+      FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
+      FIREBASE_PRIVATE_KEY_ID: ${{ secrets.FIREBASE_PRIVATE_KEY_ID }}
+      FIREBASE_PRIVATE_KEY: ${{ secrets.FIREBASE_PRIVATE_KEY }}
+      FIREBASE_CLIENT_EMAIL: ${{ secrets.FIREBASE_CLIENT_EMAIL }}
+      FIREBASE_CLIENT_ID: ${{ secrets.FIREBASE_CLIENT_ID }}
+      FIREBASE_AUTH_URI: ${{ secrets.FIREBASE_AUTH_URI }}
+      FIREBASE_TOKEN_URI: ${{ secrets.FIREBASE_TOKEN_URI }}
+      FIREBASE_AUTH_PROVIDER_X509_CERT_URL: ${{ secrets.FIREBASE_AUTH_PROVIDER_X509_CERT_URL }}
+      FIREBASE_CLIENT_X509_CERT_URL: ${{ secrets.FIREBASE_CLIENT_X509_CERT_URL }}
+      FIREBASE_UNIVERSE_DOMAIN: ${{ secrets.FIREBASE_UNIVERSE_DOMAIN }}
+      SENDER_ID: ${{ secrets.SENDER_ID }}
+      TEMPLATE_ID: ${{ secrets.TEMPLATE_ID }}
+      EMAIL_NAME: ${{ secrets.EMAIL_NAME }}
+      CLOUDINARY_CLOUD_NAME: ${{ secrets.CLOUDINARY_CLOUD_NAME }}
+      CLOUDINARY_API_KEY: ${{ secrets.CLOUDINARY_API_KEY }}
+      CLOUDINARY_API_SECRET: ${{ secrets.CLOUDINARY_API_SECRET }}
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
+      AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
+      AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
 
     steps:
+      # 1️⃣ Checkout code
       - name: Checkout Code
         uses: actions/checkout@v4
 
+      # 2️⃣ Set up Node.js
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
 
-      - name: Install Dependencies
-        run: npm ci
-
-      - name: Fix permissions before build
+      # 3️⃣ Fix permissions
+      - name: Fix permissions
         run: |
           sudo chown -R $USER:$USER .
           sudo chmod -R u+rwX,go+rX .
 
-      # ⭐ Write .env for frontend
-      - name: Write .env for frontend
+      # 4️⃣ Install frontend dependencies
+      - name: Install Frontend Dependencies
         run: |
-          touch .env
+          cd frontend
+          npm ci
+
+      # 5️⃣ Write frontend .env from secret
+      - name: Write frontend .env
+        run: |
+          cd frontend
           echo "${{ secrets.PFM_ENV }}" > .env
           cat .env
 
-      # ⭐ Verify .env content (debug step)
-      - name: Verify .env
-        run: cat .env
-
-      # ⭐ Build React frontend
+      # 6️⃣ Build React frontend
       - name: Build React frontend
-        run: NODE_OPTIONS="--max-old-space-size=3072" npm run build
-
-      # 🚀 Deploy and serve with PM2
-      - name: Deploy React build with PM2
         run: |
+          cd frontend
+          NODE_OPTIONS="--max-old-space-size=3072" npm run build
+
+      # 7️⃣ Deploy React frontend with PM2
+      - name: Deploy React frontend
+        run: |
+          cd frontend
           sudo npm install -g pm2
           pm2 delete pfm-frontend || true
-          pm2 serve dist 8080 --name pfm-frontend --watch
+          pm2 serve build 8080 --name pfm-frontend --watch
+          pm2 save
+
+      # 8️⃣ Install backend dependencies
+      - name: Install Backend Dependencies
+        run: |
+          cd ../PFM-BACKEND
+          npm ci
+
+      # 9️⃣ Start backend with PM2
+      - name: Start Backend
+        run: |
+          cd ../PFM-BACKEND
+          sudo npm install -g pm2
+          pm2 delete pfm-backend || true
+          pm2 start server.js --name pfm-backend
           pm2 save
