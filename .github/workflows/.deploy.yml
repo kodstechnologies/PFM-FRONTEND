@@ -1,4 +1,4 @@
-name: Deploy PFM Fullstack to EC2
+name: Deploy PFM Backend
 
 on:
   push:
@@ -8,86 +8,68 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        node-version: [20.x]
-
-    env:
-      # Backend secrets
-      PORT: ${{ secrets.PORT }}
-      NODE_ENV: ${{ secrets.NODE_ENV }}
-      MONGODB_URI: ${{ secrets.MONGODB_URI }}
-      MONGODB_DB_NAME: ${{ secrets.MONGODB_DB_NAME }}
-      ACCESS_TOKEN_SECRET: ${{ secrets.ACCESS_TOKEN_SECRET }}
-      REFRESH_TOKEN_SECRET: ${{ secrets.REFRESH_TOKEN_SECRET }}
-      ACCESS_TOKEN_VALIDATION_TIME: ${{ secrets.ACCESS_TOKEN_VALIDATION_TIME }}
-      REFRESH_TOKEN_VALIDATION_TIME: ${{ secrets.REFRESH_TOKEN_VALIDATION_TIME }}
-      FIREBASE_TYPE: ${{ secrets.FIREBASE_TYPE }}
-      FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
-      FIREBASE_PRIVATE_KEY_ID: ${{ secrets.FIREBASE_PRIVATE_KEY_ID }}
-      FIREBASE_PRIVATE_KEY: ${{ secrets.FIREBASE_PRIVATE_KEY }}
-      FIREBASE_CLIENT_EMAIL: ${{ secrets.FIREBASE_CLIENT_EMAIL }}
-      FIREBASE_CLIENT_ID: ${{ secrets.FIREBASE_CLIENT_ID }}
-      FIREBASE_AUTH_URI: ${{ secrets.FIREBASE_AUTH_URI }}
-      FIREBASE_TOKEN_URI: ${{ secrets.FIREBASE_TOKEN_URI }}
-      FIREBASE_AUTH_PROVIDER_X509_CERT_URL: ${{ secrets.FIREBASE_AUTH_PROVIDER_X509_CERT_URL }}
-      FIREBASE_CLIENT_X509_CERT_URL: ${{ secrets.FIREBASE_CLIENT_X509_CERT_URL }}
-      FIREBASE_UNIVERSE_DOMAIN: ${{ secrets.FIREBASE_UNIVERSE_DOMAIN }}
-      SENDER_ID: ${{ secrets.SENDER_ID }}
-      TEMPLATE_ID: ${{ secrets.TEMPLATE_ID }}
-      EMAIL_NAME: ${{ secrets.EMAIL_NAME }}
-      CLOUDINARY_CLOUD_NAME: ${{ secrets.CLOUDINARY_CLOUD_NAME }}
-      CLOUDINARY_API_KEY: ${{ secrets.CLOUDINARY_API_KEY }}
-      CLOUDINARY_API_SECRET: ${{ secrets.CLOUDINARY_API_SECRET }}
-      AWS_REGION: ${{ secrets.AWS_REGION }}
-      AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
-      AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
-      AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
-
     steps:
-      # 1️⃣ Checkout code
-      - name: Checkout Code
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2️⃣ Set up Node.js
-      - name: Use Node.js ${{ matrix.node-version }}
+      - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: ${{ matrix.node-version }}
-          cache: 'npm'
+          node-version: 18
 
-      # 3️⃣ Fix permissions
-      - name: Fix permissions
-        run: |
-          sudo chown -R $USER:$USER .
-          sudo chmod -R u+rwX,go+rX .
+      - name: Install dependencies
+        run: npm install
 
-      # 4️⃣ Install dependencies
-      - name: Install Dependencies
-        run: npm ci
+      - name: Build project (if needed)
+        run: npm run build
 
-      # 5️⃣ Write .env from secret
-      - name: Write .env
-        run: |
-          echo "${{ secrets.PFM_ENV }}" > .env
-          cat .env
+      - name: Copy code to EC2
+        uses: appleboy/scp-action@v0.1.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: 22
+          source: "."
+          target: "/home/ubuntu/PFM-BACKEND/"
 
-      # 6️⃣ Build React frontend
-      - name: Build React frontend
-        run: NODE_OPTIONS="--max-old-space-size=3072" npm run build
+      - name: Update .env on EC2
+        uses: appleboy/ssh-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: 22
+          script: |
+            cat > /home/ubuntu/PFM-BACKEND/.env <<EOL
+PORT=8000
+NODE_ENV=development
+MONGODB_URI=${{ secrets.MONGODB_URI }}
+MONGODB_DB_NAME=PFM
+ACCESS_TOKEN_SECRET=${{ secrets.ACCESS_TOKEN_SECRET }}
+REFRESH_TOKEN_SECRET=${{ secrets.REFRESH_TOKEN_SECRET }}
+ACCESS_TOKEN_VALIDATION_TIME=10d
+REFRESH_TOKEN_VALIDATION_TIME=30d
+FIREBASE_TYPE=${{ secrets.FIREBASE_TYPE }}
+FIREBASE_PROJECT_ID=${{ secrets.FIREBASE_PROJECT_ID }}
+FIREBASE_PRIVATE_KEY=${{ secrets.FIREBASE_PRIVATE_KEY }}
+FIREBASE_CLIENT_EMAIL=${{ secrets.FIREBASE_CLIENT_EMAIL }}
+SENDER_ID=${{ secrets.SENDER_ID }}
+TEMPLATE_ID=${{ secrets.TEMPLATE_ID }}
+CLOUDINARY_CLOUD_NAME=${{ secrets.CLOUDINARY_CLOUD_NAME }}
+CLOUDINARY_API_KEY=${{ secrets.CLOUDINARY_API_KEY }}
+CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET }}
+AWS_S3_BUCKET=${{ secrets.AWS_S3_BUCKET }}
+EOL
 
-      # 7️⃣ Deploy frontend with PM2
-      - name: Deploy React frontend
-        run: |
-          sudo npm install -g pm2
-          pm2 delete pfm-frontend || true
-          pm2 serve build 8080 --name pfm-frontend --watch
-          pm2 save
-
-      # 8️⃣ Start backend with PM2
-      - name: Start Backend
-        run: |
-          sudo npm install -g pm2
-          pm2 delete pfm-backend || true
-          pm2 start server.js --name pfm-backend
-          pm2 save
+      - name: Restart PM2 on EC2
+        uses: appleboy/ssh-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: 22
+          script: |
+            cd /home/ubuntu/PFM-BACKEND
+            pm2 restart pfm-backend || pm2 start server.js --name pfm-backend
+            pm2 save
