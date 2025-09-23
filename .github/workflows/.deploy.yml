@@ -12,12 +12,12 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Set up Node.js
+      - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 18.x
 
-      - name: Deploy to EC2 via SSH
+      - name: Deploy to EC2
         uses: appleboy/ssh-action@v0.1.6
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -28,38 +28,36 @@ jobs:
             cd /home/ubuntu/PFM-BACKEND
             git reset --hard
             git pull origin main
-
             echo "Updating .env with GitHub secrets"
             cat <<EOF > .env
-PORT=${{ secrets.PORT }}
-NODE_ENV=${{ secrets.NODE_ENV }}
-MONGODB_URI=${{ secrets.MONGODB_URI }}
-MONGODB_DB_NAME=${{ secrets.MONGODB_DB_NAME }}
-ACCESS_TOKEN_SECRET=${{ secrets.ACCESS_TOKEN_SECRET }}
-REFRESH_TOKEN_SECRET=${{ secrets.REFRESH_TOKEN_SECRET }}
-ACCESS_TOKEN_VALIDATION_TIME=${{ secrets.ACCESS_TOKEN_VALIDATION_TIME }}
-REFRESH_TOKEN_VALIDATION_TIME=${{ secrets.REFRESH_TOKEN_VALIDATION_TIME }}
-FIREBASE_TYPE=${{ secrets.FIREBASE_TYPE }}
-FIREBASE_PROJECT_ID=${{ secrets.FIREBASE_PROJECT_ID }}
-FIREBASE_PRIVATE_KEY="${{ secrets.FIREBASE_PRIVATE_KEY }}"
-FIREBASE_CLIENT_EMAIL=${{ secrets.FIREBASE_CLIENT_EMAIL }}
-FIREBASE_CLIENT_ID=${{ secrets.FIREBASE_CLIENT_ID }}
-FIREBASE_AUTH_URI=${{ secrets.FIREBASE_AUTH_URI }}
-FIREBASE_TOKEN_URI=${{ secrets.FIREBASE_TOKEN_URI }}
-FIREBASE_AUTH_PROVIDER_X509_CERT_URL=${{ secrets.FIREBASE_AUTH_PROVIDER_X509_CERT_URL }}
-FIREBASE_CLIENT_X509_CERT_URL=${{ secrets.FIREBASE_CLIENT_X509_CERT_URL }}
-FIREBASE_UNIVERSE_DOMAIN=${{ secrets.FIREBASE_UNIVERSE_DOMAIN }}
-SENDER_ID=${{ secrets.SENDER_ID }}
-TEMPLATE_ID=${{ secrets.TEMPLATE_ID }}
-CLOUDINARY_CLOUD_NAME=${{ secrets.CLOUDINARY_CLOUD_NAME }}
-CLOUDINARY_API_KEY=${{ secrets.CLOUDINARY_API_KEY }}
-CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET }}
-AWS_REGION=${{ secrets.AWS_REGION }}
-AWS_ACCESS_KEY=${{ secrets.AWS_ACCESS_KEY }}
-AWS_SECRET_KEY=${{ secrets.AWS_SECRET_KEY }}
-AWS_S3_BUCKET=${{ secrets.AWS_S3_BUCKET }}
-EOF
-
+            PORT=${{ secrets.PORT }}
+            NODE_ENV=${{ secrets.NODE_ENV }}
+            MONGODB_URI=${{ secrets.MONGODB_URI }}
+            MONGODB_DB_NAME=${{ secrets.MONGODB_DB_NAME }}
+            ACCESS_TOKEN_SECRET=${{ secrets.ACCESS_TOKEN_SECRET }}
+            REFRESH_TOKEN_SECRET=${{ secrets.REFRESH_TOKEN_SECRET }}
+            ACCESS_TOKEN_VALIDATION_TIME=${{ secrets.ACCESS_TOKEN_VALIDATION_TIME }}
+            REFRESH_TOKEN_VALIDATION_TIME=${{ secrets.REFRESH_TOKEN_VALIDATION_TIME }}
+            FIREBASE_TYPE=${{ secrets.FIREBASE_TYPE }}
+            FIREBASE_PROJECT_ID=${{ secrets.FIREBASE_PROJECT_ID }}
+            FIREBASE_PRIVATE_KEY="${{ secrets.FIREBASE_PRIVATE_KEY }}"
+            FIREBASE_CLIENT_EMAIL=${{ secrets.FIREBASE_CLIENT_EMAIL }}
+            FIREBASE_CLIENT_ID=${{ secrets.FIREBASE_CLIENT_ID }}
+            FIREBASE_AUTH_URI=${{ secrets.FIREBASE_AUTH_URI }}
+            FIREBASE_TOKEN_URI=${{ secrets.FIREBASE_TOKEN_URI }}
+            FIREBASE_AUTH_PROVIDER_X509_CERT_URL=${{ secrets.FIREBASE_AUTH_PROVIDER_X509_CERT_URL }}
+            FIREBASE_CLIENT_X509_CERT_URL=${{ secrets.FIREBASE_CLIENT_X509_CERT_URL }}
+            FIREBASE_UNIVERSE_DOMAIN=${{ secrets.FIREBASE_UNIVERSE_DOMAIN }}
+            SENDER_ID=${{ secrets.SENDER_ID }}
+            TEMPLATE_ID=${{ secrets.TEMPLATE_ID }}
+            CLOUDINARY_CLOUD_NAME=${{ secrets.CLOUDINARY_CLOUD_NAME }}
+            CLOUDINARY_API_KEY=${{ secrets.CLOUDINARY_API_KEY }}
+            CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET }}
+            AWS_REGION=${{ secrets.AWS_REGION }}
+            AWS_ACCESS_KEY=${{ secrets.AWS_ACCESS_KEY }}
+            AWS_SECRET_KEY=${{ secrets.AWS_SECRET_KEY }}
+            AWS_S3_BUCKET=${{ secrets.AWS_S3_BUCKET }}
+            EOF
             npm install --legacy-peer-deps
             pm2 restart pfm-backend || pm2 start server.js --name pfm-backend
             pm2 save
