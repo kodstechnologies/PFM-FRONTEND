@@ -62,44 +62,31 @@ jobs:
           sudo chown -R $USER:$USER .
           sudo chmod -R u+rwX,go+rX .
 
-      # 4️⃣ Install frontend dependencies
-      - name: Install Frontend Dependencies
-        run: |
-          cd frontend
-          npm ci
+      # 4️⃣ Install dependencies
+      - name: Install Dependencies
+        run: npm ci
 
-      # 5️⃣ Write frontend .env from secret
-      - name: Write frontend .env
+      # 5️⃣ Write .env from secret
+      - name: Write .env
         run: |
-          cd frontend
           echo "${{ secrets.PFM_ENV }}" > .env
           cat .env
 
       # 6️⃣ Build React frontend
       - name: Build React frontend
-        run: |
-          cd frontend
-          NODE_OPTIONS="--max-old-space-size=3072" npm run build
+        run: NODE_OPTIONS="--max-old-space-size=3072" npm run build
 
-      # 7️⃣ Deploy React frontend with PM2
+      # 7️⃣ Deploy frontend with PM2
       - name: Deploy React frontend
         run: |
-          cd frontend
           sudo npm install -g pm2
           pm2 delete pfm-frontend || true
           pm2 serve build 8080 --name pfm-frontend --watch
           pm2 save
 
-      # 8️⃣ Install backend dependencies
-      - name: Install Backend Dependencies
-        run: |
-          cd ../PFM-BACKEND
-          npm ci
-
-      # 9️⃣ Start backend with PM2
+      # 8️⃣ Start backend with PM2
       - name: Start Backend
         run: |
-          cd ../PFM-BACKEND
           sudo npm install -g pm2
           pm2 delete pfm-backend || true
           pm2 start server.js --name pfm-backend
