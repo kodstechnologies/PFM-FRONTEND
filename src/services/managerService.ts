@@ -19,7 +19,7 @@ export interface ManagerProfile {
   isActive: boolean;
   lastLogin: string;
   pincode?: string;
-  img?: string;
+  image?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -41,24 +41,24 @@ class ManagerService {
   private getAuthHeaders(): HeadersInit {
     // Get token from the correct location - it's stored separately, not in managerUser object
     const accessToken = localStorage.getItem('accessToken');
-    
+
     console.log('🔍 ManagerService: Getting auth headers');
     console.log('🔍 ManagerService: Access token found:', !!accessToken);
-    
+
     if (!accessToken) {
       throw new Error('No access token found. Please log in again.');
     }
-    
+
     const headers = {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${accessToken}`,
     };
-    
+
     console.log('🔍 ManagerService: Headers prepared:', {
       'Content-Type': headers['Content-Type'],
       'Authorization': headers['Authorization'] ? `Bearer ${headers['Authorization'].substring(7, 20)}...` : 'Missing'
     });
-    
+
     return headers;
   }
 
@@ -67,7 +67,7 @@ class ManagerService {
       const headers = this.getAuthHeaders();
       console.log('🔍 ManagerService: Making request to:', `${this.baseURL}/manager/profile`);
       console.log('🔍 ManagerService: Headers:', headers);
-      
+
       const response = await fetch(`${this.baseURL}/manager/profile`, {
         method: 'GET',
         headers,
@@ -84,7 +84,7 @@ class ManagerService {
 
       const result: ApiResponse<ManagerProfile> = await response.json();
       console.log('🔍 ManagerService: Response data:', result);
-      
+
       if (!result.success) {
         throw new Error(result.message || 'Failed to fetch manager profile');
       }
@@ -109,7 +109,7 @@ class ManagerService {
       }
 
       const result: ApiResponse<ManagerProfile> = await response.json();
-      
+
       if (!result.success) {
         throw new Error(result.message || 'Failed to update manager profile');
       }
@@ -118,6 +118,43 @@ class ManagerService {
     } catch (error) {
       console.error('Error updating manager profile:', error);
       throw error;
+    }
+  }
+
+  async updateManagerImage(formData: FormData): Promise<ManagerProfile> {
+    try {
+      const response = await fetch(`${this.baseURL}/manager/update-image`, {
+        method: 'PATCH',
+        headers: this.getAuthHeaders(),
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(
+          errorData.message || `HTTP error! Status: ${response.status}`
+        );
+      }
+
+      const result: { success: boolean; message?: string; data: ManagerProfile } = await response.json();
+
+      if (!result.success) {
+        throw new Error(result.message || 'Failed to update profile image');
+      }
+
+      if (!result.data || !result.data.image) {
+        throw new Error('Invalid response: Image URL not found');
+      }
+
+      return result.data;
+    } catch (error: any) {
+      console.error('Error updating profile image:', {
+        message: error.message,
+        status: error.status,
+      });
+      throw new Error(
+        error.message || 'Failed to update profile image. Please try again.'
+      );
     }
   }
 
@@ -134,7 +171,7 @@ class ManagerService {
       }
 
       const result: ApiResponse<any> = await response.json();
-      
+
       if (!result.success) {
         throw new Error(result.message || 'Failed to change password');
       }
@@ -144,6 +181,8 @@ class ManagerService {
     }
   }
 }
+
+
 
 export const managerService = new ManagerService();
 export default managerService;

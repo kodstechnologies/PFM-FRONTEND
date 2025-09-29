@@ -461,7 +461,7 @@ const MeatCenterEdit: React.FC = () => {
             </div>
 
             {/* Products */}
-            <div>
+            {/* <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Products *
               </label>
@@ -512,7 +512,7 @@ const MeatCenterEdit: React.FC = () => {
                   <span className="ml-2 text-gray-700">Meat</span>
                 </label>
               </div>
-            </div>
+            </div> */}
 
             {/* Submit Button */}
             <div className="flex justify-center pt-4">

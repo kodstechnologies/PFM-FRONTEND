@@ -4,17 +4,14 @@ import CustomPieChart from '../../components/pieChart/CustomPieChart';
 import PlaceWiseSalesBarChart from '../../components/pieChart/PlaceWiseSalesBarChart';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import TrendingDownIcon from '@mui/icons-material/TrendingDown';
 import BusinessIcon from '@mui/icons-material/Business';
 import PeopleIcon from '@mui/icons-material/People';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import ScheduleIcon from '@mui/icons-material/Schedule';
-import LocationOnIcon from '@mui/icons-material/LocationOn';
 import CurrencyRupeeIcon from '@mui/icons-material/CurrencyRupee';
+import { callApi } from '../../util/admin_api';
+import SalesByCategoryChart from '../../components/pieChart/CustomPieChart';
 
-
-// Define interfaces for type safety
 interface CardValues {
   totalRevenue: string;
   totalOrders: string;
@@ -54,14 +51,18 @@ interface RecentActivity {
 }
 
 const SuperAdminDashboard: React.FC = () => {
-  const [cardValues] = useState<CardValues>({
-    totalRevenue: '₹2,45,678',
-    totalOrders: '12,456',
-    activePartners: '89',
-    newCustomers: '234',
-    totalStores: '15',
-    activeOrders: '1,234',
-  });
+  const [data, setData] = useState<DashboardData | null>(null);
+  // console.log("🚀 ~ SuperAdminDashboard ~ data:", data.totalCategories)
+
+
+  const cardValues: CardValues = {
+    totalRevenue: data ? `₹${data.orders.totalRevenue.toLocaleString()}` : '--',
+    totalOrders: data ? data.orders.deliveredCount.toLocaleString() : '--',
+    activePartners: data ? data.deliveryPartnerStats.verified.toString() : '--',
+    newCustomers: data ? data.totalCustomers.toString() : '--',
+    totalStores: data ? data.totalStores.toString() : '--',
+    activeOrders: data ? data.orders.deliveredCount.toString() : '--',
+  };
 
   const [currentTime, setCurrentTime] = useState(new Date());
 
@@ -71,50 +72,6 @@ const SuperAdminDashboard: React.FC = () => {
     }, 1000);
     return () => clearInterval(timer);
   }, []);
-
-  const placeData: PlaceData[] = [
-    { place: 'R R Nagar', total: 35000 },
-    { place: 'Vijaynagar', total: 25000 },
-    { place: 'K G Layout', total: 12000 },
-    { place: 'Hebbal', total: 6000 },
-    { place: 'Marathalli', total: 4000 },
-  ];
-
-  const chartData: ChartData = {
-    series: [985, 737, 270],
-    labels: ['Fish', 'Chicken', 'Egg'],
-  };
-
-  const recentActivities: RecentActivity[] = [
-    {
-      id: '1',
-      type: 'order',
-      message: 'New order #12345 received from R R Nagar store',
-      time: '2 minutes ago',
-      status: 'success'
-    },
-    {
-      id: '2',
-      type: 'user',
-      message: 'New customer registration: John Doe',
-      time: '5 minutes ago',
-      status: 'info'
-    },
-    {
-      id: '3',
-      type: 'store',
-      message: 'Store "Fresh Meats Plus" activated',
-      time: '15 minutes ago',
-      status: 'success'
-    },
-    {
-      id: '4',
-      type: 'partner',
-      message: 'Delivery partner verification pending',
-      time: '1 hour ago',
-      status: 'warning'
-    }
-  ];
 
   const cardData: CardData[] = [
     {
@@ -138,7 +95,7 @@ const SuperAdminDashboard: React.FC = () => {
       description: 'vs last month'
     },
     {
-      title: 'New Customers',
+      title: 'Total Customers',
       valueKey: 'newCustomers',
       color: 'text-white',
       bgColor: 'bg-gradient-to-br from-[#C0DBEA] via-[#C0DBEA] to-[#C0DBEA]',
@@ -196,6 +153,127 @@ const SuperAdminDashboard: React.FC = () => {
     });
   };
 
+  interface DashboardData {
+    orders: {
+      totalRevenue: number;
+      deliveredCount: number;
+    };
+    totalCustomers: number;
+    totalStores: number;
+    deliveryPartnerStats: {
+      total: number;
+      verified: number;
+      pending: number;
+    };
+    latestCustomer: {
+      _id: string;
+      name: string;
+      phone?: string; // 👈 added optional since you used it
+      createdAt: string;
+    };
+    latestStore: {
+      _id: string;
+      name: string;
+      createdAt: string;
+    };
+    latestDeliveryPartner: {
+      _id: string;
+      name: string;
+      status: string;
+      createdAt: string;
+    };
+    totalCategories: number;
+    allCategoryNames: string[];
+    locationWiseOrders: any[];
+    categories?: {               // 👈 added this
+      name: string;
+      typeCategoryCount: number;
+    }[];
+  }
+
+  type ApiResponse<T> = {
+    success: boolean;
+    message: T;
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response: ApiResponse<DashboardData> = await callApi({
+          endpoint: '/admin/dashboard-api',
+          method: 'GET',
+        });
+
+        // Set the message object to state
+        setData(response.message);
+
+        console.log('Dashboard data:', response.message);
+      } catch (error) {
+        console.error('Error fetching dashboard data:', error);
+      }
+    };
+
+    fetchData();
+
+  }, []);
+
+  // console.log(data, "===============");
+  type CategoryCount = {
+    name: string;   // category name
+    count: number;  // total subcategory count inside that category
+  };
+  const categoriesData: CategoryCount[] =
+    data?.categories?.map((cat: { name: string; typeCategoryCount: number }) => ({
+      name: cat.name,
+      count: cat.typeCategoryCount,
+    })) ?? [];
+
+
+
+  // const categoriesData: CategoryCount[] = categoriesFromApi.map(cat => ({
+  //   name: cat.name,
+  //   count: cat.typeCategoryCount,
+  // }));
+
+
+
+
+  const recentActivities: RecentActivity[] = [
+    {
+      id: data?.latestCustomer?._id || '1',
+      type: 'user',
+      message: `New customer registration: ${data?.latestCustomer?.phone || 'N/A'}`,
+      time: data?.latestCustomer?.createdAt
+        ? new Date(data.latestCustomer.createdAt).toLocaleTimeString()
+        : 'N/A',
+      status: 'info',
+    },
+    {
+      id: data?.latestStore?._id || '2',
+      type: 'store',
+      message: `new Store "${data?.latestStore?.name || 'N/A'}" `,
+      time: data?.latestStore?.createdAt
+        ? new Date(data.latestStore.createdAt).toLocaleTimeString()
+        : 'N/A',
+      status: 'success',
+    },
+    {
+      id: data?.latestDeliveryPartner?._id || '3',
+      type: 'partner',
+      message: `new Delivery partner "${data?.latestDeliveryPartner?.name || 'N/A'}" status: ${data?.latestDeliveryPartner?.status || 'pending'}`,
+      time: data?.latestDeliveryPartner?.createdAt
+        ? new Date(data.latestDeliveryPartner.createdAt).toLocaleTimeString()
+        : 'N/A',
+      status: data?.latestDeliveryPartner?.status === 'verified' ? 'success' : 'warning',
+    }
+  ];
+
+  // Map locationWiseOrders to PlaceData format for the chart
+  const placeData: PlaceData[] = data?.locationWiseOrders?.map((item) => ({
+    place: item.storeName,
+    total: item.totalIncome
+  })) ?? [];
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50">
       {/* Enhanced Header */}
@@ -226,7 +304,7 @@ const SuperAdminDashboard: React.FC = () => {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="w-full mx-auto py-8 px-8 bg-gray-50">
         {/* Enhanced Stats Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
           {cardData.map((card, idx) => (
@@ -238,22 +316,21 @@ const SuperAdminDashboard: React.FC = () => {
             >
               {/* Background Pattern */}
               <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16 group-hover:scale-110 transition-transform duration-500"></div>
-              
+
               <div className="relative z-10">
                 <div className="flex items-center justify-between mb-4">
                   <div className="p-3 rounded-xl bg-white/20 backdrop-blur-sm">
                     {card.icon}
                   </div>
-                  {card.trend && (
-                    <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
-                      card.trend === 'up' ? 'bg-green-500/20 text-green-100' : 'bg-red-500/20 text-red-100'
-                    }`}>
+                  {/* {card.trend && (
+                    <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${card.trend === 'up' ? 'bg-green-500/20 text-green-100' : 'bg-red-500/20 text-red-100'
+                      }`}>
                       {card.trend === 'up' ? <TrendingUpIcon className="w-3 h-3" /> : <TrendingDownIcon className="w-3 h-3" />}
                       {card.trendValue}
                     </div>
-                  )}
+                  )} */}
                 </div>
-                
+
                 <div>
                   <p className="text-sm text-white/80 font-medium uppercase tracking-wide mb-1">
                     {card.title}
@@ -269,152 +346,89 @@ const SuperAdminDashboard: React.FC = () => {
             </div>
           ))}
         </div>
-
+        {/* ============== */}
         {/* Main Content Grid */}
-        <div className="grid grid-cols-1 xl:grid-cols-4 gap-8 mb-8">
-          {/* Charts Section */}
-          <div className="xl:col-span-3 space-y-8">
-            {/* Enhanced Charts */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Pie Chart - Sales by Category */}
-              <div className="lg:col-span-1 bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
-                <div className="p-6 border-b border-gray-100">
-                  <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                    Sales by Category
-                  </h2>
-                  <p className="text-sm text-gray-600 mt-1">Product category distribution</p>
-                </div>
-                                 <div className="p-6">
-                   <div className="h-80">
-                     <CustomPieChart
-                       isDark={false}
-                       labels={chartData.labels}
-                       series={chartData.series}
-                     />
-                   </div>
-                 </div>
-              </div>
-
-              {/* Bar Chart - Place-wise Sales */}
-              <div className="lg:col-span-2 bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
-                <div className="p-6 border-b border-gray-100">
-                  <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                    <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
-                    Place-wise Total Orders
-                  </h2>
-                  <p className="text-sm text-gray-600 mt-1">Order distribution across locations</p>
-                </div>
-                                 <div className="p-10">
-                   <div className="h-80">
-                     <PlaceWiseSalesBarChart data={placeData} />
-                   </div>
-                 </div>
-              </div>
-            </div>
-
-            {/* Quick Actions */}
-            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
-              <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-                <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                Quick Actions
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* Pie Chart - Sales by Category (60%) */}
+          <div className="lg:col-span-7 bg-gray-50 rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
+            {/* Header */}
+            <div className="p-6 bg-gradient-to-r text-black rounded-t-2xl shadow-inner">
+              <h2 className="text-xl font-bold flex items-center gap-2">
+                <div className="w-2 h-2 bg-white rounded-full"></div>
+                Sales by Category
               </h2>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <button className="flex flex-col items-center p-4 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200 transition-all duration-300 group">
-                  <BusinessIcon className="w-8 h-8 text-blue-600 mb-2 group-hover:scale-110 transition-transform" />
-                  <span className="text-sm font-medium text-blue-800">Add Store</span>
-                </button>
-                <button className="flex flex-col items-center p-4 rounded-xl bg-gradient-to-br from-emerald-50 to-emerald-100 hover:from-emerald-100 hover:to-emerald-200 transition-all duration-300 group">
-                  <PeopleIcon className="w-8 h-8 text-emerald-600 mb-2 group-hover:scale-110 transition-transform" />
-                  <span className="text-sm font-medium text-emerald-800">Add Partner</span>
-                </button>
-                <button className="flex flex-col items-center p-4 rounded-xl bg-gradient-to-br from-purple-50 to-purple-100 hover:from-purple-100 hover:to-purple-200 transition-all duration-300 group">
-                  <NotificationsIcon className="w-8 h-8 text-purple-600 mb-2 group-hover:scale-110 transition-transform" />
-                  <span className="text-sm font-medium text-purple-800">Send Alert</span>
-                </button>
-                <button className="flex flex-col items-center p-4 rounded-xl bg-gradient-to-br from-orange-50 to-orange-100 hover:from-orange-100 hover:to-orange-200 transition-all duration-300 group">
-                  <ScheduleIcon className="w-8 h-8 text-orange-600 mb-2 group-hover:scale-110 transition-transform" />
-                  <span className="text-sm font-medium text-orange-800">Schedule</span>
-                </button>
-              </div>
+              <p className="text-sm mt-1 text-white/80">Product category distribution</p>
+            </div>
+            {/* Chart */}
+            <div className="p-4 flex justify-center items-center  ">
+              <SalesByCategoryChart
+                isDark={false}
+                categories={categoriesData}
+              />
             </div>
           </div>
 
-          {/* Right Sidebar */}
-          <div className="xl:col-span-1 space-y-6">
-            {/* Recent Activity */}
-            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
-              <div className="p-6 border-b border-gray-100">
-                <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                  <div className="w-2 h-2 bg-rose-500 rounded-full"></div>
-                  Recent Activity
-                </h2>
-                <p className="text-sm text-gray-600 mt-1">Latest system updates</p>
-              </div>
-              <div className="p-4">
-                <div className="space-y-4">
-                  {recentActivities.map((activity) => (
-                    <div key={activity.id} className="flex items-start gap-3 p-3 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors">
-                      <div className={`p-2 rounded-lg ${getStatusColor(activity.status)}`}>
-                        {getActivityIcon(activity.type)}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-800 leading-tight">
-                          {activity.message}
-                        </p>
-                        <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
-                          <ScheduleIcon className="w-3 h-3" />
-                          {activity.time}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <button className="w-full mt-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors">
-                  View All Activities
-                </button>
-              </div>
-            </div>
+          {/* Recent Activity (40%) */}
+          <div className="lg:col-span-5 space-y-6">
+            <div className="bg-gray-50 rounded-2xl shadow-lg border border-gray-100 overflow-hidden p-6">
+              <h2 className="text-xl font-bold text-gray-800 mb-20">Recent Activity</h2>
 
-            {/* System Status */}
-            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
-              <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-                <div className="w-2 h-2 bg-indigo-500 rounded-full"></div>
-                System Status
-              </h2>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">Backend API</span>
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                    <span className="text-sm font-medium text-green-600">Online</span>
+              <div className="flex flex-col gap-4">
+                {recentActivities.map((activity, idx) => (
+                  <div
+                    key={activity.id}
+                    className={`flex flex-col rounded-xl p-4 justify-between
+            bg-white shadow-sm hover:shadow-md transition-shadow duration-300`}
+                  >
+                    {/* Top: Icon */}
+                    <div
+                      className={`w-12 h-12 rounded-full flex items-center justify-center mb-3 shadow-md
+              ${idx % 3 === 0
+                          ? 'bg-pink-100 text-red-500'
+                          : idx % 3 === 1
+                            ? 'bg-blue-200 text-blue-500'
+                            : 'bg-green-200 text-green-800'}`}
+                    >
+                      {getActivityIcon(activity.type)}
+                    </div>
+
+                    {/* Message */}
+                    <p className="text-sm font-semibold text-gray-800 mb-2 line-clamp-3">
+                      {activity.message}
+                    </p>
+
+                    {/* Time */}
+                    <div className="flex items-center gap-1 text-xs text-gray-500 mt-auto">
+                      <ScheduleIcon className="w-3 h-3" />
+                      {activity.time}
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">Database</span>
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                    <span className="text-sm font-medium text-green-600">Connected</span>
-                  </div>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">File Storage</span>
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                    <span className="text-sm font-medium text-green-600">Active</span>
-                  </div>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">Notifications</span>
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                    <span className="text-sm font-medium text-green-600">Enabled</span>
-                  </div>
-                </div>
+                ))}
               </div>
             </div>
           </div>
         </div>
+
+
+        <div className="lg:col-span-6 bg-gray-50 rounded-2xl shadow border border-gray-200 overflow-hidden mt-8">
+          {/* Header */}
+          <div className="p-6 text-black rounded-t-2xl shadow-inner">
+            <h2 className="text-xl font-bold flex items-center gap-2">
+              <div className="w-2 h-2 bg-white rounded-full"></div>
+              Place-wise Total Orders
+            </h2>
+            <p className="text-sm mt-1 text-white/80">Order distribution across locations</p>
+          </div>
+
+          {/* Chart */}
+          <div className="p-4">
+            {/* <div className="h-full rounded-b-2xl bg-white shadow-sm hover:shadow-md transition-shadow duration-300"> */}
+            <PlaceWiseSalesBarChart data={placeData} />
+            {/* </div> */}
+          </div>
+        </div>
+
+
       </div>
     </div>
   );

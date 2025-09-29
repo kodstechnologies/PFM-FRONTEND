@@ -21,6 +21,7 @@ import DeliveryPartnerTermsAndCondition from '../pages/privacyPolicy/DeliveryPar
 import DeleteAccount from '../pages/privacyPolicy/DeleteAcount';
 import { Layout } from 'lucide-react';
 import LayoutPage from '../pages/privacyPolicy/LayoutPage';
+import Demo from '../pages/Demo';
 
 const DeliveryPartner = lazy(() => import('../pages/Manager/DeliveryPartner'));
 const AddPartner = lazy(() => import('../pages/Manager/DeliveryPartner/AddPartner'));
@@ -50,6 +51,11 @@ const ManagerLogin = lazy(() => import('../pages/ManagerLogin'));
 // const Unauthorized = lazy(() => import('../pages/Unauthorized')); // Create this page
 
 export const commonRoutes: AppRoute[] = [
+  {
+    path: '/demo',
+    element: <Demo />,
+    layout: 'blank',
+  },
   {
     path: '/',
     element: <AdminLogin />,

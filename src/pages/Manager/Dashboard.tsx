@@ -20,15 +20,15 @@ const ManagerDashboard: React.FC = () => {
     const fetchManagerProfile = async () => {
       try {
         setLoading(true);
-        
+
         // Check if we have the required authentication data
         const accessToken = localStorage.getItem('accessToken');
         const managerUser = localStorage.getItem('managerUser');
-        
+
         console.log('🔍 Dashboard: Checking authentication data');
         console.log('🔍 Dashboard: Access token present:', !!accessToken);
         console.log('🔍 Dashboard: Manager user present:', !!managerUser);
-        
+
         if (!accessToken || !managerUser) {
           console.log('No authentication data found, redirecting to login');
           localStorage.removeItem('managerUser');
@@ -36,12 +36,12 @@ const ManagerDashboard: React.FC = () => {
           navigate('/manager-login');
           return;
         }
-        
+
         // Parse manager user to check if it's valid
         try {
           const parsedManagerUser = JSON.parse(managerUser);
           console.log('🔍 Dashboard: Manager user data:', parsedManagerUser);
-          
+
           if (!parsedManagerUser.role || parsedManagerUser.role !== 'manager') {
             console.log('Invalid manager user data, redirecting to login');
             localStorage.removeItem('managerUser');
@@ -56,22 +56,22 @@ const ManagerDashboard: React.FC = () => {
           navigate('/manager-login');
           return;
         }
-        
+
         const profile = await managerService.getManagerProfile();
         setManagerProfile(profile);
       } catch (error: any) {
         console.error('Failed to fetch manager profile:', error);
-        
+
         // If it's an authentication error (401) or no token found, redirect to login
-        if (error.message?.includes('401') || 
-            error.message?.includes('Unauthorized') || 
-            error.message?.includes('No access token found')) {
+        if (error.message?.includes('401') ||
+          error.message?.includes('Unauthorized') ||
+          error.message?.includes('No access token found')) {
           localStorage.removeItem('managerUser');
           localStorage.removeItem('accessToken');
           navigate('/manager-login');
           return;
         }
-        
+
         // For other errors, just log them and continue
         // The dashboard will show with fallback text
       } finally {
@@ -127,11 +127,11 @@ const ManagerDashboard: React.FC = () => {
   const handleDebugAuth = () => {
     const accessToken = localStorage.getItem('accessToken');
     const managerUser = localStorage.getItem('managerUser');
-    
+
     console.log('🔍 Debug Authentication:');
     console.log('🔍 Access Token:', accessToken ? 'Present' : 'Missing');
     console.log('🔍 Manager User:', managerUser ? 'Present' : 'Missing');
-    
+
     if (managerUser) {
       try {
         const parsed = JSON.parse(managerUser);
@@ -140,12 +140,12 @@ const ManagerDashboard: React.FC = () => {
         console.log('🔍 Error parsing manager user:', e);
       }
     }
-    
+
     if (accessToken) {
       console.log('🔍 Token length:', accessToken.length);
       console.log('🔍 Token preview:', accessToken.substring(0, 20) + '...');
     }
-    
+
     // Test the API call directly
     if (accessToken) {
       console.log('🔍 Testing API call directly...');
@@ -156,17 +156,17 @@ const ManagerDashboard: React.FC = () => {
           'Content-Type': 'application/json'
         }
       })
-      .then(response => {
-        console.log('🔍 Direct API Response Status:', response.status);
-        console.log('🔍 Direct API Response Headers:', Object.fromEntries(response.headers.entries()));
-        return response.text();
-      })
-      .then(text => {
-        console.log('🔍 Direct API Response Body:', text);
-      })
-      .catch(error => {
-        console.error('🔍 Direct API Call Error:', error);
-      });
+        .then(response => {
+          console.log('🔍 Direct API Response Status:', response.status);
+          console.log('🔍 Direct API Response Headers:', Object.fromEntries(response.headers.entries()));
+          return response.text();
+        })
+        .then(text => {
+          console.log('🔍 Direct API Response Body:', text);
+        })
+        .catch(error => {
+          console.error('🔍 Direct API Call Error:', error);
+        });
     }
   };
 
@@ -193,13 +193,13 @@ const ManagerDashboard: React.FC = () => {
                 ) : (
                   <div className="block text-sm text-gray-500 mt-1">
                     <span>Welcome to your dashboard</span>
-                    <button 
+                    <button
                       onClick={handleRetryProfile}
                       className="ml-2 text-blue-600 hover:text-blue-800 underline text-xs"
                     >
                       Retry loading profile
                     </button>
-                    <button 
+                    <button
                       onClick={handleDebugAuth}
                       className="ml-2 text-orange-600 hover:text-orange-800 underline text-xs"
                     >
@@ -225,7 +225,7 @@ const ManagerDashboard: React.FC = () => {
             <div className="p-8 text-white relative">
               <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16"></div>
               <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-12 -translate-x-12"></div>
-              
+
               <div className="relative z-10">
                 <div className="flex items-center mb-6">
                   <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mr-4 backdrop-blur-sm">
@@ -238,7 +238,7 @@ const ManagerDashboard: React.FC = () => {
                     <p className="text-red-100 text-lg">Real-time order monitoring for stores</p>
                   </div>
                 </div>
-                
+
                 <div className="space-y-3 mb-6">
                   <div className="flex items-center text-red-100">
                     <div className="w-2 h-2 bg-white rounded-full mr-3"></div>
@@ -272,7 +272,7 @@ const ManagerDashboard: React.FC = () => {
             <div className="p-8 text-white relative">
               <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16"></div>
               <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-12 -translate-x-12"></div>
-              
+
               <div className="relative z-10">
                 <div className="flex items-center mb-6">
                   <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mr-4 backdrop-blur-sm">
@@ -285,7 +285,7 @@ const ManagerDashboard: React.FC = () => {
                     <p className="text-blue-100 text-lg">Complete order lifecycle control</p>
                   </div>
                 </div>
-                
+
                 <div className="space-y-3 mb-6">
                   <div className="flex items-center text-blue-100">
                     <div className="w-2 h-2 bg-white rounded-full mr-3"></div>
@@ -316,8 +316,8 @@ const ManagerDashboard: React.FC = () => {
         </div>
 
         {/* Additional Features Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          {/* Analytics */}
+        {/* <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+       
           <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-100">
             <div className="flex items-center mb-4">
               <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mr-4">
@@ -336,7 +336,7 @@ const ManagerDashboard: React.FC = () => {
             </button>
           </div>
 
-          {/* Delivery Partners */}
+        
           <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-100">
             <div className="flex items-center mb-4">
               <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mr-4">
@@ -359,7 +359,7 @@ const ManagerDashboard: React.FC = () => {
             </Link>
           </div>
 
-          {/* Store Settings */}
+        
           <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-100">
             <div className="flex items-center mb-4">
               <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center mr-4">
@@ -378,7 +378,7 @@ const ManagerDashboard: React.FC = () => {
               Configure
             </button>
           </div>
-        </div>
+        </div> */}
 
         {/* Instructions Section */}
         <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-6 shadow-lg">

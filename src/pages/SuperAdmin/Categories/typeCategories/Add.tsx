@@ -22,7 +22,7 @@ interface ApiResponse<T> {
 interface TypeCategory {
     _id: string;
     name: string;
-    img: string;
+    img?: string; // Optional to reflect backend handling
     description?: string;
 }
 
@@ -48,8 +48,9 @@ const TypeCategoriesAdd: React.FC = () => {
     const navigate = useNavigate();
     const [preview, setPreview] = useState<string | null>(null);
     const location = useLocation();
-    console.log("🚀 ~ TypeCategoriesAdd ~ location:", location.state.id)
-    const id = location.state.id;
+    console.log("🚀 ~ TypeCategoriesAdd ~ location:", location.state?.id);
+    const id = location.state?.id;
+
     // Watch file changes and set preview
     const fileWatch = watch('typeImage');
     useEffect(() => {
@@ -85,17 +86,9 @@ const TypeCategoriesAdd: React.FC = () => {
     }, [fileWatch, setValue]);
 
     const onSubmit: SubmitHandler<FormInputs> = async (data) => {
+        console.log("🚀 ~ onSubmit ~ data:", data);
         if (!data.typeName.trim()) {
             toast.error('Please enter a type category name', {
-                toastId: 'add-type-category-error',
-                position: 'top-right',
-                autoClose: 3000,
-            });
-            return;
-        }
-
-        if (!data.typeImage || data.typeImage.length === 0) {
-            toast.error('Please upload a type category image', {
                 toastId: 'add-type-category-error',
                 position: 'top-right',
                 autoClose: 3000,
@@ -112,13 +105,20 @@ const TypeCategoriesAdd: React.FC = () => {
 
             const formData = new FormData();
             formData.append('name', data.typeName);
-            formData.append('img', data.typeImage[0]);
+            if (data.typeImage && data.typeImage.length > 0) {
+                formData.append('img', data.typeImage[0]);
+                console.log('🚀 ~ onSubmit ~ Image included:', data.typeImage[0].name);
+            } else {
+                console.log('🚀 ~ onSubmit ~ No image provided');
+            }
 
-            console.log('Adding type category:', { name: data.typeName, img: data.typeImage[0] });
+            console.log("🚀 ~ onSubmit ~ formData:", formData)
+            console.log('Adding type category:', { name: data.typeName, img: data.typeImage?.[0]?.name || 'none' });
             const response: AxiosResponse<ApiResponse<TypeCategory>> = await callApi(
                 `/admin/type-categories/${id}`,
                 {
                     method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` }, // Ensure token is included
                     data: formData,
                 }
             );
@@ -206,8 +206,7 @@ const TypeCategoriesAdd: React.FC = () => {
                                     required: 'Type category name is required',
                                     minLength: { value: 2, message: 'Name must be at least 2 characters' },
                                 })}
-                                className={`block w-full px-4 py-2 border rounded-lg shadow-sm sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 transition ${errors.typeName ? 'border-red-400' : 'border-gray-300'
-                                    }`}
+                                className={`block w-full px-4 py-2 border rounded-lg shadow-sm sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 transition ${errors.typeName ? 'border-red-400' : 'border-gray-300'}`}
                                 placeholder="Enter type category name"
                                 aria-invalid={errors.typeName ? 'true' : 'false'}
                             />
@@ -224,15 +223,14 @@ const TypeCategoriesAdd: React.FC = () => {
                                 htmlFor="typeImage"
                                 className="block text-sm font-medium text-gray-700 mb-1"
                             >
-                                Upload Type Category Image
+                                Upload Type Category Image (Optional)
                             </label>
                             <input
                                 id="typeImage"
                                 type="file"
                                 accept="image/*"
-                                {...register('typeImage', { required: 'Type category image is required' })}
-                                className={`block w-full px-3 py-2 border rounded-lg text-sm cursor-pointer focus:outline-none ${errors.typeImage ? 'border-red-400' : 'border-gray-300'
-                                    }`}
+                                {...register('typeImage')}
+                                className={`block w-full px-3 py-2 border rounded-lg text-sm cursor-pointer focus:outline-none ${errors.typeImage ? 'border-red-400' : 'border-gray-300'}`}
                             />
                             {errors.typeImage && (
                                 <p className="mt-1 text-xs text-red-600" role="alert">
@@ -241,7 +239,7 @@ const TypeCategoriesAdd: React.FC = () => {
                             )}
 
                             {/* Image Preview */}
-                            {preview && (
+                            {preview ? (
                                 <div className="mt-3">
                                     <p className="text-sm text-gray-600 mb-1">Preview:</p>
                                     <img
@@ -249,6 +247,13 @@ const TypeCategoriesAdd: React.FC = () => {
                                         alt="Preview"
                                         className="h-32 w-32 object-cover rounded border"
                                     />
+                                </div>
+                            ) : (
+                                <div className="mt-3">
+                                    <p className="text-sm text-gray-600 mb-1">Preview:</p>
+                                    <div className="h-32 w-32 flex items-center justify-center border rounded bg-gray-50 text-gray-500 text-sm">
+                                        No Image
+                                    </div>
                                 </div>
                             )}
                         </div>

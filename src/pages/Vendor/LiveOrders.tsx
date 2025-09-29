@@ -652,17 +652,17 @@ const LiveOrders: React.FC = () => {
         <div className="bg-gray-800 px-8 py-4 flex justify-between items-center border-b border-gray-700">
           <div className="text-xl font-semibold">
             {isManager ? (
-              'Priya Chicken - Indiranagar | Live Orders (Manager)'
+              'Priya Chicken - Indiranagar | Live Orders'
             ) : (
               storeInfo ? (
-                `${storeInfo.name} - ${storeInfo.location} | Live Orders (Store)`
+                `${storeInfo.name} - ${storeInfo.location} | Live Orders`
               ) : (
                 'Store | Live Orders (Store)'
               )
             )}
-            <div className="text-sm text-green-400 font-normal mt-1">
+            {/* <div className="text-sm text-green-400 font-normal mt-1">
               {isAuthenticated ? '📡 Connected to Backend - Real-time Data' : '🔐 Please log in to access live orders'}
-            </div>
+            </div> */}
           </div>
           <div className="flex items-center space-x-4">
             {isManager && (
