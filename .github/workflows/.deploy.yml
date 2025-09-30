@@ -1,75 +1,42 @@
-name: Deploy PFM Fullstack to EC2
+name: Auto Deploy PFM Frontend
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - main
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        node-version: [20.x]
-
     env:
-      # Backend secrets (available to backend)
-      PORT: ${{ secrets.PORT }}
-      NODE_ENV: ${{ secrets.NODE_ENV }}
-      MONGODB_URI: ${{ secrets.MONGODB_URI }}
-      MONGODB_DB_NAME: ${{ secrets.MONGODB_DB_NAME }}
-      ACCESS_TOKEN_SECRET: ${{ secrets.ACCESS_TOKEN_SECRET }}
-      REFRESH_TOKEN_SECRET: ${{ secrets.REFRESH_TOKEN_SECRET }}
-      ACCESS_TOKEN_VALIDATION_TIME: ${{ secrets.ACCESS_TOKEN_VALIDATION_TIME }}
-      REFRESH_TOKEN_VALIDATION_TIME: ${{ secrets.REFRESH_TOKEN_VALIDATION_TIME }}
-      FIREBASE_TYPE: ${{ secrets.FIREBASE_TYPE }}
-      FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
-      FIREBASE_PRIVATE_KEY_ID: ${{ secrets.FIREBASE_PRIVATE_KEY_ID }}
-      FIREBASE_PRIVATE_KEY: ${{ secrets.FIREBASE_PRIVATE_KEY }}
-      FIREBASE_CLIENT_EMAIL: ${{ secrets.FIREBASE_CLIENT_EMAIL }}
-      FIREBASE_CLIENT_ID: ${{ secrets.FIREBASE_CLIENT_ID }}
-      FIREBASE_AUTH_URI: ${{ secrets.FIREBASE_AUTH_URI }}
-      FIREBASE_TOKEN_URI: ${{ secrets.FIREBASE_TOKEN_URI }}
-      FIREBASE_AUTH_PROVIDER_X509_CERT_URL: ${{ secrets.FIREBASE_AUTH_PROVIDER_X509_CERT_URL }}
-      FIREBASE_CLIENT_X509_CERT_URL: ${{ secrets.FIREBASE_CLIENT_X509_CERT_URL }}
-      FIREBASE_UNIVERSE_DOMAIN: ${{ secrets.FIREBASE_UNIVERSE_DOMAIN }}
-      SENDER_ID: ${{ secrets.SENDER_ID }}
-      TEMPLATE_ID: ${{ secrets.TEMPLATE_ID }}
-      EMAIL_NAME: ${{ secrets.EMAIL_NAME }}
-      CLOUDINARY_CLOUD_NAME: ${{ secrets.CLOUDINARY_CLOUD_NAME }}
-      CLOUDINARY_API_KEY: ${{ secrets.CLOUDINARY_API_KEY }}
-      CLOUDINARY_API_SECRET: ${{ secrets.CLOUDINARY_API_SECRET }}
-      AWS_REGION: ${{ secrets.AWS_REGION }}
-      AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
-      AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
-      AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
+      # Frontend secret containing backend API URL and other env variables
+      FRONTEND_ENV: ${{ secrets.PFM_ENV }}
+      # EC2 SSH details
+      EC2_HOST: ${{ secrets.EC2_HOST }}
+      EC2_KEY: ${{ secrets.EC2_KEY }}
 
     steps:
       # 1️⃣ Checkout code
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # 2️⃣ Set up Node.js
-      - name: Use Node.js ${{ matrix.node-version }}
+      # 2️⃣ Setup Node.js
+      - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: 20
           cache: 'npm'
 
-      # 3️⃣ Install dependencies
-      - name: Install Dependencies
-        run: npm ci
-
-      # 4️⃣ Build frontend
-      - name: Write Frontend .env
+      # 3️⃣ Install frontend dependencies & build
+      - name: Build Frontend
         run: |
-          echo "${{ secrets.PFM_ENV }}" > .env
-      - name: Build React frontend
-        run: |
+          npm install
+          echo "$FRONTEND_ENV" > .env
           NODE_OPTIONS="--max-old-space-size=3072" npm run build
 
-      # 5️⃣ Deploy to EC2 via SSH
-      - name: Deploy to EC2
+      # 4️⃣ Deploy frontend to EC2
+      - name: Deploy Frontend to EC2
         uses: appleboy/ssh-action@v0.1.7
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -77,26 +44,34 @@ jobs:
           key: ${{ secrets.EC2_KEY }}
           port: 22
           script: |
-            # Navigate to your project folder on EC2
-            cd ~/PFM-FULLSTACK || mkdir -p ~/PFM-FULLSTACK && cd ~/PFM-FULLSTACK
+            # Ensure frontend folder exists
+            mkdir -p ~/PFM-FRONTEND
+            cd ~/PFM-FRONTEND
 
-            # Pull latest backend code (or copy from Actions)
-            # Option 1: Pull from GitHub
-            git pull origin main
+            # Create .env on EC2
+            echo "$FRONTEND_ENV" > .env
 
-            # Copy frontend build from Actions runner
-            rm -rf frontend/build
-            cp -r $GITHUB_WORKSPACE/build frontend/build
+            # Pull latest frontend code (optional)
+            if [ ! -d ".git" ]; then
+              git clone https://github.com/yourusername/your-frontend-repo.git .
+            else
+              git pull origin main
+            fi
 
-            # Install backend dependencies
-            npm ci
+            # Copy the new build from Actions runner
+            rm -rf build
+            cp -r $GITHUB_WORKSPACE/dist build
 
-            # Restart backend with PM2
-            pm2 delete pfm-backend || true
-            pm2 start server.js --name pfm-backend --update-env
+            # Install dependencies
+            npm install
+
+            # Install PM2 if missing
+            if ! command -v pm2 &> /dev/null; then
+              npm install -g pm2
+            fi
 
             # Serve frontend with PM2
             pm2 delete pfm-frontend || true
-            pm2 serve frontend/build 80 --name pfm-frontend --watch
+            pm2 serve build 80 --name pfm-frontend --watch
 
             pm2 save
