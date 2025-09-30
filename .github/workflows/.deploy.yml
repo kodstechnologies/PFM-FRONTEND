@@ -10,32 +10,26 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      # Frontend secret containing backend API URL and other env variables
       FRONTEND_ENV: ${{ secrets.PFM_ENV }}
-      # EC2 SSH details
       EC2_HOST: ${{ secrets.EC2_HOST }}
       EC2_KEY: ${{ secrets.EC2_KEY }}
 
     steps:
-      # 1️⃣ Checkout code
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # 2️⃣ Setup Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 20
           cache: 'npm'
 
-      # 3️⃣ Install frontend dependencies & build
       - name: Build Frontend
         run: |
           npm install
           echo "$FRONTEND_ENV" > .env
           NODE_OPTIONS="--max-old-space-size=3072" npm run build
 
-      # 4️⃣ Deploy frontend to EC2
       - name: Deploy Frontend to EC2
         uses: appleboy/ssh-action@v0.1.7
         with:
@@ -44,34 +38,27 @@ jobs:
           key: ${{ secrets.EC2_KEY }}
           port: 22
           script: |
-            # Ensure frontend folder exists
             mkdir -p ~/PFM-FRONTEND
             cd ~/PFM-FRONTEND
 
-            # Create .env on EC2
             echo "$FRONTEND_ENV" > .env
 
-            # Pull latest frontend code (optional)
             if [ ! -d ".git" ]; then
-              git clone https://github.com/yourusername/your-frontend-repo.git .
+              git clone https://github.com/kodstechnologies/PFM-FRONTEND.git .
             else
               git pull origin main
             fi
 
-            # Copy the new build from Actions runner
-            rm -rf build
-            cp -r $GITHUB_WORKSPACE/dist build
+            # Copy dist folder from Actions runner
+            rm -rf dist
+            cp -r $GITHUB_WORKSPACE/dist dist
 
-            # Install dependencies
             npm install
 
-            # Install PM2 if missing
             if ! command -v pm2 &> /dev/null; then
-              npm install -g pm2
+              sudo npm install -g pm2
             fi
 
-            # Serve frontend with PM2
             pm2 delete pfm-frontend || true
-            pm2 serve build 80 --name pfm-frontend --watch
-
+            pm2 serve dist 80 --name pfm-frontend --watch
             pm2 save
