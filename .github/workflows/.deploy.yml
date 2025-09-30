@@ -13,7 +13,7 @@ jobs:
         node-version: [20.x]
 
     env:
-      # Backend secrets
+      # Backend secrets (available to backend)
       PORT: ${{ secrets.PORT }}
       NODE_ENV: ${{ secrets.NODE_ENV }}
       MONGODB_URI: ${{ secrets.MONGODB_URI }}
@@ -56,39 +56,47 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
 
-      # 3️⃣ Fix permissions
-      - name: Fix permissions
-        run: |
-          sudo chown -R $USER:$USER .
-          sudo chmod -R u+rwX,go+rX .
-
-      # 4️⃣ Install dependencies
+      # 3️⃣ Install dependencies
       - name: Install Dependencies
         run: npm ci
 
-      # 5️⃣ Write frontend .env from secret
+      # 4️⃣ Build frontend
       - name: Write Frontend .env
         run: |
           echo "${{ secrets.PFM_ENV }}" > .env
-          cat .env
-
-      # 6️⃣ Build React frontend
       - name: Build React frontend
         run: |
           NODE_OPTIONS="--max-old-space-size=3072" npm run build
 
-      # 7️⃣ Deploy frontend with PM2
-      - name: Deploy React frontend
-        run: |
-          sudo npm install -g pm2
-          pm2 delete pfm-frontend || true
-          pm2 serve build 80 --name pfm-frontend --watch
-          pm2 save
+      # 5️⃣ Deploy to EC2 via SSH
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: 22
+          script: |
+            # Navigate to your project folder on EC2
+            cd ~/PFM-FULLSTACK || mkdir -p ~/PFM-FULLSTACK && cd ~/PFM-FULLSTACK
 
-      # 8️⃣ Start backend with PM2
-      - name: Start Backend
-        run: |
-          sudo npm install -g pm2
-          pm2 delete pfm-backend || true
-          pm2 start server.js --name pfm-backend --update-env
-          pm2 save
+            # Pull latest backend code (or copy from Actions)
+            # Option 1: Pull from GitHub
+            git pull origin main
+
+            # Copy frontend build from Actions runner
+            rm -rf frontend/build
+            cp -r $GITHUB_WORKSPACE/build frontend/build
+
+            # Install backend dependencies
+            npm ci
+
+            # Restart backend with PM2
+            pm2 delete pfm-backend || true
+            pm2 start server.js --name pfm-backend --update-env
+
+            # Serve frontend with PM2
+            pm2 delete pfm-frontend || true
+            pm2 serve frontend/build 80 --name pfm-frontend --watch
+
+            pm2 save
