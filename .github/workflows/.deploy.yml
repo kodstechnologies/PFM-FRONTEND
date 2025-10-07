@@ -24,16 +24,20 @@ jobs:
           node-version: 20
           cache: 'npm'
 
-      # ✅ Create .env before building
+      # ✅ Install dependencies
+      - name: Install Dependencies
+        run: npm install
+
+      # ✅ Create .env file **before building**
       - name: Create .env file
         run: |
           echo "$FRONTEND_ENV" > .env
           echo "✅ .env file created successfully"
           cat .env
 
+      # ✅ Build Frontend
       - name: Build Frontend
         run: |
-          npm install
           NODE_OPTIONS="--max-old-space-size=3072" npm run build
 
       # ✅ Deploy the built files (dist) to EC2
@@ -57,10 +61,14 @@ jobs:
           script: |
             cd ~/PFM-FRONTEND
 
+            # Install pm2 if not present
             if ! command -v pm2 &> /dev/null; then
               sudo npm install -g pm2
             fi
 
+            # Stop existing frontend process if running
             pm2 delete pfm-frontend || true
+
+            # Start frontend with pm2
             pm2 serve dist 80 --name pfm-frontend --watch
             pm2 save
