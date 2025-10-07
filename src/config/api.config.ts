@@ -3,10 +3,10 @@
 // API Configuration
 export const API_CONFIG = {
   // Backend API Base URL
-  BASE_URL: import.meta.env.VITE_API_URL || 'http://localhost:8000',
+  BASE_URL: import.meta.env.VITE_API_URL || 'https://api.priyafreshmeats.com',
 
   // Socket Server URL
-  SOCKET_URL: import.meta.env.VITE_SOCKET_URL || 'http://localhost:8000',
+  SOCKET_URL: import.meta.env.VITE_SOCKET_URL || 'wss://api.priyafreshmeats.com/socket',
 
   // API Endpoints
   ENDPOINTS: {
@@ -73,11 +73,11 @@ export const checkEnvironment = () => {
   console.log('🌍 Environment:', import.meta.env.MODE);
 
   if (!import.meta.env.VITE_API_URL) {
-    console.warn('⚠️ VITE_API_URL not set, using fallback: http://localhost:8000');
+    console.warn('⚠️ VITE_API_URL not set, using fallback: https://api.priyafreshmeats.com');
   }
 
   if (!import.meta.env.VITE_SOCKET_URL) {
-    console.warn('⚠️ VITE_SOCKET_URL not set, using fallback: http://localhost:8000');
+    console.warn('⚠️ VITE_SOCKET_URL not set, using fallback: wss://api.priyafreshmeats.com/socket');
   }
 };
 
