@@ -1,11 +1,13 @@
+// src/config/api.config.ts
+
 // API Configuration
 export const API_CONFIG = {
   // Backend API Base URL
-  BASE_URL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000',
-  
+  BASE_URL: import.meta.env.VITE_API_URL || 'http://localhost:8000',
+
   // Socket Server URL
-  SOCKET_URL: import.meta.env.VITE_SOCKET_URL || 'http://localhost:3001',
-  
+  SOCKET_URL: import.meta.env.VITE_SOCKET_URL || 'http://localhost:8000',
+
   // API Endpoints
   ENDPOINTS: {
     AUTH: {
@@ -54,28 +56,28 @@ export const API_CONFIG = {
       ORDERS: '/deliveryPartner/orders',
     },
   },
-  
+
   // Request Configuration
   REQUEST_CONFIG: {
-    TIMEOUT: 10000, // 10 seconds
+    TIMEOUT: 10000,       // 10 seconds
     RETRY_ATTEMPTS: 3,
-    RETRY_DELAY: 1000, // 1 second
+    RETRY_DELAY: 1000,    // 1 second
   },
 };
 
-// Environment check
+// Environment check function
 export const checkEnvironment = () => {
   console.log('🔧 Environment Configuration:');
   console.log('📡 API Base URL:', API_CONFIG.BASE_URL);
   console.log('🔌 Socket URL:', API_CONFIG.SOCKET_URL);
   console.log('🌍 Environment:', import.meta.env.MODE);
-  
-  if (!import.meta.env.VITE_API_BASE_URL) {
-    console.warn('⚠️  VITE_API_BASE_URL not set, using default: http://localhost:8000');
+
+  if (!import.meta.env.VITE_API_URL) {
+    console.warn('⚠️ VITE_API_URL not set, using fallback: http://localhost:8000');
   }
-  
+
   if (!import.meta.env.VITE_SOCKET_URL) {
-    console.warn('⚠️  VITE_SOCKET_URL not set, using default: http://localhost:3001');
+    console.warn('⚠️ VITE_SOCKET_URL not set, using fallback: http://localhost:8000');
   }
 };
 

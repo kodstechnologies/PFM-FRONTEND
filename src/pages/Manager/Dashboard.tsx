@@ -149,7 +149,7 @@ const ManagerDashboard: React.FC = () => {
     // Test the API call directly
     if (accessToken) {
       console.log('🔍 Testing API call directly...');
-      fetch('http://localhost:8000/manager/profile', {
+      fetch('${import.meta.env.VITE_API_BASE_URL}/manager/profile', {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${accessToken}`,
