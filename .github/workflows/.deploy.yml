@@ -40,7 +40,7 @@ jobs:
           username: ubuntu
           key: ${{ secrets.EC2_KEY }}
           source: "dist/*"
-          target: "/var/www/pfm-frontend"
+          target: "/home/ubuntu/PFM-FRONTEND"
 
       # 6️⃣ Restart frontend process using PM2
       - name: Restart frontend
