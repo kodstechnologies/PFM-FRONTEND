@@ -24,13 +24,30 @@ jobs:
           node-version: 20
           cache: 'npm'
 
+      # ✅ Create .env before building
+      - name: Create .env file
+        run: |
+          echo "$FRONTEND_ENV" > .env
+          echo "✅ .env file created successfully"
+          cat .env
+
       - name: Build Frontend
         run: |
           npm install
-          echo "$FRONTEND_ENV" > .env
           NODE_OPTIONS="--max-old-space-size=3072" npm run build
 
+      # ✅ Deploy the built files (dist) to EC2
       - name: Deploy Frontend to EC2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_KEY }}
+          source: "dist/*"
+          target: "~/PFM-FRONTEND/dist"
+
+      # ✅ Start/Restart server using SSH
+      - name: Restart Frontend on EC2
         uses: appleboy/ssh-action@v0.1.7
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -38,22 +55,7 @@ jobs:
           key: ${{ secrets.EC2_KEY }}
           port: 22
           script: |
-            mkdir -p ~/PFM-FRONTEND
             cd ~/PFM-FRONTEND
-
-            echo "$FRONTEND_ENV" > .env
-
-            if [ ! -d ".git" ]; then
-              git clone https://github.com/kodstechnologies/PFM-FRONTEND.git .
-            else
-              git pull origin main
-            fi
-
-            # Copy dist folder from Actions runner
-            rm -rf dist
-            cp -r $GITHUB_WORKSPACE/dist dist
-
-            npm install
 
             if ! command -v pm2 &> /dev/null; then
               sudo npm install -g pm2
