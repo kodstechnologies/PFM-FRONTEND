@@ -9,10 +9,6 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
-    env:
-      # Use the secret here
-      VITE_API_URL: ${{ secrets.VITE_API_URL }}
-
     steps:
       # 1️⃣ Checkout the repository
       - name: Checkout code
@@ -28,12 +24,15 @@ jobs:
       - name: Install dependencies
         run: npm install --legacy-peer-deps
 
-      # 4️⃣ Build the frontend
+      # 4️⃣ Build the frontend with environment variables
       - name: Build frontend
         run: NODE_OPTIONS="--max-old-space-size=4096" npm run build
+        env:
+          VITE_API_URL: ${{ secrets.VITE_API_URL }}
+          VITE_SOCKET_URL: ${{ secrets.VITE_SOCKET_URL }}
 
-      # 5️⃣ Deploy to server via SSH (replace with your server details)
-      - name: Copy files to server
+      # 5️⃣ Copy build files to server
+      - name: Copy files to EC2
         uses: appleboy/scp-action@v1
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -42,13 +41,15 @@ jobs:
           source: "dist/*"
           target: "/home/ubuntu/PFM-FRONTEND"
 
-      # 6️⃣ Restart frontend process using PM2
-      - name: Restart frontend
+      # 6️⃣ Restart frontend on EC2
+      - name: Restart frontend using PM2
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ubuntu
           key: ${{ secrets.EC2_KEY }}
           script: |
+            sudo mkdir -p /home/ubuntu/PFM-FRONTEND
+            sudo chown -R ubuntu:ubuntu /var/www/pfm-frontend
             pm2 delete pfm-frontend || true
-            pm2 serve /var/www/pfm-frontend 80 --name pfm-frontend --watch --update-env
+            pm2 serve /home/ubuntu/PFM-FRONTEND 80 --name pfm-frontend --spa --watch
