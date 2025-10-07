@@ -29,12 +29,12 @@ jobs:
       - name: Install Dependencies
         run: npm install
 
-      # 4️⃣ Create .env file for Vite build
-      - name: Create .env file
+      # 4️⃣ Create .env.production file for Vite build
+      - name: Create .env.production file
         run: |
-          echo "${{ secrets.PFM_ENV }}" > .env
-          echo "✅ .env file created successfully"
-          cat .env
+          echo "VITE_API_URL=${{ secrets.PFM_ENV }}" > .env.production
+          echo "✅ .env.production file created successfully"
+          cat .env.production
 
       # 5️⃣ Build Frontend
       - name: Build Frontend
