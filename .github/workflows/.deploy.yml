@@ -1,4 +1,4 @@
-name: Auto Deploy PFM Frontend
+name: Deploy PFM Frontend
 
 on:
   push:
@@ -6,70 +6,49 @@ on:
       - main
 
 jobs:
-  deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     env:
-      EC2_HOST: ${{ secrets.EC2_HOST }}
-      EC2_KEY: ${{ secrets.EC2_KEY }}
+      # Use the secret here
+      VITE_API_URL: ${{ secrets.VITE_API_URL }}
 
     steps:
-      # 1️⃣ Checkout repository
-      - name: Checkout Code
+      # 1️⃣ Checkout the repository
+      - name: Checkout code
         uses: actions/checkout@v4
 
       # 2️⃣ Setup Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 20
-          cache: 'npm'
+          node-version: 18
 
       # 3️⃣ Install dependencies
-      - name: Install Dependencies
-        run: npm ci
+      - name: Install dependencies
+        run: npm install --legacy-peer-deps
 
-      # 4️⃣ Create .env.production file for Vite
-      - name: Create .env.production
-        run: |
-          echo "${{ secrets.PFM_ENV }}" > .env.production
-          echo "✅ .env.production file created successfully"
-          cat .env.production
+      # 4️⃣ Build the frontend
+      - name: Build frontend
+        run: NODE_OPTIONS="--max-old-space-size=4096" npm run build
 
-      # 5️⃣ Build Frontend
-      - name: Build Frontend
-        run: |
-          NODE_OPTIONS="--max-old-space-size=3072" npm run build
-
-      # 6️⃣ Deploy build to EC2
-      - name: Deploy Frontend to EC2
-        uses: appleboy/scp-action@v0.1.7
+      # 5️⃣ Deploy to server via SSH (replace with your server details)
+      - name: Copy files to server
+        uses: appleboy/scp-action@v1
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ubuntu
           key: ${{ secrets.EC2_KEY }}
           source: "dist/*"
-          target: "~/PFM-FRONTEND/dist"
+          target: "/var/www/pfm-frontend"
 
-      # 7️⃣ Restart Frontend with PM2
-      - name: Restart Frontend on EC2
-        uses: appleboy/ssh-action@v0.1.7
+      # 6️⃣ Restart frontend process using PM2
+      - name: Restart frontend
+        uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ubuntu
           key: ${{ secrets.EC2_KEY }}
-          port: 22
           script: |
-            cd ~/PFM-FRONTEND
-            # Install PM2 if not present
-            if ! command -v pm2 &> /dev/null; then
-              sudo npm install -g pm2
-            fi
-            # Stop existing process if running
-            if pm2 list | grep -q pfm-frontend; then
-              pm2 delete pfm-frontend
-            fi
-            # Serve updated frontend
-            pm2 serve dist 80 --name pfm-frontend --watch
-            pm2 save
-            echo "✅ Frontend deployed and running successfully"
+            pm2 delete pfm-frontend || true
+            pm2 serve /var/www/pfm-frontend 80 --name pfm-frontend --watch --update-env
