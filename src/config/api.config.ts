@@ -1,26 +1,16 @@
 // src/config/api.config.ts
 
-
-// API Configuration
-export const API_CONFIG = {
-  // Backend API Base URL
-  BASE_URL: import.meta.env.VITE_API_URL || 'https://api.priyafreshmeats.com',
-
-  // Socket Server URL
-  SOCKET_URL: import.meta.env.VITE_SOCKET_URL || 'wss://api.priyafreshmeats.com/socket',
-
 // Environment-aware API configuration
-const BASE_URL = import.meta.env.VITE_API_URL;
-const SOCKET_URL = import.meta.env.VITE_SOCKET_URL;
+const BASE_URL = import.meta.env.VITE_API_URL || 'https://api.priyafreshmeats.com';
+const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'wss://api.priyafreshmeats.com/socket';
 
 // Ensure environment variables are present
-if (!BASE_URL) {
-  console.error('❌ VITE_API_URL is missing! Your frontend build cannot connect to the backend.');
+if (!import.meta.env.VITE_API_URL) {
+  console.warn('⚠️ VITE_API_URL not set, using fallback: https://api.priyafreshmeats.com');
 }
 
-
-if (!SOCKET_URL) {
-  console.error('❌ VITE_SOCKET_URL is missing! WebSocket connection may fail.');
+if (!import.meta.env.VITE_SOCKET_URL) {
+  console.warn('⚠️ VITE_SOCKET_URL not set, using fallback: wss://api.priyafreshmeats.com/socket');
 }
 
 // Export endpoints
@@ -79,7 +69,7 @@ export const REQUEST_CONFIG = {
   RETRY_DELAY: 1000,    // 1 second
 };
 
-// Export final config object
+// Final API config object
 export const API_CONFIG = {
   BASE_URL,
   SOCKET_URL,
@@ -90,23 +80,9 @@ export const API_CONFIG = {
 // Optional: debugging utility
 export const logEnvironment = () => {
   console.log('🔧 Environment Configuration:');
-
   console.log('📡 API Base URL:', API_CONFIG.BASE_URL);
   console.log('🔌 Socket URL:', API_CONFIG.SOCKET_URL);
   console.log('🌍 Environment:', import.meta.env.MODE);
-
-  if (!import.meta.env.VITE_API_URL) {
-    console.warn('⚠️ VITE_API_URL not set, using fallback: https://api.priyafreshmeats.com');
-  }
-
-  if (!import.meta.env.VITE_SOCKET_URL) {
-    console.warn('⚠️ VITE_SOCKET_URL not set, using fallback: wss://api.priyafreshmeats.com/socket');
-  }
-
-  console.log('📡 API Base URL:', BASE_URL);
-  console.log('🔌 Socket URL:', SOCKET_URL);
-  console.log('🌍 Mode:', import.meta.env.MODE);
-
 };
 
 export default API_CONFIG;
