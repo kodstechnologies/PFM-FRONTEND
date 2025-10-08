@@ -161,7 +161,7 @@ const AdminLogin = () => {
           {/* Header */}
           <div className="pt-8 px-8 text-center relative overflow-hidden">
             <div className="relative z-10">
-              <h1 className="text-3xl font-bold tracking-tight text-white">Admin  Login</h1>
+              <h1 className="text-3xl font-bold tracking-tight text-white">Adminn  Login</h1>
             </div>
           </div>
 
