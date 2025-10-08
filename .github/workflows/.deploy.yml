@@ -3,18 +3,18 @@ name: Deploy Frontend to EC2
 on:
   push:
     branches:
-      - main  # Trigger on push to main branch
+      - main  # Trigger deployment on push to main branch
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout repository
+      # Step 1: Checkout the repository
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Step 2: Set up Node.js
+      # Step 2: Set up Node.js environment
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
@@ -24,11 +24,24 @@ jobs:
       - name: Install dependencies
         run: npm install --legacy-peer-deps
 
-      # Step 4: Build project
+      # Step 4: Build the project
       - name: Build project
         run: npm run build
 
-      # Step 5: Copy dist folder to EC2
+      # Step 5: Clean old files on EC2
+      - name: Clean old files on EC2
+        uses: appleboy/ssh-action@v1.2.2
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_KEY }}
+          port: 22
+          script: |
+            echo "Cleaning old dist files..."
+            rm -rf /home/ubuntu/PFM-FRONTEND/dist/*
+            echo "Cleanup complete."
+
+      # Step 6: Copy new build files to EC2
       - name: Copy files to EC2
         uses: appleboy/scp-action@v1.0.0
         with:
@@ -39,7 +52,7 @@ jobs:
           source: "dist/*"
           target: "/home/ubuntu/PFM-FRONTEND/dist"
 
-      # Step 6: Reload Nginx on EC2
+      # Step 7: Reload Nginx to apply new build
       - name: Reload Nginx
         uses: appleboy/ssh-action@v1.2.2
         with:
@@ -48,5 +61,7 @@ jobs:
           key: ${{ secrets.EC2_KEY }}
           port: 22
           script: |
+            echo "Reloading Nginx..."
             sudo nginx -t
             sudo systemctl reload nginx
+            echo "Deployment completed successfully."
