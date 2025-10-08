@@ -1,56 +1,55 @@
-name: Deploy React App to EC2
+name: Deploy PFM-FRONTEND
 
 on:
   push:
     branches:
-      - main
+      - main   # Trigger on push to main branch
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      # 1. Checkout code
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-      - name: Set up Node.js
+      # 2. Setup Node.js
+      - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version: 20
 
+      # 3. Install dependencies
       - name: Install dependencies
-        run: npm install
+        run: npm install --legacy-peer-deps
 
-      - name: Build React app
+      # 4. Build frontend
+      - name: Build Frontend
         run: npm run build
 
-      - name: Deploy to EC2 via SSH
-        uses: appleboy/ssh-action@v0.1.8
+      # 5. Deploy to EC2 using SCP
+      - name: Deploy dist to EC2
+        uses: appleboy/scp-action@v1.0.0
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_KEY }}
-          port: 22
-          script: |
-            # Remove old files
-            rm -rf /home/ubuntu/PFM-FRONTEND/dist/*
-            
-            # Copy new build
-            mkdir -p /home/ubuntu/PFM-FRONTEND/dist
-            exit
-          
-      - name: Copy build files
-        uses: appleboy/scp-action@v0.1.8
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_KEY }}
-          port: 22
           source: "dist/*"
           target: "/home/ubuntu/PFM-FRONTEND/dist"
+          port: 22
+          protocol: tcp
+          timeout: 30s
+          command_timeout: 10m
+          tar_exec: tar
+          proxy_port: 22
+          proxy_timeout: 30s
+          curl_insecure: false
+          capture_stdout: false
 
+      # 6. Reload Nginx via SSH
       - name: Reload Nginx
-        uses: appleboy/ssh-action@v0.1.8
+        uses: appleboy/ssh-action@v1.7.0
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
