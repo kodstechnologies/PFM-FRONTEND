@@ -12,10 +12,10 @@ import {
 } from "@mui/icons-material";
 
 // Replace with your image paths
-import freshnessImage1 from '../../../assets/login-image/demo/front-view-fresh-raw-chicken-with-tomatoes-dark-blue-kitchen-restaurant-meal-animal-photo-farm-food-chicken-meat-color.jpg';
-import freshnessImage2 from '../../../assets/login-image/demo/raw-chicken-fillet-with-garlic-pepper-rosemary-wooden-chopping-board.jpg';
-import freshnessImage3 from '../../../assets/login-image/demo/raw-chicken-wings-white-wooden-surface.jpg';
-import freshnessImage4 from '../../../assets/login-image/demo/raw-uncooked-chicken-legs-dark-surface.jpg';
+import freshnessImage1 from '../../../assets/login-image/1.jpg';
+import freshnessImage2 from '../../../assets/login-image/1.jpg';
+import freshnessImage3 from '../../../assets/login-image/1.jpg';
+import freshnessImage4 from '../../../assets/login-image/1.jpg';
 
 function FreshnessSection() {
     const [isVisible, setIsVisible] = useState(false);
