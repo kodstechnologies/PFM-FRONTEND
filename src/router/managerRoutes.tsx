@@ -1,5 +1,6 @@
 import { lazy } from 'react';
 import type { AppRoute } from './types'; // ✅ Add this
+import LiveOrders from '../pages/Vendor/LiveOrders';
 
 const ManagerDashboard = lazy(() => import('../pages/Manager/Dashboard'));
 const OrderManagement = lazy(() => import('../pages/Manager/OrderManagement'));
@@ -64,6 +65,12 @@ export const managerRoutes: AppRoute[] = [ // ✅ Add the type
     path: '/manager/delivery-partner/details/:id',
     element: <PartnerDetails />,
     layout: 'default',
+    role: 'manager',
+  },
+  {
+    path: '/manager/live-orders',
+    element: <LiveOrders />,
+    layout: 'blank',
     role: 'manager',
   },
 ];
