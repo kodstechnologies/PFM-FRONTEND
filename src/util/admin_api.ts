@@ -1,5 +1,6 @@
 import axios, { AxiosRequestConfig, InternalAxiosRequestConfig, Method } from "axios";
 import { getConfig } from "../config/environment";
+console.log(import.meta.env.VITE_API_URL, "import.meta.env.VITE_API_URL====================");
 
 const config = getConfig();
 const BASE_URL = import.meta.env.VITE_API_URL;
@@ -46,7 +47,7 @@ export const callApi = async ({
   data = null,
   config = {},
 }: CallApiOptions) => {
-  try { 
+  try {
     const response = await API.request({
       url: endpoint,
       method,
