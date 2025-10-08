@@ -66,7 +66,7 @@ class ManagerService {
     try {
       const headers = this.getAuthHeaders();
       console.log('🔍 ManagerService: Making request to:', `${this.baseURL}/manager/profile`);
-      console.log('🔍 ManagerService: Headers:', headers);
+      console.log('🔍 ManagerService: Headers:-----------------------', headers);
 
       const response = await fetch(`${this.baseURL}/manager/profile`, {
         method: 'GET',
@@ -122,41 +122,44 @@ class ManagerService {
   }
 
   async updateManagerImage(formData: FormData): Promise<ManagerProfile> {
+    console.log(formData, "formData");
+
     try {
+      const headers = this.getAuthHeaders();
+      console.log('🔍 ManagerService: Making request to:', `${this.baseURL}/manager/profile`);
+      console.log('🔍 ManagerService: Headers: ======================', headers);
+
       const response = await fetch(`${this.baseURL}/manager/update-image`, {
-        method: 'PATCH',
-        headers: this.getAuthHeaders(),
-        body: formData,
+        method: 'PATCH', // or POST if your route is configured that way
+        headers,
+        body: formData, // ✅ Send FormData with the file
       });
+
+      console.log('🔍 ManagerService: Response status:', response.status);
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(
-          errorData.message || `HTTP error! Status: ${response.status}`
-        );
+        const errorText = await response.text();
+        console.error('🔍 ManagerService: Error response body:', errorText);
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const result: { success: boolean; message?: string; data: ManagerProfile } = await response.json();
+      const result = await response.json();
+      console.log('🔍 ManagerService: Response data:', result);
 
       if (!result.success) {
-        throw new Error(result.message || 'Failed to update profile image');
+        throw new Error(result.message || 'Failed to update manager image');
       }
 
-      if (!result.data || !result.data.image) {
-        throw new Error('Invalid response: Image URL not found');
-      }
-
-      return result.data;
+      return result.data; // should return `{ img: url }`
     } catch (error: any) {
-      console.error('Error updating profile image:', {
-        message: error.message,
-        status: error.status,
-      });
+      console.error('Error updating profile image:', error);
       throw new Error(
         error.message || 'Failed to update profile image. Please try again.'
       );
     }
   }
+
+
 
   async changePassword(currentPassword: string, newPassword: string): Promise<void> {
     try {

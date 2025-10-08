@@ -6,6 +6,7 @@ import EmailIcon from '@mui/icons-material/Email';
 import HttpsIcon from '@mui/icons-material/Https';
 import { toast, ToastContainer } from "react-toastify";
 import { callApi } from "../util/admin_api";
+import Cookies from "js-cookie";
 
 const AdminLogin = () => {
   const navigate = useNavigate();
@@ -40,6 +41,49 @@ const AdminLogin = () => {
     setTimeout(() => setShake(false), 500);
   };
 
+  // const handleLogin = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   setIsLoading(true);
+  //   setError('');
+
+  //   try {
+  //     // Call the API for admin login
+  //     const response = await callApi({
+  //       endpoint: "/admin/login",
+  //       method: "POST",
+  //       data: formData,
+  //     });
+
+  //     console.log("🚀 ~ handleLogin ~ response:", response)
+
+  //     // Store user data in localStorage
+  //     const userData = {
+  //       role: 'super-admin',
+  //       email: response.email,
+  //       name: response.name || 'Super Admin',
+  //       loginTime: new Date().toISOString(),
+  //       token: response.data.accessToken // If your API returns a token
+  //     };
+
+  //     localStorage.setItem('superAdminUser', JSON.stringify(userData));
+  //     toast.success("Login Successful", {
+  //       style: { width: window.innerWidth < 640 ? "250px" : "350px" }
+  //     });
+
+  //     setTimeout(() => {
+  //       navigate('/super-admin');
+  //     }, 2000);
+
+  //   } catch (error: any) {
+  //     const errorMessage = error.response?.data?.message || 'Invalid admin credentials';
+  //     setError(errorMessage);
+  //     triggerErrorAnimation();
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
+
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -53,7 +97,7 @@ const AdminLogin = () => {
         data: formData,
       });
 
-      console.log("🚀 ~ handleLogin ~ response:", response)
+      console.log("🚀 ~ handleLogin ~ response:", response);
 
       // Store user data in localStorage
       const userData = {
@@ -61,10 +105,23 @@ const AdminLogin = () => {
         email: response.email,
         name: response.name || 'Super Admin',
         loginTime: new Date().toISOString(),
-        token: response.data.accessToken // If your API returns a token
+        token: response.data.accessToken // access token
       };
-
       localStorage.setItem('superAdminUser', JSON.stringify(userData));
+
+      // ✅ Store tokens in cookies
+      Cookies.set("adminAccessToken", response.data.accessToken, {
+        expires: 1 / 24, // 1 hour
+        secure: true,
+        sameSite: "Strict",
+      });
+
+      Cookies.set("adminRefreshToken", response.data.refreshToken, {
+        expires: 7, // 7 days
+        secure: true,
+        sameSite: "Strict",
+      });
+
       toast.success("Login Successful", {
         style: { width: window.innerWidth < 640 ? "250px" : "350px" }
       });
@@ -81,6 +138,7 @@ const AdminLogin = () => {
       setIsLoading(false);
     }
   };
+
 
   return (
     <>
