@@ -6,11 +6,18 @@ const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'wss://api.priyafreshmeats
 
 // Ensure environment variables are present
 if (!import.meta.env.VITE_API_URL) {
+
   console.warn('⚠️ VITE_API_URL not set, using fallback: https://api.priyafreshmeats.com');
 }
 
 if (!import.meta.env.VITE_SOCKET_URL) {
   console.warn('⚠️ VITE_SOCKET_URL not set, using fallback: wss://api.priyafreshmeats.com/socket');
+
+  console.error('❌ VITE_API_URL is missing! Your frontend build cannot connect to the backend.');
+}
+if (!import.meta.env.VITE_SOCKET_URL) {
+  console.error('❌ VITE_SOCKET_URL is missing! WebSocket connection may fail.');
+
 }
 
 // Export endpoints
@@ -76,6 +83,9 @@ export const API_CONFIG = {
   ENDPOINTS,
   REQUEST_CONFIG,
 };
+
+// Expose globally for temporary debugging in browser
+;(window as any).API_CONFIG = API_CONFIG;
 
 // Optional: debugging utility
 export const logEnvironment = () => {
