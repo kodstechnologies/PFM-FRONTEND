@@ -12,7 +12,7 @@ declare global {
 // -----------------------------
 // Environment-aware API URLs
 // -----------------------------
-const BASE_URL = import.meta.env.VITE_API_URL || 'https://api.priyafreshmeats.com';
+const BASE_URL = import.meta.env.VITE_API_URL || '/api';  // <-- /api prefix for Nginx proxy
 const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'wss://api.priyafreshmeats.com/socket';
 
 if (!import.meta.env.VITE_API_URL) {
@@ -28,50 +28,47 @@ if (!import.meta.env.VITE_SOCKET_URL) {
 // -----------------------------
 export const ENDPOINTS = {
   AUTH: {
-    LOGIN: '/auth/login',
-    REGISTER: '/auth/register',
-    REFRESH: '/auth/refresh',
-    LOGOUT: '/auth/logout',
+    LOGIN: `${BASE_URL}/auth/login`,
+    REGISTER: `${BASE_URL}/auth/register`,
+    REFRESH: `${BASE_URL}/auth/refresh`,
+    LOGOUT: `${BASE_URL}/auth/logout`,
   },
   ADMIN: {
-    PROFILE: '/admin/profile',
-    USERS: '/admin/users',
-    CATEGORIES: '/admin/categories',
-    PRODUCTS: '/admin/products',
-    ORDERS: '/admin/orders',
-    DELIVERY_PARTNERS: '/admin/delivery-partners',
-    MEAT_CENTERS: '/admin/meat-centers',
-    NOTIFICATIONS: '/admin/notifications',
+    PROFILE: `${BASE_URL}/admin/profile`,
+    USERS: `${BASE_URL}/admin/users`,
+    CATEGORIES: `${BASE_URL}/admin/categories`,
+    PRODUCTS: `${BASE_URL}/admin/products`,
+    ORDERS: `${BASE_URL}/admin/orders`,
+    DELIVERY_PARTNERS: `${BASE_URL}/admin/delivery-partners`,
+    MEAT_CENTERS: `${BASE_URL}/admin/meat-centers`,
+    NOTIFICATIONS: `${BASE_URL}/admin/notifications`,
   },
   MANAGER: {
-    DELIVERY_PARTNERS: '/manager/delivery-partners',
-    INVENTORY: '/manager/inventory',
-    INVENTORY_SUB_CATEGORIES: '/manager/inventory/sub-categories',
-    INVENTORY_TYPES: '/manager/inventory/types',
-
-    // ✅ Added missing keys below
-    INVENTORY_CATEGORY: '/manager/inventory/category',
-    INVENTORY_TYPE_CATEGORY: '/manager/inventory/type-category',
-    INVENTORY_PRODUCT_QUANTITY: '/manager/inventory/product-quantity',
-
-    ORDERS: '/manager/orders',
-    ORDER_MANAGEMENT: '/manager/order-management',
-    ORDER_STATS: '/manager/order-stats',
-    LIVE_ORDERS: '/manager/live-orders',
+    DELIVERY_PARTNERS: `${BASE_URL}/manager/delivery-partners`,
+    INVENTORY: `${BASE_URL}/manager/inventory`,
+    INVENTORY_SUB_CATEGORIES: `${BASE_URL}/manager/inventory/sub-categories`,
+    INVENTORY_TYPES: `${BASE_URL}/manager/inventory/types`,
+    INVENTORY_CATEGORY: `${BASE_URL}/manager/inventory/category`,
+    INVENTORY_TYPE_CATEGORY: `${BASE_URL}/manager/inventory/type-category`,
+    INVENTORY_PRODUCT_QUANTITY: `${BASE_URL}/manager/inventory/product-quantity`,
+    ORDERS: `${BASE_URL}/manager/orders`,
+    ORDER_MANAGEMENT: `${BASE_URL}/manager/order-management`,
+    ORDER_STATS: `${BASE_URL}/manager/order-stats`,
+    LIVE_ORDERS: `${BASE_URL}/manager/live-orders`,
   },
   STORE: {
-    LIVE_ORDERS: '/store/live-orders',
-    INVENTORY: '/store/inventory',
-    PRODUCTS: '/store/products',
-    ORDERS: '/store/orders',
+    LIVE_ORDERS: `${BASE_URL}/store/live-orders`,
+    INVENTORY: `${BASE_URL}/store/inventory`,
+    PRODUCTS: `${BASE_URL}/store/products`,
+    ORDERS: `${BASE_URL}/store/orders`,
   },
   CUSTOMER: {
-    ORDERS: '/customer/orders',
-    PROFILE: '/customer/profile',
+    ORDERS: `${BASE_URL}/customer/orders`,
+    PROFILE: `${BASE_URL}/customer/profile`,
   },
   DELIVERY_PARTNER: {
-    ASSIGNED_ORDERS: '/delivery/orders',
-    UPDATE_STATUS: '/delivery/update-status',
+    ASSIGNED_ORDERS: `${BASE_URL}/delivery/orders`,
+    UPDATE_STATUS: `${BASE_URL}/delivery/update-status`,
   },
 };
 
