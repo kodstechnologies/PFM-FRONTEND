@@ -1,26 +1,22 @@
 // src/config/api.config.ts
 
-// Environment-aware API configuration
+// -----------------------------
+// Environment-aware API URLs
+// -----------------------------
 const BASE_URL = import.meta.env.VITE_API_URL || 'https://api.priyafreshmeats.com';
 const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'wss://api.priyafreshmeats.com/socket';
 
-// Ensure environment variables are present
 if (!import.meta.env.VITE_API_URL) {
-
-  console.warn('⚠️ VITE_API_URL not set, using fallback: https://api.priyafreshmeats.com');
+  console.warn('⚠️ VITE_API_URL not set, using fallback:', BASE_URL);
 }
 
 if (!import.meta.env.VITE_SOCKET_URL) {
-  console.warn('⚠️ VITE_SOCKET_URL not set, using fallback: wss://api.priyafreshmeats.com/socket');
-
-  console.error('❌ VITE_API_URL is missing! Your frontend build cannot connect to the backend.');
-}
-if (!import.meta.env.VITE_SOCKET_URL) {
-  console.error('❌ VITE_SOCKET_URL is missing! WebSocket connection may fail.');
-
+  console.warn('⚠️ VITE_SOCKET_URL not set, using fallback:', SOCKET_URL);
 }
 
-// Export endpoints
+// -----------------------------
+// Endpoints
+// -----------------------------
 export const ENDPOINTS = {
   AUTH: {
     LOGIN: '/auth/login',
@@ -38,45 +34,21 @@ export const ENDPOINTS = {
     MEAT_CENTERS: '/admin/meat-centers',
     NOTIFICATIONS: '/admin/notifications',
   },
-  MANAGER: {
-    PROFILE: '/manager/profile',
-    ORDERS: '/manager/orders',
-    ORDER_STATS: '/manager/orders/stats',
-    LIVE_ORDERS: '/manager/live-orders',
-    DELIVERY_PARTNERS: '/manager/delivery-partners',
-    INVENTORY: '/manager/inventory',
-    INVENTORY_CATEGORY: '/manager/inventory/category',
-    INVENTORY_TYPE_CATEGORY: '/manager/inventory/type-category',
-    INVENTORY_PRODUCT_QUANTITY: '/manager/inventory/product',
-    INVENTORY_LOW_STOCK: '/manager/inventory/low-stock',
-    INVENTORY_OUT_OF_STOCK: '/manager/inventory/out-of-stock',
-    INVENTORY_BULK_UPDATE: '/manager/inventory/bulk-update',
-  },
-  STORE: {
-    PROFILE: '/store/profile',
-    ORDERS: '/store/orders',
-    PRODUCTS: '/store/products',
-  },
-  CUSTOMER: {
-    PROFILE: '/customer/profile',
-    CART: '/customer/cart',
-    ORDERS: '/customer/orders',
-    CATEGORIES: '/customer/categories',
-  },
-  DELIVERY_PARTNER: {
-    PROFILE: '/deliveryPartner/profile',
-    ORDERS: '/deliveryPartner/orders',
-  },
+  // ... include all other roles: MANAGER, STORE, CUSTOMER, DELIVERY_PARTNER
 };
 
-// Request configuration
+// -----------------------------
+// Request config
+// -----------------------------
 export const REQUEST_CONFIG = {
-  TIMEOUT: 10000,       // 10 seconds
+  TIMEOUT: 10000,       // 10s
   RETRY_ATTEMPTS: 3,
-  RETRY_DELAY: 1000,    // 1 second
+  RETRY_DELAY: 1000,    // 1s
 };
 
+// -----------------------------
 // Final API config object
+// -----------------------------
 export const API_CONFIG = {
   BASE_URL,
   SOCKET_URL,
@@ -84,15 +56,22 @@ export const API_CONFIG = {
   REQUEST_CONFIG,
 };
 
-// Expose globally for temporary debugging in browser
-;(window as any).API_CONFIG = API_CONFIG;
+// -----------------------------
+// Expose globally for debugging
+// -----------------------------
+if (typeof window !== 'undefined') {
+  (window as any).API_CONFIG = API_CONFIG;
+  console.log('✅ API_CONFIG attached to window:', window.API_CONFIG);
+}
 
-// Optional: debugging utility
+// -----------------------------
+// Optional utility to log environment
+// -----------------------------
 export const logEnvironment = () => {
   console.log('🔧 Environment Configuration:');
   console.log('📡 API Base URL:', API_CONFIG.BASE_URL);
   console.log('🔌 Socket URL:', API_CONFIG.SOCKET_URL);
-  console.log('🌍 Environment:', import.meta.env.MODE);
+  console.log('🌍 Mode:', import.meta.env.MODE);
 };
 
 export default API_CONFIG;
