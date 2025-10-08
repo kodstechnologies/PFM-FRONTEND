@@ -1,4 +1,4 @@
-name: Deploy PFM Frontend
+name: Deploy React/Vite Frontend on EC2
 
 on:
   push:
@@ -6,42 +6,53 @@ on:
       - main
 
 jobs:
-  build-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18
-
-      - name: Install dependencies
-        run: npm install --legacy-peer-deps
-
-      - name: Build frontend
-        run: NODE_OPTIONS="--max-old-space-size=4096" npm run build -- --mode production
-        env:
-          VITE_API_URL: ${{ secrets.VITE_API_URL }}
-          VITE_SOCKET_URL: ${{ secrets.VITE_SOCKET_URL }}
-
-      - name: Copy files to EC2
-        uses: appleboy/scp-action@v1
+      - name: Deploy on EC2
+        uses: appleboy/ssh-action@v0.1.9
         with:
           host: ${{ secrets.EC2_HOST }}
-          username: ubuntu
+          username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_KEY }}
-          source: "dist/*"
-          target: "/home/ubuntu/PFM-FRONTEND"
-
-      - name: Restart frontend on EC2
-        uses: appleboy/ssh-action@v1
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ubuntu
-          key: ${{ secrets.EC2_KEY }}
+          port: 22
           script: |
-            pm2 delete pfm-frontend || true
-            pm2 serve /home/ubuntu/PFM-FRONTEND 3000 --name pfm-frontend --spa --watch
+            echo "🔄 Pulling latest code"
+            cd /home/ubuntu/PFM-FRONTEND || exit 1
+            git reset --hard
+            git clean -fd
+            git pull origin main
+
+            echo "⚡ Setting environment variables for build"
+            export VITE_API_URL="${{ secrets.VITE_API_URL }}"
+            export VITE_SOCKET_URL="${{ secrets.VITE_SOCKET_URL }}"
+            export NODE_OPTIONS="--max-old-space-size=4096"
+
+            echo "📦 Installing dependencies"
+            npm install
+
+            echo "🧹 Cleaning previous build"
+            rm -rf dist
+
+            echo "🏗️ Building project"
+            npm run build
+
+            echo "📂 Deploying build to /var/www/admin"
+            sudo rm -rf /var/www/admin_old
+            sudo mv /var/www/admin /var/www/admin_old || true
+            sudo mkdir -p /var/www/admin
+            sudo cp -r dist/* /var/www/admin/
+
+            echo "🔧 Setting ownership and permissions"
+            sudo chown -R www-data:www-data /var/www/admin
+            sudo find /var/www/admin -type d -exec chmod 755 {} \;
+            sudo find /var/www/admin -type f -exec chmod 644 {} \;
+
+            echo "🔁 Reloading Nginx"
+            sudo systemctl reload nginx
+
+            echo "✅ Deployment completed"
