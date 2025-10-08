@@ -34,14 +34,24 @@ jobs:
           username: ubuntu
           key: ${{ secrets.EC2_KEY }}
           source: "dist/*"
-          target: "/home/ubuntu/PFM-FRONTEND"
+          target: "/home/ubuntu/PFM-FRONTEND/dist"
 
-      - name: Restart frontend on EC2
+      - name: Set permissions on EC2
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ubuntu
           key: ${{ secrets.EC2_KEY }}
           script: |
-            pm2 delete pfm-frontend || true
-            pm2 serve /home/ubuntu/PFM-FRONTEND 3000 --name pfm-frontend --spa --watch
+            sudo chown -R www-data:www-data /home/ubuntu/PFM-FRONTEND/dist
+            sudo chmod -R 755 /home/ubuntu/PFM-FRONTEND/dist
+
+      - name: Reload Nginx
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_KEY }}
+          script: |
+            sudo nginx -t
+            sudo systemctl reload nginx
