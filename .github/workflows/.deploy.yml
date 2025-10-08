@@ -19,13 +19,16 @@ jobs:
           node-version: 18
 
       - name: Install dependencies
-        run: npm install --legacy-peer-deps
+        run: |
+          npm cache clean --force
+          npm install --legacy-peer-deps
 
       - name: Build frontend
-        run: NODE_OPTIONS="--max-old-space-size=4096" npm run build -- --mode production
+        run: NODE_OPTIONS="--max-old-space-size=6144" npm run build -- --mode production
         env:
           VITE_API_URL: ${{ secrets.VITE_API_URL }}
           VITE_SOCKET_URL: ${{ secrets.VITE_SOCKET_URL }}
+          CI: false
 
       - name: Copy files to EC2
         uses: appleboy/scp-action@v1
@@ -46,7 +49,7 @@ jobs:
             sudo chown -R www-data:www-data /home/ubuntu/PFM-FRONTEND/dist
             sudo chmod -R 755 /home/ubuntu/PFM-FRONTEND/dist
 
-      - name: Reload Nginx
+      - name: Test and reload Nginx
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.EC2_HOST }}
