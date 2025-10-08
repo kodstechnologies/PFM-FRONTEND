@@ -1,3 +1,5 @@
+import './config/check-env';
+import './config/api.config';
 import React, { Suspense } from 'react';
 import ReactDOM from 'react-dom/client'
 

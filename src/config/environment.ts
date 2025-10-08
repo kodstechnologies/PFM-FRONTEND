@@ -4,9 +4,10 @@
 
 export const ENV_CONFIG = {
   // API Configuration
-  API_BASE_URL: 'http://localhost:8000',
-  SOCKET_URL: 'http://localhost:3001',
-  
+  API_BASE_URL: import.meta.env.VITE_API_BASE_URL || 'https://api.priyafreshmeats.com',
+  //SOCKET_URL: '${import.meta.env.VITE_SOCKET_URL}',
+  SOCKET_URL: import.meta.env.VITE_SOCKET_URL || 'wss://api.priyafreshmeats.com/socket',
+
   // App Configuration
   APP_NAME: 'PriyaFreshMeat',
   APP_VERSION: '1.0.0',
@@ -36,3 +37,4 @@ export const getConfig = () => {
 };
 
 export default ENV_CONFIG;
+

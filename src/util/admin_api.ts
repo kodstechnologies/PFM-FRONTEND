@@ -2,7 +2,7 @@ import axios, { AxiosRequestConfig, InternalAxiosRequestConfig, Method } from "a
 import { getConfig } from "../config/environment";
 
 const config = getConfig();
-const BASE_URL = config.API_BASE_URL;
+const BASE_URL = import.meta.env.VITE_API_URL;
 
 const API = axios.create({
   baseURL: BASE_URL,

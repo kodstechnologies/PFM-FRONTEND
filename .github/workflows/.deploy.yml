@@ -1,50 +1,47 @@
-name: Deploy PFM Frontend to EC2
+name: Deploy PFM Frontend
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - main
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        node-version: [18.x]
-
     steps:
-    - name: Checkout Code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v3
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'npm'
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
 
-    - name: Install Dependencies
-      run: npm ci
+      - name: Install dependencies
+        run: npm install --legacy-peer-deps
 
-    - name: Fix permissions before build
-      run: |
-        sudo chown -R $USER:$USER .
-        sudo chmod -R u+rwX,go+rX .
+      - name: Build frontend
+        run: NODE_OPTIONS="--max-old-space-size=4096" npm run build -- --mode production
+        env:
+          VITE_API_URL: ${{ secrets.VITE_API_URL }}
+          VITE_SOCKET_URL: ${{ secrets.VITE_SOCKET_URL }}
 
-    - run: |
-        touch .env
-        echo "${{ secrets.VITE_API_BASE_URL }}" > .env
-        cat .env
+      - name: Copy files to EC2
+        uses: appleboy/scp-action@v1
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_KEY }}
+          source: "dist/*"
+          target: "/home/ubuntu/PFM-FRONTEND"
 
-    # ⭐ Build React frontend with env variable
-    - name: Build React frontend
-      run: NODE_OPTIONS="--max-old-space-size=3072" npm run build
-      env:
-        VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
-
-    # 🚀 Deploy and serve with PM2
-    - name: Deploy React build with PM2
-      run: |
-        sudo npm install -g pm2
-        pm2 delete pfm-frontend || true
-        pm2 serve dist 8080 --name pfm-frontend --watch
-        pm2 save
+      - name: Restart frontend on EC2
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_KEY }}
+          script: |
+            pm2 delete pfm-frontend || true
+            pm2 serve /home/ubuntu/PFM-FRONTEND 3000 --name pfm-frontend --spa --watch
