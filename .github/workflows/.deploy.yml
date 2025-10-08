@@ -10,11 +10,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Checkout code
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # 2️⃣ SSH into EC2 and deploy
       - name: Deploy on EC2
         uses: appleboy/ssh-action@v0.1.9
         with:
@@ -29,12 +27,16 @@ jobs:
             git clean -fd
             git pull origin main
 
-            echo "📦 Installing dependencies"
-            npm install
-
             echo "⚡ Setting environment variables for build"
             export VITE_API_URL="${{ secrets.VITE_API_URL }}"
             export VITE_SOCKET_URL="${{ secrets.VITE_SOCKET_URL }}"
+            export NODE_OPTIONS="--max-old-space-size=4096"
+
+            echo "📦 Installing dependencies"
+            npm install
+
+            echo "🧹 Cleaning previous build"
+            rm -rf dist
 
             echo "🏗️ Building project"
             npm run build
@@ -42,7 +44,8 @@ jobs:
             echo "📂 Deploying build to /var/www/admin"
             sudo rm -rf /var/www/admin_old
             sudo mv /var/www/admin /var/www/admin_old || true
-            sudo cp -r dist /var/www/admin
+            sudo mkdir -p /var/www/admin
+            sudo cp -r dist/* /var/www/admin/
 
             echo "🔧 Setting ownership and permissions"
             sudo chown -R www-data:www-data /var/www/admin
