@@ -1,4 +1,4 @@
-name: Deploy React/Vite Frontend on Server
+name: Deploy React/Vite Frontend on EC2
 
 on:
   push:
@@ -10,12 +10,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Checkout repo
+      # 1️⃣ Checkout code
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # 2️⃣ SSH into EC2 server and deploy
-      - name: Deploy on EC2 server
+      # 2️⃣ SSH into EC2 and deploy
+      - name: Deploy on EC2
         uses: appleboy/ssh-action@v0.1.9
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -39,9 +39,10 @@ jobs:
             echo "🏗️ Building project"
             npm run build
 
-            echo "📂 Copying build to /var/www/admin"
-            sudo rm -rf /var/www/admin/*
-            sudo cp -r dist/* /var/www/admin/
+            echo "📂 Deploying build to /var/www/admin"
+            sudo rm -rf /var/www/admin_old
+            sudo mv /var/www/admin /var/www/admin_old || true
+            sudo cp -r dist /var/www/admin
 
             echo "🔧 Setting ownership and permissions"
             sudo chown -R www-data:www-data /var/www/admin
@@ -50,3 +51,5 @@ jobs:
 
             echo "🔁 Reloading Nginx"
             sudo systemctl reload nginx
+
+            echo "✅ Deployment completed"
