@@ -6,6 +6,7 @@ import cors from 'cors';
 const app = express();
 const server = createServer(app);
 // Allow configuring CORS origins via env (comma-separated)
+console.log("🚀 ~ process.env.CORS_ORIGINS:", process.env.CORS_ORIGINS)
 const allowedOrigins = (process.env.CORS_ORIGINS || 'http://localhost:5173')
   .split(',')
   .map((o) => o.trim());
@@ -28,10 +29,10 @@ const connectedClients = new Map();
 
 io.on('connection', (socket) => {
   console.log('🔌 Client connected:', socket.id);
-  
+
   const { role, userId } = socket.handshake.query;
   connectedClients.set(socket.id, { role, userId });
-  
+
   console.log(`👤 ${role} connected: ${userId}`);
 
   // Handle new orders from vendor TV screen
@@ -75,8 +76,8 @@ server.listen(PORT, () => {
 
 // Health check endpoint
 app.get('/health', (req, res) => {
-  res.json({ 
-    status: 'ok', 
+  res.json({
+    status: 'ok',
     connectedClients: connectedClients.size,
     timestamp: new Date().toISOString()
   });
