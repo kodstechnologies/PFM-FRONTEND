@@ -1,45 +1,46 @@
-name: Deploy PFM-FRONTEND to EC2
+name: Deploy React App to EC2
 
 on:
   push:
     branches:
-      - main  # or your branch name
+      - main
 
 jobs:
-  deploy:
-    runs-on: ubuntu-24.04
+  build-and-deploy:
+    runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: 20
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
 
-    - name: Install dependencies
-      run: npm install --legacy-peer-deps
-      working-directory: ./PFM-FRONTEND
+      - name: Install dependencies
+        run: npm install --legacy-peer-deps
 
-    - name: Build frontend
-      run: npm run build
-      working-directory: ./PFM-FRONTEND
+      - name: Build project
+        run: npm run build
 
-    - name: Copy files to EC2
-      uses: appleboy/scp-action@v0.1.13
-      with:
-        host: ${{ secrets.EC2_HOST }}
-        username: ${{ secrets.EC2_USER }}
-        key: ${{ secrets.EC2_KEY }}
-        source: "PFM-FRONTEND/dist/*"
-        target: "/home/ubuntu/PFM-FRONTEND/dist"
+      - name: Copy files to EC2
+        uses: appleboy/scp-action@v1.0.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_KEY }}
+          source: "dist/*"
+          target: "/home/ubuntu/PFM-FRONTEND/dist"
 
-    - name: Restart frontend service (optional)
-      uses: appleboy/ssh-action@v0.1.9
-      with:
-        host: ${{ secrets.EC2_HOST }}
-        username: ${{ secrets.EC2_USER }}
-        key: ${{ secrets.EC2_KEY }}
-        script: |
-          pm2 restart pfm-frontend || pm2 start /home/ubuntu/PFM-FRONTEND/dist --name pfm-frontend
+      - name: Restart frontend (if using PM2 or similar)
+        uses: appleboy/ssh-action@v0.1.8
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_KEY }}
+          script: |
+            cd /home/ubuntu/PFM-FRONTEND
+            # Optional: if using pm2
+            # pm2 restart all
+            echo "Deployment completed"
