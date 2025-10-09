@@ -1,21 +1,120 @@
-import { lazy } from 'react';
-import type { AppRoute } from './types'; // ✅ Add this
+// import { lazy } from 'react';
+// import type { AppRoute } from './types'; // ✅ Add this
+// import LiveOrders from '../pages/Vendor/LiveOrders';
+// import ManagerProfile from '../pages/Manager/Profile';
+// import PrintQR from '../components/PrintQR';
+
+// const AddPartner = lazy(() => import('../pages/Manager/DeliveryPartner/AddPartner'));
+// const PartnerDetails = lazy(() => import('../pages/Manager/DeliveryPartner/PartnerDetails'));
+// const DeliveryPartner = lazy(() => import('../pages/Manager/DeliveryPartner'));
+
+// export const managerRoutes: AppRoute[] = [ // ✅ Add the type
+//   {
+//     path: '/manager/profile',
+//     element: <ManagerProfile />,
+//     layout: 'default',
+//     role: 'manager',
+//   },
+//   {
+//     path: '/manager/live-orders',
+//     element: <LiveOrders />,
+//     layout: 'blank',
+//     role: 'manager',
+//   },
+//   {
+//     path: '/manager/print-qr/:orderId',
+//     element: <PrintQR />,
+//     layout: 'blank',
+//     role: 'manager',
+//   },
+
+//   {
+//     path: '/manager/delivery-partner',
+//     element: <DeliveryPartner />,
+//     layout: 'default',
+//     role: 'manager',
+//   },
+//   {
+//     path: '/manager/delivery-partner/add',
+//     element: <AddPartner />,
+//     layout: 'default',
+//     role: 'manager',
+//   },
+//   {
+//     path: '/manager/delivery-partner/details/:partnerId',
+//     element: <PartnerDetails />,
+//     layout: 'default',
+//     role: 'manager',
+//   },
+// ];
+
+
+// Updated managerRoutes with dashboard route and index redirect
+
+// src/routes/managerRoutes.tsx
+import { lazy } from 'react'; // Add Navigate import
+import type { AppRoute } from './types';
 import LiveOrders from '../pages/Vendor/LiveOrders';
+import ManagerProfile from '../pages/Manager/Profile';
+import PrintQR from '../components/PrintQR';
+import { Navigate } from 'react-router-dom';
+import OrderManagement from '../pages/Manager/OrderManagement';
+import Inventory from '../pages/Manager/Inventory';
+import InventoryTypes from '../pages/Manager/InventoryTypes';
+import InventorySubCategories from '../pages/Manager/InventorySubCategories';
+import EditPartner from '../pages/Manager/DeliveryPartner/EditPartner';
 
-const ManagerDashboard = lazy(() => import('../pages/Manager/Dashboard'));
-const OrderManagement = lazy(() => import('../pages/Manager/OrderManagement'));
-const DeliveryPartnerList = lazy(() => import('../pages/Manager/DeliveryPartner'));
 const AddPartner = lazy(() => import('../pages/Manager/DeliveryPartner/AddPartner'));
-const EditPartner = lazy(() => import('../pages/Manager/DeliveryPartner/EditPartner'));
 const PartnerDetails = lazy(() => import('../pages/Manager/DeliveryPartner/PartnerDetails'));
-const Inventory = lazy(() => import('../pages/Manager/Inventory'));
-const InventoryTypes = lazy(() => import('../pages/Manager/InventoryTypes'));
-const InventorySubCategories = lazy(() => import('../pages/Manager/InventorySubCategories'));
+const DeliveryPartner = lazy(() => import('../pages/Manager/DeliveryPartner'));
+const ManagerDashboard = lazy(() => import('../pages/Manager/Dashboard')); // Assume this component exists; create if not
 
-export const managerRoutes: AppRoute[] = [ // ✅ Add the type
+export const managerRoutes: AppRoute[] = [
   {
     path: '/manager-dashboard',
     element: <ManagerDashboard />,
+    layout: 'default',
+    role: 'manager',
+  },
+  {
+    path: '/manager',
+    element: <Navigate to="/manager-dashboard" replace />,
+    layout: 'default',
+    role: 'manager',
+  },
+  {
+    path: '/manager/profile',
+    element: <ManagerProfile />,
+    layout: 'default',
+    role: 'manager',
+  },
+  {
+    path: '/manager/live-orders',
+    element: <LiveOrders />,
+    layout: 'blank',
+    role: 'manager',
+  },
+  {
+    path: '/manager/print-qr/:orderId',
+    element: <PrintQR />,
+    layout: 'blank',
+    role: 'manager',
+  },
+  {
+    path: '/manager/delivery-partner',
+    element: <DeliveryPartner />,
+    layout: 'default',
+    role: 'manager',
+  },
+  {
+    path: '/manager/delivery-partner/add',
+    element: <AddPartner />,
+    layout: 'default',
+    role: 'manager',
+  },
+  {
+    path: '/manager/delivery-partner/details/:partnerId',
+    element: <PartnerDetails />,
     layout: 'default',
     role: 'manager',
   },
@@ -31,6 +130,7 @@ export const managerRoutes: AppRoute[] = [ // ✅ Add the type
     layout: 'default',
     role: 'manager',
   },
+
   {
     path: '/manager/inventory/:categoryId/types',
     element: <InventoryTypes />,
@@ -44,33 +144,9 @@ export const managerRoutes: AppRoute[] = [ // ✅ Add the type
     role: 'manager',
   },
   {
-    path: '/manager/delivery-partner',
-    element: <DeliveryPartnerList />,
-    layout: 'default',
-    role: 'manager',
-  },
-  {
-    path: '/manager/delivery-partner/add',
-    element: <AddPartner />,
-    layout: 'default',
-    role: 'manager',
-  },
-  {
     path: '/manager/delivery-partner/edit/:id',
     element: <EditPartner />,
     layout: 'default',
-    role: 'manager',
-  },
-  {
-    path: '/manager/delivery-partner/details/:id',
-    element: <PartnerDetails />,
-    layout: 'default',
-    role: 'manager',
-  },
-  {
-    path: '/manager/live-orders',
-    element: <LiveOrders />,
-    layout: 'blank',
     role: 'manager',
   },
 ];

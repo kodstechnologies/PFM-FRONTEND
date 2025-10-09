@@ -5,7 +5,6 @@ import { Suspense } from 'react';
 import BlankLayout from '../components/Layouts/BlankLayout';
 import DefaultLayout from '../components/Layouts/DefaultLayout';
 import ProtectedRoute from './ProtectedRoute';
-
 import { commonRoutes } from './routes';
 import { superAdminRoutes } from './superAdminRoutes';
 import { managerRoutes } from './managerRoutes';
