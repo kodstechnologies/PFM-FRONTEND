@@ -8,6 +8,7 @@ import ProtectedRoute from './ProtectedRoute';
 import { commonRoutes } from './routes';
 import { superAdminRoutes } from './superAdminRoutes';
 import { managerRoutes } from './managerRoutes';
+import { storeRoutes } from './storeRoutes';
 import type { AppRoute } from './types';
 
 // ✅ Create all routes and let ProtectedRoute handle authentication
@@ -15,6 +16,7 @@ const allRoutes: AppRoute[] = [
   ...commonRoutes,
   ...superAdminRoutes,
   ...managerRoutes,
+  ...storeRoutes,
 ];
 
 // console.log('✅ All Routes:', allRoutes);
