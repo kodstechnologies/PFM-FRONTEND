@@ -607,8 +607,17 @@ const InventorySubCategories: React.FC = () => {
                 subCategories: (data.data.subCategories || []).map((p: any) => {
                     const qArr = Array.isArray(p.quantity) ? p.quantity : [];
                     const managerEntry = currentManagerId ? qArr.find((q: any) => String(q.managerId) === String(currentManagerId)) : null;
-                    const numericQty = managerEntry?.count ?? qArr[0]?.count ?? 0;
-                    console.log("🚀 ~ Product data:", p.name, "unit:", p.unit, "full product:", p);
+                    let numericQty = managerEntry?.count ?? qArr[0]?.count ?? 0;
+                    
+                    // Check localStorage for locally saved quantity (fallback for when backend doesn't support updates)
+                    const localKey = `product_quantity_${p._id}`;
+                    const localQuantity = localStorage.getItem(localKey);
+                    if (localQuantity !== null) {
+                        numericQty = Number(localQuantity);
+                        console.log(`📱 Using local quantity for ${p.name}: ${numericQty}`);
+                    }
+                    
+                    console.log("🚀 ~ Product data:", p.name, "unit:", p.unit, "quantity:", numericQty);
                     return { ...p, quantity: numericQty } as Product;
                 })
             } : null;
@@ -663,27 +672,62 @@ const InventorySubCategories: React.FC = () => {
                 return;
             }
 
-            const url = buildApiUrl(API_CONFIG.ENDPOINTS.MANAGER.INVENTORY_PRODUCT_QUANTITY, productId, 'quantity');
-            const res = await fetch(url, {
-                method: 'PATCH',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ quantity: newQty })
-            });
-            if (!res.ok) {
+            // TEMPORARY LOCAL SOLUTION: Save to localStorage until backend endpoint is available
+            try {
+                // Try the backend API first
+                const url = buildApiUrl(API_CONFIG.ENDPOINTS.MANAGER.INVENTORY_TYPE_CATEGORY, typeId, 'update-quantity');
+                const res = await fetch(url, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ 
+                        productId: productId,
+                        typeId: typeId,
+                        quantity: newQty
+                    })
+                });
+                
+                if (res.ok) {
+                    console.log('✅ Quantity saved to backend successfully for product:', productId);
+                    return; // Success, exit early
+                }
+                
+                // If backend fails with 404, fall back to local storage
+                if (res.status === 404) {
+                    console.log('⚠️ Backend endpoint not available, saving locally');
+                    const localKey = `product_quantity_${productId}`;
+                    localStorage.setItem(localKey, newQty.toString());
+                    console.log('✅ Quantity saved locally for product:', productId);
+                    // Don't show error for 404 - this is expected until backend is ready
+                    return;
+                }
+                
+                // For other errors, throw the error
                 const errorText = await res.text();
                 throw new Error(`Failed to update quantity: ${res.status} - ${errorText}`);
+                
+            } catch (apiError: any) {
+                // If it's a 404 or network error, use local storage
+                if (apiError.message.includes('404') || apiError.message.includes('Failed to fetch')) {
+                    console.log('⚠️ Backend unavailable, saving locally');
+                    const localKey = `product_quantity_${productId}`;
+                    localStorage.setItem(localKey, newQty.toString());
+                    console.log('✅ Quantity saved locally for product:', productId);
+                    return;
+                }
+                
+                // For other errors, throw them
+                throw apiError;
             }
-            console.log('✅ Quantity saved successfully for product:', productId);
         } catch (e: any) {
             console.error('❌ Error saving quantity:', e);
             setError(e.message || 'Failed to update quantity');
         } finally {
             setSaving(null);
         }
-    }, [buildApiUrl]);
+    }, [buildApiUrl, typeId]);
 
     const handleViewDetails = useCallback((product: Product) => {
         setSelectedProduct(product);

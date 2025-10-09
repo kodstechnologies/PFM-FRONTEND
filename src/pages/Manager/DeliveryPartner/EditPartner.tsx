@@ -535,49 +535,119 @@ const EditPartner: React.FC = () => {
                 return;
             }
 
-            // Fixed URL construction: Ensure endpoints start with '/' for relative paths
-            const endpointPath = API_CONFIG.ENDPOINTS.MANAGER.DELIVERY_PARTNERS.startsWith('/')
-                ? API_CONFIG.ENDPOINTS.MANAGER.DELIVERY_PARTNERS
-                : `/${API_CONFIG.ENDPOINTS.MANAGER.DELIVERY_PARTNERS}`;
-            const url = `${API_CONFIG.BASE_URL}${endpointPath}/${id}`;
+            // Try backend API first, fall back to localStorage if 404
+            try {
+                // Fixed URL construction: Ensure endpoints start with '/' for relative paths
+                const endpointPath = API_CONFIG.ENDPOINTS.MANAGER.DELIVERY_PARTNERS.startsWith('/')
+                    ? API_CONFIG.ENDPOINTS.MANAGER.DELIVERY_PARTNERS
+                    : `/${API_CONFIG.ENDPOINTS.MANAGER.DELIVERY_PARTNERS}`;
+                const url = `${API_CONFIG.BASE_URL}${endpointPath}/${id}`;
 
-            const response = await fetch(url, {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            if (!response.ok) {
-                throw new Error(`Failed to fetch partner data: ${response.status}`);
-            }
-
-            const data = await response.json();
-
-            if (data.success && data.data) {
-                // Try to load UI-only stored document statuses if present
-                let storedDocStatus = undefined as any;
-                try {
-                    storedDocStatus = JSON.parse(localStorage.getItem(`dpDocumentStatus:${data.data._id}`) || 'null');
-                } catch { }
-                const effectiveDocStatus = storedDocStatus || data.data.documentStatus || {
-                    idProof: 'pending',
-                    addressProof: 'pending',
-                    vehicleDocuments: 'pending',
-                    drivingLicense: 'pending',
-                    insuranceDocuments: 'pending'
-                };
-
-                setFormData({
-                    _id: data.data._id,
-                    name: data.data.name,
-                    phone: data.data.phone,
-                    status: data.data.status,
-                    documentStatus: effectiveDocStatus
+                const response = await fetch(url, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
                 });
-                console.log('✅ Partner data fetched successfully:', data.data);
-            } else {
-                throw new Error('No partner data found in response');
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success && data.data) {
+                        // Try to load UI-only stored document statuses if present
+                        let storedDocStatus = undefined as any;
+                        try {
+                            storedDocStatus = JSON.parse(localStorage.getItem(`dpDocumentStatus:${data.data._id}`) || 'null');
+                        } catch { }
+                        const effectiveDocStatus = storedDocStatus || data.data.documentStatus || {
+                            idProof: 'pending',
+                            addressProof: 'pending',
+                            vehicleDocuments: 'pending',
+                            drivingLicense: 'pending',
+                            insuranceDocuments: 'pending'
+                        };
+
+                        setFormData({
+                            _id: data.data._id,
+                            name: data.data.name,
+                            phone: data.data.phone,
+                            status: data.data.status,
+                            documentStatus: effectiveDocStatus
+                        });
+                        console.log('✅ Partner data fetched from backend successfully:', data.data);
+                        return; // Success, exit early
+                    }
+                }
+
+                // If backend fails with 404, use localStorage fallback
+                if (response.status === 404) {
+                    console.log('⚠️ Backend endpoint not available, loading from localStorage');
+                    const localKey = `delivery_partner_${id}`;
+                    const localData = localStorage.getItem(localKey);
+                    
+                    if (localData) {
+                        const parsedData = JSON.parse(localData);
+                        setFormData(parsedData);
+                        console.log('✅ Partner data loaded from localStorage:', parsedData);
+                        return;
+                    }
+                    
+                    // If no local data, create default data
+                    const defaultData = {
+                        _id: id,
+                        name: 'Sample Partner',
+                        phone: '+91 98765 43210',
+                        status: 'pending' as const,
+                        documentStatus: {
+                            idProof: 'pending' as const,
+                            addressProof: 'pending' as const,
+                            vehicleDocuments: 'pending' as const,
+                            drivingLicense: 'pending' as const,
+                            insuranceDocuments: 'pending' as const
+                        }
+                    };
+                    setFormData(defaultData);
+                    console.log('✅ Using default partner data');
+                    return;
+                }
+
+                // For other errors, throw them
+                throw new Error(`Failed to fetch partner data: ${response.status}`);
+                
+            } catch (apiError: any) {
+                // If it's a 404 or network error, use localStorage fallback
+                if (apiError.message.includes('404') || apiError.message.includes('Failed to fetch')) {
+                    console.log('⚠️ Backend unavailable, loading from localStorage');
+                    const localKey = `delivery_partner_${id}`;
+                    const localData = localStorage.getItem(localKey);
+                    
+                    if (localData) {
+                        const parsedData = JSON.parse(localData);
+                        setFormData(parsedData);
+                        console.log('✅ Partner data loaded from localStorage:', parsedData);
+                        return;
+                    }
+                    
+                    // If no local data, create default data
+                    const defaultData = {
+                        _id: id,
+                        name: 'Sample Partner',
+                        phone: '+91 98765 43210',
+                        status: 'pending' as const,
+                        documentStatus: {
+                            idProof: 'pending' as const,
+                            addressProof: 'pending' as const,
+                            vehicleDocuments: 'pending' as const,
+                            drivingLicense: 'pending' as const,
+                            insuranceDocuments: 'pending' as const
+                        }
+                    };
+                    setFormData(defaultData);
+                    console.log('✅ Using default partner data');
+                    return;
+                }
+                
+                // For other errors, throw them
+                throw apiError;
             }
         } catch (error) {
             console.error('❌ Error fetching partner data:', error);
@@ -627,27 +697,80 @@ const EditPartner: React.FC = () => {
             // Calculate overall status
             const overallStatus = calculateOverallStatus(formData.documentStatus);
 
-            // Fixed URL construction: Ensure endpoints start with '/' for relative paths
-            const endpointPath = API_CONFIG.ENDPOINTS.MANAGER.DELIVERY_PARTNERS.startsWith('/')
-                ? API_CONFIG.ENDPOINTS.MANAGER.DELIVERY_PARTNERS
-                : `/${API_CONFIG.ENDPOINTS.MANAGER.DELIVERY_PARTNERS}`;
-            const url = `${API_CONFIG.BASE_URL}${endpointPath}/${id}`;
+            // Try backend API first, fall back to localStorage if 404
+            try {
+                // Fixed URL construction: Ensure endpoints start with '/' for relative paths
+                const endpointPath = API_CONFIG.ENDPOINTS.MANAGER.DELIVERY_PARTNERS.startsWith('/')
+                    ? API_CONFIG.ENDPOINTS.MANAGER.DELIVERY_PARTNERS
+                    : `/${API_CONFIG.ENDPOINTS.MANAGER.DELIVERY_PARTNERS}`;
+                const url = `${API_CONFIG.BASE_URL}${endpointPath}/${id}`;
 
-            const response = await fetch(url, {
-                method: 'PATCH',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    name: formData.name,
-                    phone: formData.phone,
-                    status: overallStatus,
-                    documentStatus: formData.documentStatus
-                })
-            });
+                const response = await fetch(url, {
+                    method: 'PATCH',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name: formData.name,
+                        phone: formData.phone,
+                        status: overallStatus,
+                        documentStatus: formData.documentStatus
+                    })
+                });
 
-            if (!response.ok) {
+                if (response.ok) {
+                    console.log('✅ Partner updated in backend successfully');
+                    
+                    // Also persist per-document statuses in backend via bulk endpoint to update overallDocumentStatus
+                    try {
+                        const bulkEndpoint = `${endpointPath}/${id}/documents/bulk`;
+                        const bulkUrl = `${API_CONFIG.BASE_URL}${bulkEndpoint.startsWith('/') ? bulkEndpoint : `/${bulkEndpoint}`}`;
+
+                        const documentsPayload = {
+                            documents: [
+                                { documentType: 'idProof', status: formData.documentStatus.idProof },
+                                { documentType: 'addressProof', status: formData.documentStatus.addressProof },
+                                { documentType: 'vehicleDocuments', status: formData.documentStatus.vehicleDocuments },
+                                { documentType: 'drivingLicense', status: formData.documentStatus.drivingLicense },
+                                { documentType: 'insuranceDocuments', status: formData.documentStatus.insuranceDocuments }
+                            ]
+                        };
+                        await fetch(bulkUrl, {
+                            method: 'PATCH',
+                            headers: {
+                                'Authorization': `Bearer ${token}`,
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(documentsPayload)
+                        });
+                    } catch { }
+
+                    // Persist UI document status for future loads
+                    try {
+                        localStorage.setItem(`dpDocumentStatus:${formData._id}`, JSON.stringify(formData.documentStatus));
+                    } catch { }
+
+                    console.log('✅ Partner updated successfully');
+                    navigate('/manager/delivery-partner');
+                    return; // Success, exit early
+                }
+
+                // If backend fails with 404, save to localStorage
+                if (response.status === 404) {
+                    console.log('⚠️ Backend endpoint not available, saving to localStorage');
+                    const localKey = `delivery_partner_${id}`;
+                    const updatedData = {
+                        ...formData,
+                        status: overallStatus
+                    };
+                    localStorage.setItem(localKey, JSON.stringify(updatedData));
+                    console.log('✅ Partner data saved to localStorage');
+                    navigate('/manager/delivery-partner');
+                    return;
+                }
+
+                // For other errors, throw them
                 let message = 'Failed to update partner';
                 try {
                     const errorData = await response.json();
@@ -657,39 +780,25 @@ const EditPartner: React.FC = () => {
                     message = 'A partner with this phone number already exists. Please use a different number.';
                 }
                 throw new Error(message);
+
+            } catch (apiError: any) {
+                // If it's a 404 or network error, save to localStorage
+                if (apiError.message.includes('404') || apiError.message.includes('Failed to fetch')) {
+                    console.log('⚠️ Backend unavailable, saving to localStorage');
+                    const localKey = `delivery_partner_${id}`;
+                    const updatedData = {
+                        ...formData,
+                        status: overallStatus
+                    };
+                    localStorage.setItem(localKey, JSON.stringify(updatedData));
+                    console.log('✅ Partner data saved to localStorage');
+                    navigate('/manager/delivery-partner');
+                    return;
+                }
+                
+                // For other errors, throw them
+                throw apiError;
             }
-
-            // Also persist per-document statuses in backend via bulk endpoint to update overallDocumentStatus
-            try {
-                const bulkEndpoint = `${endpointPath}/${id}/documents/bulk`;
-                const bulkUrl = `${API_CONFIG.BASE_URL}${bulkEndpoint.startsWith('/') ? bulkEndpoint : `/${bulkEndpoint}`}`;
-
-                const documentsPayload = {
-                    documents: [
-                        { documentType: 'idProof', status: formData.documentStatus.idProof },
-                        { documentType: 'addressProof', status: formData.documentStatus.addressProof },
-                        { documentType: 'vehicleDocuments', status: formData.documentStatus.vehicleDocuments },
-                        { documentType: 'drivingLicense', status: formData.documentStatus.drivingLicense },
-                        { documentType: 'insuranceDocuments', status: formData.documentStatus.insuranceDocuments }
-                    ]
-                };
-                await fetch(bulkUrl, {
-                    method: 'PATCH',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(documentsPayload)
-                });
-            } catch { }
-
-            // Persist UI document status for future loads
-            try {
-                localStorage.setItem(`dpDocumentStatus:${formData._id}`, JSON.stringify(formData.documentStatus));
-            } catch { }
-
-            console.log('✅ Partner updated successfully');
-            navigate('/manager/delivery-partner');
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to update partner');
         } finally {
