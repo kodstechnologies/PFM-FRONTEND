@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import SocketService from '../../services/socketService';
-import { API_CONFIG } from '../../config/api.config';
+import SocketService from '../../../services/socketService';
+// import SocketService from '../../services/socketService';
+import { API_CONFIG } from '../../../config/api.config';
+// import { API_CONFIG } from '../../config/api.config';
 import { toast, ToastContainer } from 'react-toastify';
 
 interface OrderDetail {
@@ -23,7 +25,7 @@ interface Order {
   orderDetails?: OrderDetail[];
 }
 
-const LiveOrders: React.FC = () => {
+const LiveOrders2: React.FC = () => {
   const navigate = useNavigate();
   const [currentTime, setCurrentTime] = useState<string>('');
   const [orders, setOrders] = useState<Order[]>([]);
@@ -41,7 +43,7 @@ const LiveOrders: React.FC = () => {
   const isManager = window.location.pathname.includes('/manager/');
   const userRole = isManager ? 'manager' : 'store';
   const userId = isManager ? 'manager-tv-screen' : 'store-tv-screen';
-  console.log("🚀 ~ LiveOrders ~ userId:", userId)
+  console.log("🚀 ~ LiveOrders2 ~ userId:", userId)
   let managerId = "manager-tv-screen"
   // Socket connection
   useEffect(() => {
@@ -49,8 +51,8 @@ const LiveOrders: React.FC = () => {
       try {
         socketService.connect(userRole, userId);
         if (!isManager) {
-          socketService.onNewOrder(() => fetchLiveOrders());
-          socketService.onOrderStatusChange(() => fetchLiveOrders());
+          socketService.onNewOrder(() => fetchLiveOrders2());
+          socketService.onOrderStatusChange(() => fetchLiveOrders2());
         }
       } catch (error) {
         console.error(`Failed to connect ${userRole} socket:`, error);
@@ -88,7 +90,7 @@ const LiveOrders: React.FC = () => {
     }
 
     setIsAuthenticated(true);
-    fetchLiveOrders();
+    fetchLiveOrders2();
   }, [isManager, navigate]);
 
   // Normalize endpoint helper
@@ -106,7 +108,7 @@ const LiveOrders: React.FC = () => {
   };
 
   // Fetch live orders
-  const fetchLiveOrders = useCallback(async () => {
+  const fetchLiveOrders2 = useCallback(async () => {
     try {
       setIsLoading(true);
       setError(null);
@@ -133,12 +135,12 @@ const LiveOrders: React.FC = () => {
           'Content-Type': 'application/json'
         }
       });
-      console.log("🚀 ~ LiveOrders ~ response:", response)
+      console.log("🚀 ~ LiveOrders2 ~ response:", response)
 
       if (response.ok) {
         const data = await response.json();
         if (data.success) {
-          console.log("🚀 ~ LiveOrders ~ data.data.details:", data.data.details.managerID)
+          console.log("🚀 ~ LiveOrders2 ~ data.data.details:", data.data.details.managerID)
           if (data.data.details) {
             setStoreInfo({
               name: data.data.details.name || (isManager ? 'Manager' : 'Store'),
@@ -146,7 +148,7 @@ const LiveOrders: React.FC = () => {
               managerId: data.data.details.managerID || "manager id"
             });
           }
-          // console.log("🚀 ~ LiveOrders ~ data.data.orders:===================", data.data)
+          // console.log("🚀 ~ LiveOrders2 ~ data.data.orders:===================", data.data)
           if (data.data.orders) {
             const transformedOrders: Order[] = data.data.orders.map((order: any) => ({
               id: order._id,
@@ -156,7 +158,7 @@ const LiveOrders: React.FC = () => {
               status: mapBackendStatusToFrontend(order.status),
               orderDetails: order.orderDetails || []
             }));
-            console.log("🚀 ~ LiveOrders ~ transformedOrders:", transformedOrders)
+            console.log("🚀 ~ LiveOrders2 ~ transformedOrders:", transformedOrders)
             setOrders(transformedOrders);
           } else {
             setOrders([]);
@@ -252,11 +254,11 @@ const LiveOrders: React.FC = () => {
       const accessToken = localStorage.getItem('accessToken');
       const token = accessToken || (managerUser ? JSON.parse(managerUser).accessToken : null) ||
         (storeUser ? JSON.parse(storeUser).accessToken : null);
-      if (token) fetchLiveOrders();
+      if (token) fetchLiveOrders2();
     }, 30000);
 
     return () => clearInterval(interval);
-  }, [isManager, fetchLiveOrders]);
+  }, [isManager, fetchLiveOrders2]);
 
   // Time update
   useEffect(() => {
@@ -449,7 +451,7 @@ const LiveOrders: React.FC = () => {
             </div>
 
             {/* Manager action / Update button */}
-            {(order.status === 'new' || order.status === 'preparing') && (
+            {/* {(order.status === 'new' || order.status === 'preparing') && (
               <div className="mt-3">
                 <button
                   onClick={handleOrderClick}
@@ -467,7 +469,7 @@ const LiveOrders: React.FC = () => {
                   ) : order.status === 'new' ? 'Start Preparing' : 'Mark as Ready'}
                 </button>
               </div>
-            )}
+            )} */}
 
             {order.status === 'picked-up' && (
               <div className="text-xs text-green-300 mt-2">✅ Picked up</div>
@@ -475,7 +477,7 @@ const LiveOrders: React.FC = () => {
           </div>
 
           {/* QR button */}
-          {order.status === 'awaiting-pickup' && (
+          {/* {order.status === 'awaiting-pickup' && (
             <div className="ml-3 flex items-center mt-3 md:mt-0">
               <a
                 href={`/${userRole}/print-qr/${order.id}?orderDetails=${encodeURIComponent(JSON.stringify(order.orderDetails || []))}`}
@@ -490,7 +492,7 @@ const LiveOrders: React.FC = () => {
                 Print QR
               </a>
             </div>
-          )}
+          )} */}
         </div>
       </div>
     );
@@ -524,7 +526,7 @@ const LiveOrders: React.FC = () => {
             )}
             <div className="text-xl font-mono bg-gray-700 px-3 py-1 rounded-lg shadow-md">{currentTime}</div>
             {isAuthenticated && (
-              <button onClick={fetchLiveOrders} disabled={isLoading} className="bg-green-600 hover:bg-green-700 disabled:bg-gray-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center shadow-md hover:shadow-lg">
+              <button onClick={fetchLiveOrders2} disabled={isLoading} className="bg-green-600 hover:bg-green-700 disabled:bg-gray-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center shadow-md hover:shadow-lg">
                 <svg className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                 </svg>
@@ -613,7 +615,7 @@ const LiveOrders: React.FC = () => {
                 <div className="flex-1 flex items-center justify-center">
                   <div className="text-center">
                     <div className="text-red-500 text-xl mb-4">⚠️ {error}</div>
-                    <button onClick={fetchLiveOrders} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">
+                    <button onClick={fetchLiveOrders2} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">
                       Retry
                     </button>
                   </div>
@@ -696,4 +698,4 @@ const LiveOrders: React.FC = () => {
   );
 };
 
-export default LiveOrders;
+export default LiveOrders2;

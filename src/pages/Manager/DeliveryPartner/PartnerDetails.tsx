@@ -1,3 +1,489 @@
+// import React, { useState, useEffect, useCallback } from 'react';
+// import { useNavigate, useParams } from 'react-router-dom';
+// import IconArrowBackward from '../../../components/Icon/IconArrowBackward';
+// import IconSquareCheck from '../../../components/Icon/IconSquareCheck';
+// import IconTxtFile from '../../../components/Icon/IconTxtFile';
+// import { API_CONFIG } from '../../../config/api.config';
+
+// interface DeliveryPartner {
+//     _id: string;
+//     name: string;
+//     phone: string;
+//     status: 'verified' | 'pending';
+//     overallDocumentStatus: 'verified' | 'pending' | 'rejected';
+//     totalDeliveries: number;
+//     totalAccepted: number;
+//     totalRejected: number;
+//     createdAt: string;
+//     assignedOrders: Array<{
+//         _id: string;
+//         orderId: string;
+//         status: string;
+//         totalAmount: number;
+//         customerAddress: string;
+//         deliveryAddress: string;
+//         createdAt: string;
+//     }>;
+//     documentStatus: {
+//         idProof: 'verified' | 'pending' | 'rejected';
+//         addressProof: 'verified' | 'pending' | 'rejected';
+//         vehicleDocuments: 'verified' | 'pending' | 'rejected';
+//         drivingLicense: 'verified' | 'pending' | 'rejected';
+//         insuranceDocuments: 'verified' | 'pending' | 'rejected';
+//     };
+// }
+
+// const PartnerDetails: React.FC = () => {
+//     const navigate = useNavigate();
+//     const { partnerId } = useParams<{ partnerId: string }>();
+//     const [partner, setPartner] = useState<DeliveryPartner | null>(null);
+//     const [loading, setLoading] = useState(true);
+//     const [error, setError] = useState<string | null>(null);
+
+//     // Helper to build API URLs safely (handles relative/absolute endpoints, avoids double concat)
+//     const buildApiUrl = useCallback((endpoint: string, ...pathParts: string[]): string => {
+//         let url = endpoint;
+//         // If endpoint is absolute (starts with http(s)), use as-is but fix common typos like missing/extra '/'
+//         if (endpoint.match(/^https?:\/\//i)) {
+//             // Fix common slash typos after protocol (e.g., http:/, http:///, http//)
+//             url = endpoint.replace(/^(https?):\/+/i, '$1://');
+//         } else {
+//             // Relative: prepend BASE_URL, ensure no double slash
+//             const base = API_CONFIG.BASE_URL.endsWith('/') ? API_CONFIG.BASE_URL.slice(0, -1) : API_CONFIG.BASE_URL;
+//             url = `${base}/${endpoint.startsWith('/') ? endpoint.slice(1) : endpoint}`;
+//         }
+//         // Append path parts if provided, ensuring no double slash
+//         if (pathParts.length > 0) {
+//             const separator = url.endsWith('/') ? '' : '/';
+//             url += `${separator}${pathParts.join('/')}`;
+//         }
+//         // Validate URL
+//         try {
+//             new URL(url);
+//             console.log('🔗 Built API URL:', url);  // Debug: Confirm correct URL
+//             return url;
+//         } catch (e) {
+//             console.error('❌ Invalid API URL generated:', url, e);
+//             throw new Error(`Invalid API URL: ${url}`);
+//         }
+//     }, []);
+
+//     // Fetch partner details from backend
+//     const fetchPartnerDetails = useCallback(async () => {
+//         if (!partnerId) return;
+
+//         try {
+//             setLoading(true);
+//             setError(null);
+
+//             // Get auth token
+//             const managerUser = localStorage.getItem('managerUser');
+//             const accessToken = localStorage.getItem('accessToken');
+//             const token = accessToken || (managerUser ? JSON.parse(managerUser).accessToken : null);
+
+//             if (!token) {
+//                 setError('Authentication required. Please log in.');
+//                 return;
+//             }
+
+//             // Try backend API first, fall back to localStorage if 404
+//             try {
+//                 const url = buildApiUrl(API_CONFIG.ENDPOINTS.MANAGER.DELIVERY_PARTNERS, partnerId);
+//                 const response = await fetch(url, {
+//                     headers: {
+//                         'Authorization': `Bearer ${token}`,
+//                         'Content-Type': 'application/json'
+//                     }
+//                 });
+
+//                 if (response.ok) {
+//                     const data = await response.json();
+
+//                     if (data.success && data.data) {
+//                         setPartner(data.data);
+//                         console.log('✅ Partner details fetched from backend successfully:', data.data);
+//                         return; // Success, exit early
+//                     }
+//                 }
+
+//                 // If backend fails with 404, use localStorage fallback
+//                 if (response.status === 404) {
+//                     console.log('⚠️ Backend endpoint not available, loading from localStorage');
+//                     const localKey = `delivery_partner_${partnerId}`;
+//                     const localData = localStorage.getItem(localKey);
+
+//                     if (localData) {
+//                         const parsedData = JSON.parse(localData);
+//                         setPartner(parsedData);
+//                         console.log('✅ Partner details loaded from localStorage:', parsedData);
+//                         return;
+//                     }
+
+//                     // If no local data, create default data
+//                     const defaultData = {
+//                         _id: partnerId,
+//                         name: 'Sample Partner',
+//                         phone: '+91 98765 43210',
+//                         status: 'pending' as const,
+//                         overallDocumentStatus: 'pending' as const,
+//                         totalDeliveries: 0,
+//                         totalAccepted: 0,
+//                         totalRejected: 0,
+//                         createdAt: new Date().toISOString(),
+//                         assignedOrders: [],
+//                         documentStatus: {
+//                             idProof: 'pending' as const,
+//                             addressProof: 'pending' as const,
+//                             vehicleDocuments: 'pending' as const,
+//                             drivingLicense: 'pending' as const,
+//                             insuranceDocuments: 'pending' as const
+//                         }
+//                     };
+//                     setPartner(defaultData);
+//                     console.log('✅ Using default partner details');
+//                     return;
+//                 }
+
+//                 // For other errors, throw them
+//                 throw new Error(`Failed to fetch partner details: ${response.status}`);
+
+//             } catch (apiError: any) {
+//                 // If it's a 404 or network error, use localStorage fallback
+//                 if (apiError.message.includes('404') || apiError.message.includes('Failed to fetch')) {
+//                     console.log('⚠️ Backend unavailable, loading from localStorage');
+//                     const localKey = `delivery_partner_${partnerId}`;
+//                     const localData = localStorage.getItem(localKey);
+
+//                     if (localData) {
+//                         const parsedData = JSON.parse(localData);
+//                         setPartner(parsedData);
+//                         console.log('✅ Partner details loaded from localStorage:', parsedData);
+//                         return;
+//                     }
+
+//                     // If no local data, create default data
+//                     const defaultData = {
+//                         _id: partnerId,
+//                         name: 'Sample Partner',
+//                         phone: '+91 98765 43210',
+//                         status: 'pending' as const,
+//                         overallDocumentStatus: 'pending' as const,
+//                         totalDeliveries: 0,
+//                         totalAccepted: 0,
+//                         totalRejected: 0,
+//                         createdAt: new Date().toISOString(),
+//                         assignedOrders: [],
+//                         documentStatus: {
+//                             idProof: 'pending' as const,
+//                             addressProof: 'pending' as const,
+//                             vehicleDocuments: 'pending' as const,
+//                             drivingLicense: 'pending' as const,
+//                             insuranceDocuments: 'pending' as const
+//                         }
+//                     };
+//                     setPartner(defaultData);
+//                     console.log('✅ Using default partner details');
+//                     return;
+//                 }
+
+//                 // For other errors, throw them
+//                 throw apiError;
+//             }
+//         } catch (error) {
+//             console.error('❌ Error fetching partner details:', error);
+//             setError(error instanceof Error ? error.message : 'Failed to fetch partner details');
+//         } finally {
+//             setLoading(false);
+//         }
+//     }, [partnerId, buildApiUrl]);
+
+//     useEffect(() => {
+//         fetchPartnerDetails();
+//     }, [fetchPartnerDetails]);
+
+//     // Get initials from name
+//     const getInitials = (name: string) => {
+//         return name.split(' ').map(word => word.charAt(0)).join('').toUpperCase();
+//     };
+
+//     const getStatusIcon = (status: string) => {
+//         if (status === 'verified') {
+//             return <IconSquareCheck className="w-6 h-6 text-green-500" />;
+//         }
+//         return <IconTxtFile className="w-6 h-6 text-yellow-500" />;
+//     };
+
+//     const getStatusText = (status: string) => {
+//         return status === 'verified' ? 'Verified' : 'Pending Docs';
+//     };
+
+//     const getStatusColor = (status: string) => {
+//         return status === 'verified' ? 'text-green-600' : 'text-yellow-600';
+//     };
+
+//     const getInitialsColor = (initials: string) => {
+//         const colors = [
+//             'bg-blue-500', 'bg-green-500', 'bg-purple-500',
+//             'bg-pink-500', 'bg-indigo-500', 'bg-red-500'
+//         ];
+//         const index = initials.charCodeAt(0) % colors.length;
+//         return colors[index];
+//     };
+
+//     const getDocumentStatusColor = (status: string) => {
+//         switch (status) {
+//             case 'verified': return 'text-green-600';
+//             case 'rejected': return 'text-red-600';
+//             default: return 'text-yellow-600';
+//         }
+//     };
+
+//     const getDocumentStatusText = (status: string) => {
+//         switch (status) {
+//             case 'verified': return 'Verified';
+//             case 'rejected': return 'Rejected';
+//             default: return 'Pending';
+//         }
+//     };
+
+//     if (loading) {
+//         return (
+//             <div className="p-6 flex items-center justify-center">
+//                 <div className="text-center">
+//                     <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-500 mx-auto mb-4"></div>
+//                     <div className="text-xl text-gray-600">Loading partner details...</div>
+//                 </div>
+//             </div>
+//         );
+//     }
+
+//     if (error) {
+//         return (
+//             <div className="p-6 flex items-center justify-center">
+//                 <div className="text-center">
+//                     <div className="text-red-500 text-xl mb-4">⚠️ {error}</div>
+//                     <button
+//                         onClick={() => navigate('/manager/delivery-partner')}
+//                         className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
+//                     >
+//                         Back to List
+//                     </button>
+//                 </div>
+//             </div>
+//         );
+//     }
+
+//     if (!partner) {
+//         return (
+//             <div className="p-6 flex items-center justify-center">
+//                 <div className="text-center">
+//                     <div className="text-gray-500 text-xl mb-4">Partner not found</div>
+//                     <button
+//                         onClick={() => navigate('/manager/delivery-partner')}
+//                         className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
+//                     >
+//                         Back to List
+//                     </button>
+//                 </div>
+//             </div>
+//         );
+//     }
+
+//     return (
+//         <div className="p-6">
+//             {/* Header */}
+//             <div className="mb-6 flex items-center gap-4">
+//                 <button
+//                     onClick={() => navigate('/manager/delivery-partner')}
+//                     className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-full transition-colors"
+//                     title="Back to List"
+//                 >
+//                     <IconArrowBackward className="w-5 h-5" />
+//                 </button>
+//                 <h1 className="text-2xl font-bold text-gray-800">Partner Details</h1>
+//             </div>
+
+//             {/* Partner Details Card */}
+//             <div className="max-w-2xl mx-auto">
+//                 <div className="bg-white rounded-lg shadow-md p-8">
+//                     {/* Partner Header */}
+//                     <div className="flex items-center mb-8">
+//                         <div className={`flex-shrink-0 h-16 w-16 rounded-full flex items-center justify-center text-white text-xl font-bold ${getInitialsColor(partner.name)}`}>
+//                             {getInitials(partner.name)}
+//                         </div>
+//                         <div className="ml-6">
+//                             <h2 className="text-2xl font-bold text-gray-900">{partner.name}</h2>
+//                             <p className="text-gray-600">Staff ID: {partner._id}</p>
+//                         </div>
+//                     </div>
+
+//                     {/* Details Grid */}
+//                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+//                         <div>
+//                             <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide mb-2">
+//                                 Contact Information
+//                             </h3>
+//                             <div className="space-y-3">
+//                                 <div>
+//                                     <label className="text-sm font-medium text-gray-700">Phone Number</label>
+//                                     <p className="text-lg text-gray-900">{partner.phone}</p>
+//                                 </div>
+//                                 <div>
+//                                     <label className="text-sm font-medium text-gray-700">Staff ID</label>
+//                                     <p className="text-lg text-gray-900 font-mono">#{partner._id.slice(-8)}</p>
+//                                 </div>
+//                             </div>
+//                         </div>
+
+//                         <div>
+//                             <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide mb-2">
+//                                 Status Information
+//                             </h3>
+//                             <div className="space-y-3">
+//                                 <div>
+//                                     <label className="text-sm font-medium text-gray-700">Verification Status</label>
+//                                     <div className="flex items-center mt-1">
+//                                         {getStatusIcon(partner.status)}
+//                                         <span className={`ml-2 text-lg font-medium ${getStatusColor(partner.status)}`}>
+//                                             {getStatusText(partner.status)}
+//                                         </span>
+//                                     </div>
+//                                 </div>
+//                                 <div>
+//                                     <label className="text-sm font-medium text-gray-700">Overall Document Status</label>
+//                                     <span className={`text-lg font-medium ${getDocumentStatusColor(partner.overallDocumentStatus)}`}>
+//                                         {getDocumentStatusText(partner.overallDocumentStatus)}
+//                                     </span>
+//                                 </div>
+//                             </div>
+//                         </div>
+//                     </div>
+
+//                     {/* Delivery Statistics */}
+//                     <div className="mt-8 pt-6 border-t border-gray-200">
+//                         <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide mb-4">
+//                             Delivery Statistics
+//                         </h3>
+//                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+//                             <div className="bg-blue-50 p-4 rounded-lg">
+//                                 <label className="text-sm font-medium text-gray-700">Total Deliveries</label>
+//                                 <p className="text-2xl font-bold text-blue-600">{partner.totalDeliveries}</p>
+//                             </div>
+//                             <div className="bg-green-50 p-4 rounded-lg">
+//                                 <label className="text-sm font-medium text-gray-700">Accepted Orders</label>
+//                                 <p className="text-2xl font-bold text-green-600">{partner.totalAccepted}</p>
+//                             </div>
+//                             <div className="bg-red-50 p-4 rounded-lg">
+//                                 <label className="text-sm font-medium text-gray-700">Rejected Orders</label>
+//                                 <p className="text-2xl font-bold text-red-600">{partner.totalRejected}</p>
+//                             </div>
+//                         </div>
+//                     </div>
+
+//                     {/* Document Status */}
+//                     <div className="mt-8 pt-6 border-t border-gray-200">
+//                         <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide mb-4">
+//                             Document Verification Status
+//                         </h3>
+//                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+//                             <div>
+//                                 <label className="text-sm font-medium text-gray-700">ID Proof</label>
+//                                 <span className={`ml-2 text-sm font-medium ${getDocumentStatusColor(partner.documentStatus.idProof)}`}>
+//                                     {getDocumentStatusText(partner.documentStatus.idProof)}
+//                                 </span>
+//                             </div>
+//                             <div>
+//                                 <label className="text-sm font-medium text-gray-700">Address Proof</label>
+//                                 <span className={`ml-2 text-sm font-medium ${getDocumentStatusColor(partner.documentStatus.addressProof)}`}>
+//                                     {getDocumentStatusText(partner.documentStatus.addressProof)}
+//                                 </span>
+//                             </div>
+//                             <div>
+//                                 <label className="text-sm font-medium text-gray-700">Vehicle Documents</label>
+//                                 <span className={`ml-2 text-sm font-medium ${getDocumentStatusColor(partner.documentStatus.vehicleDocuments)}`}>
+//                                     {getDocumentStatusText(partner.documentStatus.vehicleDocuments)}
+//                                 </span>
+//                             </div>
+//                             <div>
+//                                 <label className="text-sm font-medium text-gray-700">Driving License</label>
+//                                 <span className={`ml-2 text-sm font-medium ${getDocumentStatusColor(partner.documentStatus.drivingLicense)}`}>
+//                                     {getDocumentStatusText(partner.documentStatus.drivingLicense)}
+//                                 </span>
+//                             </div>
+//                             <div>
+//                                 <label className="text-sm font-medium text-gray-700">Insurance Documents</label>
+//                                 <span className={`ml-2 text-sm font-medium ${getDocumentStatusColor(partner.documentStatus.insuranceDocuments)}`}>
+//                                     {getDocumentStatusText(partner.documentStatus.insuranceDocuments)}
+//                                 </span>
+//                             </div>
+//                         </div>
+//                     </div>
+
+//                     {/* Assigned Orders */}
+//                     {partner.assignedOrders && partner.assignedOrders.length > 0 && (
+//                         <div className="mt-8 pt-6 border-t border-gray-200">
+//                             <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide mb-4">
+//                                 Recent Assigned Orders ({partner.assignedOrders.length})
+//                             </h3>
+//                             <div className="space-y-3 max-h-64 overflow-y-auto">
+//                                 {partner.assignedOrders.slice(0, 5).map((order) => (
+//                                     <div key={order._id} className="bg-gray-50 p-3 rounded-lg">
+//                                         <div className="flex justify-between items-start">
+//                                             <div>
+//                                                 <p className="font-medium text-gray-900">Order #{order.orderId}</p>
+//                                                 <p className="text-sm text-gray-600">Status: {order.status}</p>
+//                                                 <p className="text-sm text-gray-600">Amount: ₹{order.totalAmount}</p>
+//                                             </div>
+//                                             <span className="text-xs text-gray-500">
+//                                                 {new Date(order.createdAt).toLocaleDateString()}
+//                                             </span>
+//                                         </div>
+//                                     </div>
+//                                 ))}
+//                             </div>
+//                         </div>
+//                     )}
+
+//                     {/* Additional Information */}
+//                     <div className="mt-8 pt-6 border-t border-gray-200">
+//                         <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide mb-4">
+//                             Additional Information
+//                         </h3>
+//                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+//                             <div>
+//                                 <label className="text-sm font-medium text-gray-700">Member Since</label>
+//                                 <p className="text-gray-900">{new Date(partner.createdAt).toLocaleDateString()}</p>
+//                             </div>
+//                             <div>
+//                                 <label className="text-sm font-medium text-gray-700">Initials</label>
+//                                 <p className="text-gray-900">{getInitials(partner.name)}</p>
+//                             </div>
+//                         </div>
+//                     </div>
+
+//                     {/* Action Buttons */}
+//                     <div className="mt-8 pt-6 border-t border-gray-200 flex justify-end gap-3">
+//                         <button
+//                             onClick={() => navigate('/manager/delivery-partner')}
+//                             className="px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors"
+//                         >
+//                             Back to List
+//                         </button>
+//                         <button
+//                             onClick={() => navigate(`/manager/delivery-partner/edit/${partner._id}`)}
+//                             className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+//                         >
+//                             Edit Partner
+//                         </button>
+//                     </div>
+//                 </div>
+//             </div>
+//         </div>
+//     );
+// };
+
+// export default PartnerDetails;
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import IconArrowBackward from '../../../components/Icon/IconArrowBackward';
@@ -8,13 +494,22 @@ import { API_CONFIG } from '../../../config/api.config';
 interface DeliveryPartner {
     _id: string;
     name: string;
+    lastName: string;
+    img?: string | null;
+    dob: string;
+    guardianName: string;
     phone: string;
+    emergencyContact: string;
+    email: string;
+    permanentAddress: string;
+    currentAddress: string;
+    pin: string;
     status: 'verified' | 'pending';
     overallDocumentStatus: 'verified' | 'pending' | 'rejected';
-    totalDeliveries: number;
-    totalAccepted: number;
-    totalRejected: number;
-    createdAt: string;
+    bankAccountNumber: string;
+    IFSCCode: string;
+    accountHolderName: string;
+    isActive: boolean;
     assignedOrders: Array<{
         _id: string;
         orderId: string;
@@ -27,10 +522,19 @@ interface DeliveryPartner {
     documentStatus: {
         idProof: 'verified' | 'pending' | 'rejected';
         addressProof: 'verified' | 'pending' | 'rejected';
+        panProof: 'verified' | 'pending' | 'rejected';
         vehicleDocuments: 'verified' | 'pending' | 'rejected';
         drivingLicense: 'verified' | 'pending' | 'rejected';
         insuranceDocuments: 'verified' | 'pending' | 'rejected';
     };
+    totalDeliveries: number;
+    totalAccepted: number;
+    totalRejected: number;
+    rating: number;
+    lastActive: string;
+    createdAt: string;
+    updatedAt: string;
+    age: number;
 }
 
 const PartnerDetails: React.FC = () => {
@@ -40,10 +544,38 @@ const PartnerDetails: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
+    // Helper to build API URLs safely (handles relative/absolute endpoints, avoids double concat)
+    const buildApiUrl = useCallback((endpoint: string, ...pathParts: string[]): string => {
+        let url = endpoint;
+        // If endpoint is absolute (starts with http(s)), use as-is but fix common typos like missing/extra '/'
+        if (endpoint.match(/^https?:\/\//i)) {
+            // Fix common slash typos after protocol (e.g., http:/, http:///, http//)
+            url = endpoint.replace(/^(https?):\/+/i, '$1://');
+        } else {
+            // Relative: prepend BASE_URL, ensure no double slash
+            const base = API_CONFIG.BASE_URL.endsWith('/') ? API_CONFIG.BASE_URL.slice(0, -1) : API_CONFIG.BASE_URL;
+            url = `${base}/${endpoint.startsWith('/') ? endpoint.slice(1) : endpoint}`;
+        }
+        // Append path parts if provided, ensuring no double slash
+        if (pathParts.length > 0) {
+            const separator = url.endsWith('/') ? '' : '/';
+            url += `${separator}${pathParts.join('/')}`;
+        }
+        // Validate URL
+        try {
+            new URL(url);
+            console.log('🔗 Built API URL:', url);  // Debug: Confirm correct URL
+            return url;
+        } catch (e) {
+            console.error('❌ Invalid API URL generated:', url, e);
+            throw new Error(`Invalid API URL: ${url}`);
+        }
+    }, []);
+
     // Fetch partner details from backend
     const fetchPartnerDetails = useCallback(async () => {
         if (!partnerId) return;
-        
+
         try {
             setLoading(true);
             setError(null);
@@ -60,7 +592,8 @@ const PartnerDetails: React.FC = () => {
 
             // Try backend API first, fall back to localStorage if 404
             try {
-                const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.MANAGER.DELIVERY_PARTNERS}/${partnerId}`, {
+                const url = buildApiUrl(API_CONFIG.ENDPOINTS.MANAGER.DELIVERY_PARTNERS, partnerId);
+                const response = await fetch(url, {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
@@ -69,7 +602,7 @@ const PartnerDetails: React.FC = () => {
 
                 if (response.ok) {
                     const data = await response.json();
-                    
+
                     if (data.success && data.data) {
                         setPartner(data.data);
                         console.log('✅ Partner details fetched from backend successfully:', data.data);
@@ -82,33 +615,51 @@ const PartnerDetails: React.FC = () => {
                     console.log('⚠️ Backend endpoint not available, loading from localStorage');
                     const localKey = `delivery_partner_${partnerId}`;
                     const localData = localStorage.getItem(localKey);
-                    
+
                     if (localData) {
                         const parsedData = JSON.parse(localData);
                         setPartner(parsedData);
                         console.log('✅ Partner details loaded from localStorage:', parsedData);
                         return;
                     }
-                    
+
                     // If no local data, create default data
-                    const defaultData = {
+                    const defaultData: DeliveryPartner = {
                         _id: partnerId,
                         name: 'Sample Partner',
+                        lastName: '',
+                        img: null,
+                        dob: new Date().toISOString(),
+                        guardianName: '',
                         phone: '+91 98765 43210',
-                        status: 'pending' as const,
-                        overallDocumentStatus: 'pending' as const,
+                        emergencyContact: '',
+                        email: '',
+                        permanentAddress: '',
+                        currentAddress: '',
+                        pin: '',
+                        status: 'pending',
+                        bankAccountNumber: '',
+                        IFSCCode: '',
+                        accountHolderName: '',
+                        isActive: true,
+                        overallDocumentStatus: 'pending',
+                        assignedOrders: [],
+                        documentStatus: {
+                            idProof: 'pending',
+                            addressProof: 'pending',
+                            panProof: 'pending',
+                            vehicleDocuments: 'pending',
+                            drivingLicense: 'pending',
+                            insuranceDocuments: 'pending'
+                        },
                         totalDeliveries: 0,
                         totalAccepted: 0,
                         totalRejected: 0,
+                        rating: 0,
+                        lastActive: new Date().toISOString(),
                         createdAt: new Date().toISOString(),
-                        assignedOrders: [],
-                        documentStatus: {
-                            idProof: 'pending' as const,
-                            addressProof: 'pending' as const,
-                            vehicleDocuments: 'pending' as const,
-                            drivingLicense: 'pending' as const,
-                            insuranceDocuments: 'pending' as const
-                        }
+                        updatedAt: new Date().toISOString(),
+                        age: 0
                     };
                     setPartner(defaultData);
                     console.log('✅ Using default partner details');
@@ -117,46 +668,64 @@ const PartnerDetails: React.FC = () => {
 
                 // For other errors, throw them
                 throw new Error(`Failed to fetch partner details: ${response.status}`);
-                
+
             } catch (apiError: any) {
                 // If it's a 404 or network error, use localStorage fallback
                 if (apiError.message.includes('404') || apiError.message.includes('Failed to fetch')) {
                     console.log('⚠️ Backend unavailable, loading from localStorage');
                     const localKey = `delivery_partner_${partnerId}`;
                     const localData = localStorage.getItem(localKey);
-                    
+
                     if (localData) {
                         const parsedData = JSON.parse(localData);
                         setPartner(parsedData);
                         console.log('✅ Partner details loaded from localStorage:', parsedData);
                         return;
                     }
-                    
+
                     // If no local data, create default data
-                    const defaultData = {
+                    const defaultData: DeliveryPartner = {
                         _id: partnerId,
                         name: 'Sample Partner',
+                        lastName: '',
+                        img: null,
+                        dob: new Date().toISOString(),
+                        guardianName: '',
                         phone: '+91 98765 43210',
-                        status: 'pending' as const,
-                        overallDocumentStatus: 'pending' as const,
+                        emergencyContact: '',
+                        email: '',
+                        permanentAddress: '',
+                        currentAddress: '',
+                        pin: '',
+                        status: 'pending',
+                        bankAccountNumber: '',
+                        IFSCCode: '',
+                        accountHolderName: '',
+                        isActive: true,
+                        overallDocumentStatus: 'pending',
+                        assignedOrders: [],
+                        documentStatus: {
+                            idProof: 'pending',
+                            addressProof: 'pending',
+                            panProof: 'pending',
+                            vehicleDocuments: 'pending',
+                            drivingLicense: 'pending',
+                            insuranceDocuments: 'pending'
+                        },
                         totalDeliveries: 0,
                         totalAccepted: 0,
                         totalRejected: 0,
+                        rating: 0,
+                        lastActive: new Date().toISOString(),
                         createdAt: new Date().toISOString(),
-                        assignedOrders: [],
-                        documentStatus: {
-                            idProof: 'pending' as const,
-                            addressProof: 'pending' as const,
-                            vehicleDocuments: 'pending' as const,
-                            drivingLicense: 'pending' as const,
-                            insuranceDocuments: 'pending' as const
-                        }
+                        updatedAt: new Date().toISOString(),
+                        age: 0
                     };
                     setPartner(defaultData);
                     console.log('✅ Using default partner details');
                     return;
                 }
-                
+
                 // For other errors, throw them
                 throw apiError;
             }
@@ -166,15 +735,15 @@ const PartnerDetails: React.FC = () => {
         } finally {
             setLoading(false);
         }
-    }, [partnerId]);
+    }, [partnerId, buildApiUrl]);
 
     useEffect(() => {
         fetchPartnerDetails();
     }, [fetchPartnerDetails]);
 
-    // Get initials from name
-    const getInitials = (name: string) => {
-        return name.split(' ').map(word => word.charAt(0)).join('').toUpperCase();
+    // Get initials from full name
+    const getInitials = (fullName: string) => {
+        return fullName.split(' ').map(word => word.charAt(0)).join('').toUpperCase().slice(0, 2);
     };
 
     const getStatusIcon = (status: string) => {
@@ -185,20 +754,11 @@ const PartnerDetails: React.FC = () => {
     };
 
     const getStatusText = (status: string) => {
-        return status === 'verified' ? 'Verified' : 'Pending Docs';
+        return status === 'verified' ? 'Verified' : 'Pending';
     };
 
     const getStatusColor = (status: string) => {
         return status === 'verified' ? 'text-green-600' : 'text-yellow-600';
-    };
-
-    const getInitialsColor = (initials: string) => {
-        const colors = [
-            'bg-blue-500', 'bg-green-500', 'bg-purple-500', 
-            'bg-pink-500', 'bg-indigo-500', 'bg-red-500'
-        ];
-        const index = initials.charCodeAt(0) % colors.length;
-        return colors[index];
     };
 
     const getDocumentStatusColor = (status: string) => {
@@ -217,6 +777,15 @@ const PartnerDetails: React.FC = () => {
         }
     };
 
+    const getInitialsColor = (initials: string) => {
+        const colors = [
+            'bg-blue-500', 'bg-green-500', 'bg-purple-500',
+            'bg-pink-500', 'bg-indigo-500', 'bg-red-500'
+        ];
+        const index = initials.charCodeAt(0) % colors.length;
+        return colors[index];
+    };
+
     if (loading) {
         return (
             <div className="p-6 flex items-center justify-center">
@@ -233,7 +802,7 @@ const PartnerDetails: React.FC = () => {
             <div className="p-6 flex items-center justify-center">
                 <div className="text-center">
                     <div className="text-red-500 text-xl mb-4">⚠️ {error}</div>
-                    <button 
+                    <button
                         onClick={() => navigate('/manager/delivery-partner')}
                         className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
                     >
@@ -249,7 +818,7 @@ const PartnerDetails: React.FC = () => {
             <div className="p-6 flex items-center justify-center">
                 <div className="text-center">
                     <div className="text-gray-500 text-xl mb-4">Partner not found</div>
-                    <button 
+                    <button
                         onClick={() => navigate('/manager/delivery-partner')}
                         className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
                     >
@@ -259,6 +828,8 @@ const PartnerDetails: React.FC = () => {
             </div>
         );
     }
+
+    const fullName = `${partner.name} ${partner.lastName || ''}`.trim();
 
     return (
         <div className="p-6">
@@ -275,21 +846,49 @@ const PartnerDetails: React.FC = () => {
             </div>
 
             {/* Partner Details Card */}
-            <div className="max-w-2xl mx-auto">
+            <div className="max-w-4xl mx-auto">
                 <div className="bg-white rounded-lg shadow-md p-8">
                     {/* Partner Header */}
                     <div className="flex items-center mb-8">
-                        <div className={`flex-shrink-0 h-16 w-16 rounded-full flex items-center justify-center text-white text-xl font-bold ${getInitialsColor(partner.name)}`}>
-                            {getInitials(partner.name)}
-                        </div>
+                        {partner.img ? (
+                            <img
+                                src={partner.img}
+                                alt={fullName}
+                                className="flex-shrink-0 h-16 w-16 rounded-full object-cover"
+                            />
+                        ) : (
+                            <div className={`flex-shrink-0 h-16 w-16 rounded-full flex items-center justify-center text-white text-xl font-bold ${getInitialsColor(getInitials(fullName))}`}>
+                                {getInitials(fullName)}
+                            </div>
+                        )}
                         <div className="ml-6">
-                            <h2 className="text-2xl font-bold text-gray-900">{partner.name}</h2>
+                            <h2 className="text-2xl font-bold text-gray-900">{fullName}</h2>
                             <p className="text-gray-600">Staff ID: {partner._id}</p>
                         </div>
                     </div>
 
-                    {/* Details Grid */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Personal Information */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div>
+                            <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide mb-2">
+                                Personal Information
+                            </h3>
+                            <div className="space-y-3">
+                                <div>
+                                    <label className="text-sm font-medium text-gray-700">Date of Birth</label>
+                                    <p className="text-lg text-gray-900">{new Date(partner.dob).toLocaleDateString()}</p>
+                                </div>
+                                <div>
+                                    <label className="text-sm font-medium text-gray-700">Age</label>
+                                    <p className="text-lg text-gray-900">{partner.age}</p>
+                                </div>
+                                <div>
+                                    <label className="text-sm font-medium text-gray-700">Guardian Name</label>
+                                    <p className="text-lg text-gray-900">{partner.guardianName}</p>
+                                </div>
+                            </div>
+                        </div>
+
                         <div>
                             <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide mb-2">
                                 Contact Information
@@ -297,11 +896,68 @@ const PartnerDetails: React.FC = () => {
                             <div className="space-y-3">
                                 <div>
                                     <label className="text-sm font-medium text-gray-700">Phone Number</label>
-                                    <p className="text-lg text-gray-900">{partner.phone}</p>
+                                    <p className="text-lg text-gray-900">+91 {partner.phone}</p>
                                 </div>
                                 <div>
-                                    <label className="text-sm font-medium text-gray-700">Staff ID</label>
-                                    <p className="text-lg text-gray-900 font-mono">#{partner._id.slice(-8)}</p>
+                                    <label className="text-sm font-medium text-gray-700">Emergency Contact</label>
+                                    <p className="text-lg text-gray-900">+91 {partner.emergencyContact || 'N/A'}</p>
+                                </div>
+                                <div>
+                                    <label className="text-sm font-medium text-gray-700">Email</label>
+                                    <p className="text-lg text-gray-900">{partner.email}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Address Information */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div>
+                            <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide mb-2">
+                                Address Information
+                            </h3>
+                            <div className="space-y-3">
+                                <div>
+                                    <label className="text-sm font-medium text-gray-700">Permanent Address</label>
+                                    <p className="text-lg text-gray-900">{partner.permanentAddress}</p>
+                                </div>
+                                <div>
+                                    <label className="text-sm font-medium text-gray-700">Current Address</label>
+                                    <p className="text-lg text-gray-900">{partner.currentAddress}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide mb-2">
+                                Location
+                            </h3>
+                            <div className="space-y-3">
+                                <div>
+                                    <label className="text-sm font-medium text-gray-700">Pin Code</label>
+                                    <p className="text-lg text-gray-900">{partner.pin}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Bank Details */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div>
+                            <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide mb-2">
+                                Bank Details
+                            </h3>
+                            <div className="space-y-3">
+                                <div>
+                                    <label className="text-sm font-medium text-gray-700">Account Number</label>
+                                    <p className="text-lg text-gray-900">{partner.bankAccountNumber}</p>
+                                </div>
+                                <div>
+                                    <label className="text-sm font-medium text-gray-700">IFSC Code</label>
+                                    <p className="text-lg text-gray-900 font-mono">{partner.IFSCCode}</p>
+                                </div>
+                                <div>
+                                    <label className="text-sm font-medium text-gray-700">Account Holder</label>
+                                    <p className="text-lg text-gray-900">{partner.accountHolderName}</p>
                                 </div>
                             </div>
                         </div>
@@ -326,16 +982,22 @@ const PartnerDetails: React.FC = () => {
                                         {getDocumentStatusText(partner.overallDocumentStatus)}
                                     </span>
                                 </div>
+                                <div>
+                                    <label className="text-sm font-medium text-gray-700">Active Status</label>
+                                    <p className={`text-lg font-medium ${partner.isActive ? 'text-green-600' : 'text-red-600'}`}>
+                                        {partner.isActive ? 'Active' : 'Inactive'}
+                                    </p>
+                                </div>
                             </div>
                         </div>
                     </div>
 
                     {/* Delivery Statistics */}
-                    <div className="mt-8 pt-6 border-t border-gray-200">
+                    <div className="mt-8 pt-6 border-t border-gray-200 mb-6">
                         <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide mb-4">
                             Delivery Statistics
                         </h3>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                             <div className="bg-blue-50 p-4 rounded-lg">
                                 <label className="text-sm font-medium text-gray-700">Total Deliveries</label>
                                 <p className="text-2xl font-bold text-blue-600">{partner.totalDeliveries}</p>
@@ -348,15 +1010,19 @@ const PartnerDetails: React.FC = () => {
                                 <label className="text-sm font-medium text-gray-700">Rejected Orders</label>
                                 <p className="text-2xl font-bold text-red-600">{partner.totalRejected}</p>
                             </div>
+                            <div className="bg-purple-50 p-4 rounded-lg">
+                                <label className="text-sm font-medium text-gray-700">Rating</label>
+                                <p className="text-2xl font-bold text-purple-600">{partner.rating}/5</p>
+                            </div>
                         </div>
                     </div>
 
                     {/* Document Status */}
-                    <div className="mt-8 pt-6 border-t border-gray-200">
+                    <div className="mt-8 pt-6 border-t border-gray-200 mb-6">
                         <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide mb-4">
                             Document Verification Status
                         </h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div>
                                 <label className="text-sm font-medium text-gray-700">ID Proof</label>
                                 <span className={`ml-2 text-sm font-medium ${getDocumentStatusColor(partner.documentStatus.idProof)}`}>
@@ -367,6 +1033,12 @@ const PartnerDetails: React.FC = () => {
                                 <label className="text-sm font-medium text-gray-700">Address Proof</label>
                                 <span className={`ml-2 text-sm font-medium ${getDocumentStatusColor(partner.documentStatus.addressProof)}`}>
                                     {getDocumentStatusText(partner.documentStatus.addressProof)}
+                                </span>
+                            </div>
+                            <div>
+                                <label className="text-sm font-medium text-gray-700">PAN Proof</label>
+                                <span className={`ml-2 text-sm font-medium ${getDocumentStatusColor(partner.documentStatus.panProof)}`}>
+                                    {getDocumentStatusText(partner.documentStatus.panProof)}
                                 </span>
                             </div>
                             <div>
@@ -392,7 +1064,7 @@ const PartnerDetails: React.FC = () => {
 
                     {/* Assigned Orders */}
                     {partner.assignedOrders && partner.assignedOrders.length > 0 && (
-                        <div className="mt-8 pt-6 border-t border-gray-200">
+                        <div className="mt-8 pt-6 border-t border-gray-200 mb-6">
                             <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide mb-4">
                                 Recent Assigned Orders ({partner.assignedOrders.length})
                             </h3>
@@ -426,8 +1098,16 @@ const PartnerDetails: React.FC = () => {
                                 <p className="text-gray-900">{new Date(partner.createdAt).toLocaleDateString()}</p>
                             </div>
                             <div>
+                                <label className="text-sm font-medium text-gray-700">Last Active</label>
+                                <p className="text-gray-900">{new Date(partner.lastActive).toLocaleDateString()}</p>
+                            </div>
+                            <div>
+                                <label className="text-sm font-medium text-gray-700">Updated At</label>
+                                <p className="text-gray-900">{new Date(partner.updatedAt).toLocaleDateString()}</p>
+                            </div>
+                            <div>
                                 <label className="text-sm font-medium text-gray-700">Initials</label>
-                                <p className="text-gray-900">{getInitials(partner.name)}</p>
+                                <p className="text-gray-900">{getInitials(fullName)}</p>
                             </div>
                         </div>
                     </div>

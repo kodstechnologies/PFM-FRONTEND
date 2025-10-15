@@ -30,7 +30,7 @@ const StoreLogin = () => {
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem('storeUser') || '{}');
     if (user.role === 'store') {
-      navigate('/store/live-orders');
+      navigate('/store');
     }
   }, [navigate]);
 
@@ -225,7 +225,7 @@ const StoreLogin = () => {
         style: { width: window.innerWidth < 640 ? '250px' : '350px' },
       });
 
-      setTimeout(() => navigate('/store/live-orders'), 800);
+      setTimeout(() => navigate('/store'), 800);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Login failed';
       setError(message);

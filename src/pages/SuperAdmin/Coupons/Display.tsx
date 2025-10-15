@@ -595,23 +595,6 @@ const CouponsList: React.FC = () => {
                                         </Typography>
                                     </div>
 
-                                    {coupon.code && (
-                                        <div
-                                            className={`p-4 rounded-xl mb-4 border-2 border-dashed ${coupon.isExpired
-                                                ? "bg-gray-200 border-gray-400"
-                                                : "bg-gradient-to-r from-amber-500 to-orange-600 border-amber-300"
-                                                }`}
-                                        >
-                                            <Typography
-                                                variant="body1"
-                                                className={`font-bold text-center tracking-wider ${coupon.isExpired ? "text-gray-700" : "text-white"
-                                                    }`}
-                                            >
-                                                {coupon.code}
-                                            </Typography>
-                                        </div>
-                                    )}
-
                                     <div className="text-center mb-6">
                                         <Typography
                                             variant="h3"

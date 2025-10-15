@@ -56,6 +56,37 @@
 //   const [searchTerm, setSearchTerm] = useState('');
 //   const [statusFilter, setStatusFilter] = useState('');
 
+//   // Helper to build API URLs safely (handles relative/absolute endpoints, avoids double concat)
+//   const buildApiUrl = useCallback((endpoint: string, queryParams?: URLSearchParams): string => {
+//     let url = endpoint;
+//     // If endpoint is absolute (starts with http(s)), use as-is but fix common typos like missing ':'
+//     if (url.startsWith('http')) {
+//       if (url.startsWith('http//')) {
+//         url = url.replace('http//', 'http://');  // Fix typo for http
+//       } else if (url.startsWith('https//')) {
+//         url = url.replace('https//', 'https://');  // Fix the exact typo seen in logs
+//       }
+//     } else {
+//       // Relative: prepend BASE_URL
+//       const base = API_CONFIG.BASE_URL.endsWith('/') ? API_CONFIG.BASE_URL : `${API_CONFIG.BASE_URL}/`;
+//       url = `${base}${url.startsWith('/') ? url.slice(1) : url}`;
+//     }
+//     // Append query params if provided
+//     if (queryParams && queryParams.toString()) {
+//       const separator = url.includes('?') ? '&' : '?';
+//       url += `${separator}${queryParams.toString()}`;
+//     }
+//     // Validate URL
+//     try {
+//       new URL(url);
+//       console.log('🔗 Built API URL:', url);  // Debug: Confirm correct URL
+//       return url;
+//     } catch (e) {
+//       console.error('❌ Invalid API URL generated:', url, e);
+//       throw new Error(`Invalid API URL: ${url}`);
+//     }
+//   }, []);
+
 //   // Fetch all orders from backend with pagination handling
 //   const fetchAllOrders = useCallback(async () => {
 //     try {
@@ -63,10 +94,20 @@
 //       setError(null);
 //       setFetchProgress('Starting to fetch orders...');
 
-//       // Get auth token
-//       const managerUser = localStorage.getItem('managerUser');
-//       const accessToken = localStorage.getItem('accessToken');
-//       const token = accessToken || (managerUser ? JSON.parse(managerUser).accessToken : null);
+//       // Get auth token (with safer parsing)
+//       let token: string | null = localStorage.getItem('accessToken');
+//       if (!token) {
+//         try {
+//           const managerUser = localStorage.getItem('managerUser');
+//           if (managerUser) {
+//             const parsed = JSON.parse(managerUser);
+//             token = parsed.accessToken || null;
+//           }
+//         } catch (parseErr) {
+//           console.error('❌ Error parsing managerUser from localStorage:', parseErr);
+//           token = null;
+//         }
+//       }
 
 //       if (!token) {
 //         setError('Authentication required. Please log in.');
@@ -82,18 +123,22 @@
 //       while (hasMorePages) {
 //         setFetchProgress(`Fetching page ${currentPage}...`);
 
-//         const response = await fetch(
-//           `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.MANAGER.ORDERS}?page=${currentPage}&limit=${pageSize}`, 
-//           {
-//             headers: {
-//               'Authorization': `Bearer ${token}`,
-//               'Content-Type': 'application/json'
-//             }
+//         const queryParams = new URLSearchParams({
+//           page: currentPage.toString(),
+//           limit: pageSize.toString()
+//         });
+//         const url = buildApiUrl(API_CONFIG.ENDPOINTS.MANAGER.ORDERS, queryParams);
+
+//         const response = await fetch(url, {
+//           headers: {
+//             'Authorization': `Bearer ${token}`,
+//             'Content-Type': 'application/json'
 //           }
-//         );
+//         });
 
 //         if (!response.ok) {
-//           throw new Error(`Failed to fetch orders: ${response.status}`);
+//           const errorText = await response.text();
+//           throw new Error(`Failed to fetch orders: ${response.status} - ${errorText}`);
 //         }
 
 //         const data = await response.json();
@@ -123,18 +168,30 @@
 //     } finally {
 //       setIsLoading(false);
 //     }
-//   }, []);
+//   }, [buildApiUrl]);
 
 //   // Fetch order statistics
 //   const fetchOrderStats = useCallback(async () => {
 //     try {
-//       const managerUser = localStorage.getItem('managerUser');
-//       const accessToken = localStorage.getItem('accessToken');
-//       const token = accessToken || (managerUser ? JSON.parse(managerUser).accessToken : null);
+//       // Reuse token logic
+//       let token: string | null = localStorage.getItem('accessToken');
+//       if (!token) {
+//         try {
+//           const managerUser = localStorage.getItem('managerUser');
+//           if (managerUser) {
+//             const parsed = JSON.parse(managerUser);
+//             token = parsed.accessToken || null;
+//           }
+//         } catch (parseErr) {
+//           console.error('❌ Error parsing managerUser for stats:', parseErr);
+//           return;
+//         }
+//       }
 
 //       if (!token) return;
 
-//       const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.MANAGER.ORDER_STATS}`, {
+//       const url = buildApiUrl(API_CONFIG.ENDPOINTS.MANAGER.ORDER_STATS);
+//       const response = await fetch(url, {
 //         headers: {
 //           'Authorization': `Bearer ${token}`,
 //           'Content-Type': 'application/json'
@@ -145,12 +202,16 @@
 //         const data = await response.json();
 //         if (data.success && data.data.stats) {
 //           setStats(data.data.stats);
+//           console.log('✅ Order stats fetched successfully:', data.data.stats);
 //         }
+//       } else {
+//         const errorText = await response.text();
+//         console.error(`❌ Failed to fetch stats: ${response.status} - ${errorText}`);
 //       }
 //     } catch (error) {
 //       console.error('❌ Error fetching stats:', error);
 //     }
-//   }, []);
+//   }, [buildApiUrl]);
 
 //   // Load data on component mount
 //   useEffect(() => {
@@ -164,7 +225,7 @@
 
 //     // Apply status filter only (search will be handled by CustomTable)
 //     if (statusFilter) {
-//       filtered = filtered.filter(order => 
+//       filtered = filtered.filter(order =>
 //         order.status.toLowerCase() === statusFilter.toLowerCase()
 //       );
 //     }
@@ -265,11 +326,10 @@
 //         };
 
 //         return (
-//         <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-//             statusColors[status as keyof typeof statusColors] || 'bg-gray-100 text-gray-800'
-//         }`}>
+//           <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusColors[status as keyof typeof statusColors] || 'bg-gray-100 text-gray-800'
+//             }`}>
 //             {status}
-//         </span>
+//           </span>
 //         );
 //       }
 //     },
@@ -338,7 +398,7 @@
 //       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
 //         <div className="text-center">
 //           <div className="text-red-500 text-xl mb-4">⚠️ {error}</div>
-//           <button 
+//           <button
 //             onClick={handleRefresh}
 //             className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
 //           >
@@ -383,7 +443,7 @@
 
 //             {/* Status Filter */}
 //             <div className="relative">
-//               <select 
+//               <select
 //                 value={statusFilter}
 //                 onChange={(e) => setStatusFilter(e.target.value)}
 //                 className="block w-48 px-4 py-2 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white shadow-sm hover:shadow-md hover:border-gray-300 appearance-none cursor-pointer"
@@ -408,7 +468,7 @@
 //         {/* Stats Cards */}
 //         <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
 //           {/* Total Orders Card */}
-//           <div 
+//           <div
 //             className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl shadow-md p-4 border border-blue-200 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 cursor-pointer"
 //             onClick={() => setStatusFilter('')}
 //           >
@@ -431,7 +491,7 @@
 //           </div>
 
 //           {/* Delivered Card */}
-//           <div 
+//           <div
 //             className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl shadow-md p-4 border border-green-200 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 cursor-pointer"
 //             onClick={() => setStatusFilter('delivered')}
 //           >
@@ -454,7 +514,7 @@
 //           </div>
 
 //           {/* In Transit Card */}
-//           <div 
+//           <div
 //             className="bg-gradient-to-br from-amber-50 to-amber-100 rounded-xl shadow-md p-4 border border-amber-200 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 cursor-pointer"
 //             onClick={() => setStatusFilter('in_transit')}
 //           >
@@ -477,7 +537,7 @@
 //           </div>
 
 //           {/* Picked Up Card */}
-//           <div 
+//           <div
 //             className="bg-gradient-to-br from-teal-50 to-teal-100 rounded-xl shadow-md p-4 border border-teal-200 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 cursor-pointer"
 //             onClick={() => setStatusFilter('picked_up')}
 //           >
@@ -571,7 +631,6 @@
 
 // export default OrderManagement;
 
-
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import CustomTable from '../../components/CustomTable';
 import { API_CONFIG } from '../../config/api.config';
@@ -604,12 +663,11 @@ interface OrderStats {
   totalRevenue: number;
 }
 
-interface PaginationInfo {
-  currentPage: number;
-  totalPages: number;
+interface DailyStats {
+  date: string;
   totalOrders: number;
-  hasNextPage: boolean;
-  hasPrevPage: boolean;
+  delivered: number;
+  totalRevenue: number;
 }
 
 const OrderManagement: React.FC = () => {
@@ -630,30 +688,31 @@ const OrderManagement: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
 
-  // Helper to build API URLs safely (handles relative/absolute endpoints, avoids double concat)
+  // State for calendar view
+  const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
+  const [calendarView, setCalendarView] = useState<'day' | 'week' | 'month'>('day');
+  const [dailyStats, setDailyStats] = useState<DailyStats[]>([]);
+
+  // Helper to build API URLs safely
   const buildApiUrl = useCallback((endpoint: string, queryParams?: URLSearchParams): string => {
     let url = endpoint;
-    // If endpoint is absolute (starts with http(s)), use as-is but fix common typos like missing ':'
     if (url.startsWith('http')) {
       if (url.startsWith('http//')) {
-        url = url.replace('http//', 'http://');  // Fix typo for http
+        url = url.replace('http//', 'http://');
       } else if (url.startsWith('https//')) {
-        url = url.replace('https//', 'https://');  // Fix the exact typo seen in logs
+        url = url.replace('https//', 'https://');
       }
     } else {
-      // Relative: prepend BASE_URL
       const base = API_CONFIG.BASE_URL.endsWith('/') ? API_CONFIG.BASE_URL : `${API_CONFIG.BASE_URL}/`;
       url = `${base}${url.startsWith('/') ? url.slice(1) : url}`;
     }
-    // Append query params if provided
     if (queryParams && queryParams.toString()) {
       const separator = url.includes('?') ? '&' : '?';
       url += `${separator}${queryParams.toString()}`;
     }
-    // Validate URL
     try {
       new URL(url);
-      console.log('🔗 Built API URL:', url);  // Debug: Confirm correct URL
+      console.log('🔗 Built API URL:', url);
       return url;
     } catch (e) {
       console.error('❌ Invalid API URL generated:', url, e);
@@ -668,7 +727,6 @@ const OrderManagement: React.FC = () => {
       setError(null);
       setFetchProgress('Starting to fetch orders...');
 
-      // Get auth token (with safer parsing)
       let token: string | null = localStorage.getItem('accessToken');
       if (!token) {
         try {
@@ -691,9 +749,8 @@ const OrderManagement: React.FC = () => {
       let allOrders: OrderData[] = [];
       let currentPage = 1;
       let hasMorePages = true;
-      const pageSize = 100; // Fetch more orders per page to reduce API calls
+      const pageSize = 100;
 
-      // Fetch all pages of orders
       while (hasMorePages) {
         setFetchProgress(`Fetching page ${currentPage}...`);
 
@@ -721,7 +778,6 @@ const OrderManagement: React.FC = () => {
           allOrders = [...allOrders, ...data.data.orders];
           setFetchProgress(`Fetched ${allOrders.length} orders so far...`);
 
-          // Check if there are more pages
           if (data.data.pagination && data.data.pagination.hasNextPage) {
             currentPage++;
           } else {
@@ -747,7 +803,6 @@ const OrderManagement: React.FC = () => {
   // Fetch order statistics
   const fetchOrderStats = useCallback(async () => {
     try {
-      // Reuse token logic
       let token: string | null = localStorage.getItem('accessToken');
       if (!token) {
         try {
@@ -787,6 +842,73 @@ const OrderManagement: React.FC = () => {
     }
   }, [buildApiUrl]);
 
+  // Calculate daily statistics from orders
+  const calculateDailyStats = useMemo(() => {
+    const statsMap = new Map<string, DailyStats>();
+
+    orders.forEach(order => {
+      const orderDate = new Date(order.createdAt).toISOString().split('T')[0];
+
+      if (!statsMap.has(orderDate)) {
+        statsMap.set(orderDate, {
+          date: orderDate,
+          totalOrders: 0,
+          delivered: 0,
+          totalRevenue: 0
+        });
+      }
+
+      const dayStats = statsMap.get(orderDate)!;
+      dayStats.totalOrders += 1;
+      dayStats.totalRevenue += order.amount;
+
+      if (order.status === 'delivered') {
+        dayStats.delivered += 1;
+      }
+    });
+
+    const dailyStatsArray = Array.from(statsMap.values())
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+    return dailyStatsArray;
+  }, [orders]);
+
+  // Get orders for selected date range
+  const getDateFilteredOrders = useMemo(() => {
+    const selectedDateObj = new Date(selectedDate);
+
+    switch (calendarView) {
+      case 'day':
+        return orders.filter(order => {
+          const orderDate = new Date(order.createdAt).toISOString().split('T')[0];
+          return orderDate === selectedDate;
+        });
+
+      case 'week':
+        const startOfWeek = new Date(selectedDateObj);
+        startOfWeek.setDate(selectedDateObj.getDate() - selectedDateObj.getDay());
+        const endOfWeek = new Date(startOfWeek);
+        endOfWeek.setDate(startOfWeek.getDate() + 6);
+
+        return orders.filter(order => {
+          const orderDate = new Date(order.createdAt);
+          return orderDate >= startOfWeek && orderDate <= endOfWeek;
+        });
+
+      case 'month':
+        const startOfMonth = new Date(selectedDateObj.getFullYear(), selectedDateObj.getMonth(), 1);
+        const endOfMonth = new Date(selectedDateObj.getFullYear(), selectedDateObj.getMonth() + 1, 0);
+
+        return orders.filter(order => {
+          const orderDate = new Date(order.createdAt);
+          return orderDate >= startOfMonth && orderDate <= endOfMonth;
+        });
+
+      default:
+        return orders;
+    }
+  }, [orders, selectedDate, calendarView]);
+
   // Load data on component mount
   useEffect(() => {
     fetchAllOrders();
@@ -795,9 +917,8 @@ const OrderManagement: React.FC = () => {
 
   // Filter orders based on search and status
   const filteredOrders = useMemo(() => {
-    let filtered = orders;
+    let filtered = getDateFilteredOrders;
 
-    // Apply status filter only (search will be handled by CustomTable)
     if (statusFilter) {
       filtered = filtered.filter(order =>
         order.status.toLowerCase() === statusFilter.toLowerCase()
@@ -805,18 +926,49 @@ const OrderManagement: React.FC = () => {
     }
 
     return filtered;
-  }, [orders, statusFilter]);
+  }, [getDateFilteredOrders, statusFilter]);
 
   // Calculate stats from filtered orders
   const calculatedStats = useMemo(() => {
-    const totalOrders = orders.length; // Use total orders since search is handled by table
-    const delivered = orders.filter(order => order.status === 'delivered').length;
-    const inTransit = orders.filter(order => order.status === 'in_transit').length;
-    const pickedUp = orders.filter(order => order.status === 'picked_up').length;
-    const totalRevenue = orders.reduce((sum, order) => sum + order.amount, 0);
+    const totalOrders = getDateFilteredOrders.length;
+    const delivered = getDateFilteredOrders.filter(order => order.status === 'delivered').length;
+    const inTransit = getDateFilteredOrders.filter(order => order.status === 'in_transit').length;
+    const pickedUp = getDateFilteredOrders.filter(order => order.status === 'picked_up').length;
+    const totalRevenue = getDateFilteredOrders.reduce((sum, order) => sum + order.amount, 0);
 
     return { totalOrders, delivered, inTransit, pickedUp, totalRevenue };
-  }, [orders]);
+  }, [getDateFilteredOrders]);
+
+  // Get stats for selected date
+  const selectedDateStats = useMemo(() => {
+    return calculateDailyStats.find(stat => stat.date === selectedDate) || {
+      date: selectedDate,
+      totalOrders: 0,
+      delivered: 0,
+      totalRevenue: 0
+    };
+  }, [calculateDailyStats, selectedDate]);
+
+  // Format date for display
+  const formatDateDisplay = (dateString: string) => {
+    const date = new Date(dateString);
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    if (date.toDateString() === today.toDateString()) {
+      return 'Today';
+    } else if (date.toDateString() === yesterday.toDateString()) {
+      return 'Yesterday';
+    } else {
+      return date.toLocaleDateString('en-IN', {
+        weekday: 'short',
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric'
+      });
+    }
+  };
 
   // Map backend status to frontend display
   const mapBackendStatusToFrontend = (backendStatus: string): string => {
@@ -841,14 +993,6 @@ const OrderManagement: React.FC = () => {
 
   // Table columns configuration
   const columns = [
-    // {
-    //   accessor: '_id',
-    //   title: 'Order ID',
-    //   sortable: true,
-    //   render: (row: OrderData) => (
-    //     <span className="font-mono text-sm text-gray-600">#{row._id.slice(-8)}</span>
-    //   )
-    // },
     {
       accessor: 'clientName',
       title: 'Client Details',
@@ -924,7 +1068,6 @@ const OrderManagement: React.FC = () => {
         </div>
       )
     },
-
     {
       accessor: 'amount',
       title: 'Amount (₹)',
@@ -949,6 +1092,17 @@ const OrderManagement: React.FC = () => {
   const handleRefresh = () => {
     fetchAllOrders();
     fetchOrderStats();
+  };
+
+  // Navigate to previous/next day
+  const navigateDate = (direction: 'prev' | 'next') => {
+    const date = new Date(selectedDate);
+    if (direction === 'prev') {
+      date.setDate(date.getDate() - 1);
+    } else {
+      date.setDate(date.getDate() + 1);
+    }
+    setSelectedDate(date.toISOString().split('T')[0]);
   };
 
   if (isLoading) {
@@ -1036,6 +1190,121 @@ const OrderManagement: React.FC = () => {
                 </svg>
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* Calendar Section */}
+        <div className="mb-8">
+          <div className="bg-white rounded-xl shadow-md p-6 border border-gray-200">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-bold text-gray-800">Calendar View</h2>
+              <div className="flex items-center space-x-4">
+                {/* Calendar View Toggle */}
+                <div className="flex bg-gray-100 rounded-lg p-1">
+                  {(['day', 'week', 'month'] as const).map((view) => (
+                    <button
+                      key={view}
+                      onClick={() => setCalendarView(view)}
+                      className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${calendarView === view
+                        ? 'bg-white text-blue-600 shadow-sm'
+                        : 'text-gray-600 hover:text-gray-800'
+                        }`}
+                    >
+                      {view.charAt(0).toUpperCase() + view.slice(1)}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Date Navigation */}
+                <div className="flex items-center space-x-2">
+                  <button
+                    onClick={() => navigateDate('prev')}
+                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors duration-200"
+                  >
+                    <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                    </svg>
+                  </button>
+
+                  <input
+                    type="date"
+                    value={selectedDate}
+                    onChange={(e) => setSelectedDate(e.target.value)}
+                    className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+
+                  <button
+                    onClick={() => navigateDate('next')}
+                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors duration-200"
+                  >
+                    <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Selected Date Stats */}
+            {/* <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+              <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                <div className="text-sm font-medium text-blue-700 mb-1">Selected Date</div>
+                <div className="text-lg font-bold text-blue-900">
+                  {formatDateDisplay(selectedDate)}
+                </div>
+              </div>
+              <div className="bg-green-50 rounded-lg p-4 border border-green-200">
+                <div className="text-sm font-medium text-green-700 mb-1">Orders</div>
+                <div className="text-lg font-bold text-green-900">
+                  {selectedDateStats.totalOrders}
+                </div>
+              </div>
+              <div className="bg-purple-50 rounded-lg p-4 border border-purple-200">
+                <div className="text-sm font-medium text-purple-700 mb-1">Delivered</div>
+                <div className="text-lg font-bold text-purple-900">
+                  {selectedDateStats.delivered}
+                </div>
+              </div>
+              <div className="bg-orange-50 rounded-lg p-4 border border-orange-200">
+                <div className="text-sm font-medium text-orange-700 mb-1">Revenue</div>
+                <div className="text-lg font-bold text-orange-900">
+                  ₹{selectedDateStats.totalRevenue.toLocaleString()}
+                </div>
+              </div>
+            </div> */}
+
+            {/* Recent Days Stats */}
+            {/* <div>
+              <h3 className="text-lg font-semibold text-gray-800 mb-4">Recent Days</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {calculateDailyStats.slice(0, 4).map((dayStat) => (
+                  <div
+                    key={dayStat.date}
+                    onClick={() => setSelectedDate(dayStat.date)}
+                    className={`bg-white rounded-lg p-4 border-2 cursor-pointer transition-all duration-200 hover:shadow-md ${selectedDate === dayStat.date
+                        ? 'border-blue-500 bg-blue-50'
+                        : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                  >
+                    <div className="flex justify-between items-start mb-2">
+                      <div className="font-medium text-gray-900">
+                        {formatDateDisplay(dayStat.date)}
+                      </div>
+                      {selectedDate === dayStat.date && (
+                        <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                      )}
+                    </div>
+                    <div className="flex justify-between text-sm text-gray-600">
+                      <span>{dayStat.totalOrders} orders</span>
+                      <span>₹{dayStat.totalRevenue.toLocaleString()}</span>
+                    </div>
+                    <div className="mt-2 text-xs text-green-600">
+                      {dayStat.delivered} delivered
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div> */}
           </div>
         </div>
 
@@ -1160,6 +1429,7 @@ const OrderManagement: React.FC = () => {
         <div className="mb-6">
           <div className="flex justify-between items-center mb-4">
             <div className="text-sm text-gray-500">
+              Showing orders for: {formatDateDisplay(selectedDate)} •
               Last updated: {new Date().toLocaleTimeString()}
             </div>
             <div className="flex items-center space-x-4">
@@ -1191,7 +1461,7 @@ const OrderManagement: React.FC = () => {
         {!isLoading && filteredOrders.length === 0 && (
           <div className="text-center py-12">
             <div className="text-gray-400 text-xl mb-4">
-              {searchTerm || statusFilter ? 'No orders match your filters' : 'No orders available'}
+              {searchTerm || statusFilter ? 'No orders match your filters' : `No orders available for ${formatDateDisplay(selectedDate)}`}
             </div>
             <div className="text-gray-500 text-sm">
               {searchTerm || statusFilter ? 'Try adjusting your search or filter criteria' : 'Orders will appear here when customers place them'}

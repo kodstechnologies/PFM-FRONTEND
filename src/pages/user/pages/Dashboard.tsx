@@ -1,6 +1,21 @@
 import React from 'react'
+import { useNavigate } from 'react-router-dom';
 
 function UserDashboard() {
+    const navigate = useNavigate();
+
+    const handleAdminClick = () => {
+        navigate('/admin-login');
+    };
+
+    const handleManagerClick = () => {
+        navigate('/manager-login');
+    };
+
+    const handleStoreClick = () => {
+        navigate('/store-login');
+    };
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center px-4">
             <div className="max-w-4xl w-full text-center">
@@ -14,7 +29,7 @@ function UserDashboard() {
                         />
                     </div>
                     <div className="mb-4">
-                        
+
                         <h1 className="text-4xl md:text-5xl font-bold text-red-800 mb-4">
                             Priya Fresh Meats
                         </h1>
@@ -26,39 +41,48 @@ function UserDashboard() {
                 </div>
 
                 {/* Welcome Section */}
-                <div className="bg-white rounded-2xl shadow-xl p-8 md:p-12 mb-8">
+
+
+                {/* Role Selection Cards */}
+                <div className="grid md:grid-cols-3 gap-6">
+                    <div
+                        className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-300 cursor-pointer"
+                        onClick={handleAdminClick}
+                    >
+                        <div className="text-3xl mb-4">👨‍💼</div>
+                        <h3 className="text-xl font-semibold text-gray-800 mb-2">Admin</h3>
+                        <p className="text-gray-600">Access admin login</p>
+                    </div>
+                    <div
+                        className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-300 cursor-pointer"
+                        onClick={handleManagerClick}
+                    >
+                        <div className="text-3xl mb-4">👨‍💼</div>
+                        <h3 className="text-xl font-semibold text-gray-800 mb-2">Manager</h3>
+                        <p className="text-gray-600">Access manager login</p>
+                    </div>
+                    <div
+                        className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-300 cursor-pointer"
+                        onClick={handleStoreClick}
+                    >
+                        <div className="text-3xl mb-4">🏪</div>
+                        <h3 className="text-xl font-semibold text-gray-800 mb-2">Store</h3>
+                        <p className="text-gray-600">Access store login</p>
+                    </div>
+                </div>
+                <div className="bg-white rounded-2xl shadow-xl p-8 md:p-12 mt-8">
                     <h2 className="text-2xl md:text-3xl font-semibold text-gray-800 mb-4">
                         Welcome to PFM Dashboard
                     </h2>
                     <p className="text-gray-600 text-lg leading-relaxed max-w-2xl mx-auto">
-                        Your gateway to premium quality fresh meats and exceptional service. 
+                        Your gateway to premium quality fresh meats and exceptional service.
                         Experience the finest selection of meat products delivered with care and precision.
                     </p>
                 </div>
-
-                {/* Features Section */}
-                <div className="grid md:grid-cols-3 gap-6">
-                    <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-300">
-                        <div className="text-3xl mb-4">🥩</div>
-                        <h3 className="text-xl font-semibold text-gray-800 mb-2">Premium Quality</h3>
-                        <p className="text-gray-600">Hand-selected, fresh meats of the highest quality</p>
-                    </div>
-                    <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-300">
-                        <div className="text-3xl mb-4">🚚</div>
-                        <h3 className="text-xl font-semibold text-gray-800 mb-2">Fast Delivery</h3>
-                        <p className="text-gray-600">Quick and reliable delivery to your doorstep</p>
-                    </div>
-                    <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-300">
-                        <div className="text-3xl mb-4">⭐</div>
-                        <h3 className="text-xl font-semibold text-gray-800 mb-2">Trusted Service</h3>
-                        <p className="text-gray-600">Years of experience serving our community</p>
-                    </div>
-                </div>
-
                 {/* Footer Text */}
                 <div className="mt-12 text-gray-500">
                     <p className="text-sm">
-                        © 2024 Priya Fresh Meats. All rights reserved.
+                        © 2025 Priya Fresh Meats. All rights reserved.
                     </p>
                 </div>
             </div>
