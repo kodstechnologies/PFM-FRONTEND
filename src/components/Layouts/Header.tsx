@@ -10,7 +10,7 @@ import IconLogout from '../Icon/IconLogout';
 import adminProfile from "../../assets/profile/priya.jpg"
 import managerProfile from "../../assets/profile/young-entrepreneur.jpg"
 import { toast, ToastContainer } from 'react-toastify';
-
+import profileImg from "../../assets/profile/priya1.jpg"
 const Header = () => {
     const location = useLocation();
     const navigate = useNavigate();
@@ -241,27 +241,30 @@ const Header = () => {
                                     button={
                                         <img
                                             className="w-9 h-9 rounded-full object-cover saturate-50 group-hover:saturate-100"
-                                            src={profile}
+                                            src={profileImg}
                                             alt="admin profile"
                                         />
                                     }
                                 >
+
                                     <ul className="text-dark dark:text-white-dark !py-0 w-[230px] font-semibold dark:text-white-light/90">
                                         <li>
                                             <div className="flex items-center px-4 py-4">
                                                 <Link to={`/${url}/profile`} className="flex">
                                                     <img
                                                         className="rounded-md w-10 h-10 object-cover"
-                                                        src={profile}
+                                                        src={profileImg}
                                                         alt="userProfile"
                                                     />
                                                     <div className="ltr:pl-4 rtl:pr-4 truncate">
-                                                        <h4 className="text-base">{user.name || "manager"}</h4>
+                                                        <h4 className="text-base">Profile</h4>
+                                                        {/* <h4 className="text-base">{user.name || "manager"}</h4> */}
                                                         <button
                                                             type="button"
                                                             className="text-black/60 hover:text-primary dark:text-dark-light/60 dark:hover:text-white"
                                                         >
-                                                            {user.email || "manager@example.com"}
+                                                            Profile Details
+                                                            {/* {user.email || "manager@example.com"} */}
                                                         </button>
                                                     </div>
                                                 </Link>
