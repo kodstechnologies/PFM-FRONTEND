@@ -58,7 +58,7 @@ const SuperAdminDashboard: React.FC = () => {
   const cardValues: CardValues = {
     totalRevenue: data ? `₹${data.orders.totalRevenue.toLocaleString()}` : '--',
     totalOrders: data ? data.orders.deliveredCount.toLocaleString() : '--',
-    activePartners: data ? data.deliveryPartnerStats.verified.toString() : '--',
+    activePartners: data ? data.deliveryPartnerStats.total.toString() : '--',
     newCustomers: data ? data.totalCustomers.toString() : '--',
     totalStores: data ? data.totalStores.toString() : '--',
     activeOrders: data ? data.orders.deliveredCount.toString() : '--',

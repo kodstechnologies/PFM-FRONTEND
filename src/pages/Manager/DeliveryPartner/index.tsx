@@ -153,10 +153,10 @@ const DeliveryPartnerList: React.FC = () => {
                     _id: partner._id || `temp-${Math.random().toString(36).substr(2, 9)}`,
                     name: partner.name,
                     phone: partner.phone,
-                    status: 'pending', // Default status
-                    overallDocumentStatus: 'pending', // Default status
-                    totalDeliveries: 0, // You might need to fetch this separately
-                    createdAt: new Date().toISOString(), // Default to current time
+                    status: partner.status || 'pending',
+                    overallDocumentStatus: partner.overallDocumentStatus || 'pending',
+                    totalDeliveries: partner.totalDeliveries || 0,
+                    createdAt: partner.createdAt || new Date().toISOString(),
                 }));
 
                 setDeliveryPartners(transformedPartners);
@@ -261,7 +261,7 @@ const DeliveryPartnerList: React.FC = () => {
 
                 if (response.ok) {
                     // Remove from local state
-                    setDeliveryPartners(prev => prev.filter(partner => partner._id !== partnerId));
+                    // setDeliveryPartners(prev => prev.filter(partner => partner._id !== partnerId));
                     console.log('✅ Delivery partner deleted successfully');
                 } else {
                     const errorText = await response.text();
@@ -370,6 +370,7 @@ const DeliveryPartnerList: React.FC = () => {
                         <option value="all">All Statuses</option>
                         <option value="verified">Verified</option>
                         <option value="pending">Pending Docs</option>
+                        <option value="rejected">Rejected</option>
                     </select>
                 </div>
             </div>
@@ -462,9 +463,6 @@ const DeliveryPartnerList: React.FC = () => {
                 ]}
                 pageSizeOptions={[5, 10, 20]}
             />
-
-
-
         </div>
     );
 };

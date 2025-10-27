@@ -31,6 +31,15 @@ export interface ApiResponse<T> {
   success: boolean;
 }
 
+export interface DashboardData {
+  managerName: string;
+  totalDeliveryPartners: number;
+  activePartners: number;
+  inactivePartners: number;
+  verifiedPartners: number;
+  pendingPartners: number;
+}
+
 class ManagerService {
   private baseURL: string;
 
@@ -92,6 +101,41 @@ class ManagerService {
       return result.data;
     } catch (error) {
       console.error('Error fetching manager profile:', error);
+      throw error;
+    }
+  }
+  async getManagerDashboard(managerId: string): Promise<DashboardData> {
+    try {
+      const headers = this.getAuthHeaders();
+      const url = `${this.baseURL}/manager/dashboard/${managerId}`;
+
+      console.log('🔍 ManagerService: Making request to:', url);
+      console.log('🔍 ManagerService: Headers:', headers);
+
+      const response = await fetch(url, {
+        method: 'GET',
+        headers,
+      });
+
+      console.log('🔍 ManagerService: Response status:', response.status);
+      console.log('🔍 ManagerService: Response headers:', Object.fromEntries(response.headers.entries()));
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('🔍 ManagerService: Error response body:', errorText);
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result: ApiResponse<DashboardData> = await response.json();
+      console.log('🔍 ManagerService: Response data:', result);
+
+      if (!result.success) {
+        throw new Error(result.message || 'Failed to fetch manager dashboard');
+      }
+
+      return result.data;
+    } catch (error) {
+      console.error('Error fetching manager dashboard:', error);
       throw error;
     }
   }

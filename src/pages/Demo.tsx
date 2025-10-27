@@ -58,7 +58,7 @@ const RazorpayTest: React.FC = () => {
                 order_id: data.orderId,
                 handler: async function (response: RazorpayResponse) {
                     // 3️⃣ Send payment details to backend for verification
-                    const verifyRes = await fetch("http://localhost:5000/api/payment/verify", {
+                    const verifyRes = await fetch("http://localhost:8000/payments/verify", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify(response),

@@ -91,6 +91,7 @@ import { lazy } from 'react';
 import type { AppRoute } from './types';
 import NotFoundPage from '../pages/NotFoundPage';
 import UserLogin from '../pages/UserLogin';
+import RazorpayTest from '../pages/Demo';
 
 const UserPrivacyPolicy = lazy(() => import('../pages/privacyPolicy/UserPrivacyPolicy'));
 const DeliveryPartnerPrivacyPolicy = lazy(() => import('../pages/privacyPolicy/DeliveryPartnerPrivacyPolicy'));
@@ -171,5 +172,11 @@ export const commonRoutes: AppRoute[] = [
     path: '/landing-page',
     element: <LayoutPage />,
     layout: 'blank', // Custom prop used by your app to apply a specific layout or no layout
-  }
+  },
+  {
+    path: '/demo',
+    element: <RazorpayTest />,
+    layout: 'blank', // Custom prop used by your app to apply a specific layout or no layout
+  },
+  
 ];
