@@ -431,18 +431,18 @@ const LiveOrders2: React.FC = () => {
             <div className="space-y-2">
               {order.orderDetails?.map((item, idx) => (
                 <div key={idx} className="flex items-center space-x-3 bg-gray-800 p-2 rounded">
-                  {item.img && (
+                  {/* {item.img && (
                     <img
                       src={item.img}
                       alt={item.name}
                       className="w-12 h-12 object-cover rounded-md border border-gray-600"
                       onError={(e) => (e.target as HTMLImageElement).src = '/placeholder-image.jpg'}
                     />
-                  )}
+                  )} */}
                   <div className="flex-1">
                     <div className="text-sm font-medium">{item.name}</div>
                     <div className="text-xs opacity-80">
-                      Qty: {item.quantity} {item.unit || ''} {item.weight ? `(${item.weight})` : ''}
+                      Qty: {item.quantity} {item.unit || ''} {item.weight ? ` x ${item.weight}` : ''}
                     </div>
                   </div>
                   <div className="text-sm font-semibold">₹{item.price}</div>
