@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 
 // A lightweight print page that renders a QR via a public QR image API
 // and auto-triggers the print dialog when the image is ready.
@@ -10,7 +10,9 @@ const PrintQR: React.FC = () => {
   const [searchParams] = useSearchParams();
   const [isImageLoaded, setIsImageLoaded] = useState(false);
   const hasPrintedRef = useRef(false);
-
+  const location = useLocation();
+  console.log("🚀 ~ PrintQR ~ location:", location)
+  const storeName = "rrrr";
   // Get orderDetails from query parameters
   const orderDetailsParam = searchParams.get('orderDetails');
   const orderDetails = useMemo(() => {
@@ -60,6 +62,10 @@ const PrintQR: React.FC = () => {
     const encoded = encodeURIComponent(qrPayload);
     return `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encoded}`;
   }, [qrPayload]);
+
+useEffect(()=>{
+  
+})
 
   useEffect(() => {
     if (isImageLoaded && !hasPrintedRef.current) {
@@ -114,7 +120,7 @@ const PrintQR: React.FC = () => {
 
         <div className="border border-gray-200 rounded-lg p-6">
           <div className="text-center">
-            <div className="text-lg font-semibold mb-2">Priya Chicken - Indiranagar</div>
+            <div className="text-lg font-semibold mb-2">Priya Chicken - {storeName}</div>
             <div className="text-sm text-gray-600 mb-6">Show this at pickup counter</div>
             <img
               src={qrImageUrl}
@@ -125,7 +131,7 @@ const PrintQR: React.FC = () => {
             <div className="mt-6">
               <div className="font-mono text-xl">Order: {orderId}</div>
               <div className="text-gray-700">Pickup Code: {orderId.slice(-4)}</div>
-              
+
               {/* Display product information */}
               {productIds.length > 0 && (
                 <div className="mt-4 text-left">
