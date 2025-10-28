@@ -1,3 +1,4 @@
+import axios from 'axios';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 
@@ -5,14 +6,15 @@ import { useLocation, useNavigate, useParams, useSearchParams } from 'react-rout
 // and auto-triggers the print dialog when the image is ready.
 
 const PrintQR: React.FC = () => {
+  const BaseUrl = import.meta.env.VITE_API_URL; // ✅ use the value from .env
+  console.log("🚀 ~ PrintQR ~ BaseUrl:", BaseUrl)
+
   const navigate = useNavigate();
   const { orderId } = useParams<{ orderId: string }>();
   const [searchParams] = useSearchParams();
   const [isImageLoaded, setIsImageLoaded] = useState(false);
   const hasPrintedRef = useRef(false);
-  const location = useLocation();
-  console.log("🚀 ~ PrintQR ~ location:", location)
-  const storeName = "rrrr";
+
   // Get orderDetails from query parameters
   const orderDetailsParam = searchParams.get('orderDetails');
   const orderDetails = useMemo(() => {
@@ -63,10 +65,22 @@ const PrintQR: React.FC = () => {
     return `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encoded}`;
   }, [qrPayload]);
 
-useEffect(()=>{
-  
-})
+  const [store_Name, setStore_Name] = useState("");
 
+  useEffect(() => {
+    const fetchStoreName = async () => {
+      try {
+        const { data } = await axios.get(`${BaseUrl}/store/print-manager-name/${orderId}`);
+        setStore_Name(data.storeName);
+      } catch (err) {
+        console.error("Error fetching store name:", err);
+      }
+    };
+    fetchStoreName();
+  }, [orderId]);
+
+  console.log(store_Name, "store_Name===========");
+  const storeName = store_Name;
   useEffect(() => {
     if (isImageLoaded && !hasPrintedRef.current) {
       // Delay slightly to ensure layout is complete
