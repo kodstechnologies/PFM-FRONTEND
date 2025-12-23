@@ -1039,7 +1039,7 @@ const EditPartner: React.FC = () => {
 
             let storedDocStatus: Partial<DeliveryPartner['documentStatus']> | undefined;
             try {
-                storedDocStatus = JSON.parse(localStorage.getItem(`dpDocumentStatus:${id}`) || '{}');
+                // storedDocStatus = JSON.parse(localStorage.getItem(`dpDocumentStatus:${id}`) || '{}');
             } catch { }
 
             // Try backend API first
@@ -1274,7 +1274,7 @@ const EditPartner: React.FC = () => {
                     console.log('✅ Partner updated in backend successfully');
 
                     try {
-                        localStorage.setItem(`dpDocumentStatus:${formData._id}`, JSON.stringify(formData.documentStatus));
+                        // localStorage.setItem(`dpDocumentStatus:${formData._id}`, JSON.stringify(formData.documentStatus));
                     } catch { }
 
                     console.log('✅ Partner updated successfully');
