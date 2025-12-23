@@ -488,6 +488,7 @@
 import axios from 'axios';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
+import logo from "../assets/logo/logo.png"
 
 type ProductItem = {
   id?: string;
@@ -504,6 +505,7 @@ const PrintQR: React.FC = () => {
   const [isImageLoaded, setIsImageLoaded] = useState(false);
   const hasPrintedRef = useRef(false);
   const orderDetailsParam = searchParams.get('orderDetails');
+  const [recieverName, setRecieverName] = useState([]);
   const orderDetails = useMemo(() => {
     if (orderDetailsParam) {
       try {
@@ -557,6 +559,7 @@ const PrintQR: React.FC = () => {
       try {
         const { data } = await axios.get(`${BaseUrl}/store/print-manager-name/${orderId}`);
         setStore_Name(data.storeName || 'Indiranagar');
+        setRecieverName(data.recieverName)
       } catch (err) {
         console.error("Error fetching store name:", err);
         setStore_Name('Indiranagar');
@@ -608,7 +611,7 @@ const PrintQR: React.FC = () => {
             </div>
           </div>
           <div className="text-center border-2 border-dashed border-gray-300 rounded-xl p-8">
-            <h2 className="text-xl font-bold mb-2">Priya Chicken - {storeName}</h2>
+            <h2 className="text-xl font-bold mb-2">Priya Fresh Meats - {storeName}</h2>
             <p className="text-gray-600 mb-6">Show this at pickup counter</p>
             <img
               src={qrImageUrl}
@@ -643,33 +646,51 @@ const PrintQR: React.FC = () => {
       <div className="print-only">
         <div className="label-content">
           <div className="text-center">
-            <div className="font-bold text-sm mb-1">PRIYA CHICKEN</div>
-            <div className="text-xs mb-2">{storeName.toUpperCase()}</div>
-            <img
-              src={qrImageUrl}
-              alt="QR"
-              className="qr-code"
-              onLoad={() => setIsImageLoaded(true)}
-            />
-            <div className="mt-2">
-              <div className="font-bold text-sm">ORDER: {orderId}</div>
-              <div className="font-bold text-base tracking-wider text-blue-600">CODE: {pickupCode}</div>
-            </div>
-            {productItems.length > 0 && (
-              <div className="text-xs mt-3 text-left px-2 max-w-md mx-auto">
-                <h3 className="font-bold mb-2 text-sm">Order Items</h3>
-                {productItems.map((item) => (
-                  <div key={item.id} className="flex justify-between py-0.5 border-b border-gray-300">
-                    <span>{item.name} × {item.quantity}</span>
-                    <span className="font-medium">₹{item.total}</span>
-                  </div>
-                ))}
-                <div className="border-t border-black mt-2 pt-2 font-bold flex justify-between text-sm">
-                  <span>Total</span>
-                  <span>₹{totalAmount}</span>
-                </div>
+            {/* <div className="font-bold text-3xl mb-1 ">Priya Fresh Meats</div> */}
+            <div className=' gap-[4rem] w-[70rem] flex justify-center '>
+              <div>
+                <img src={logo} alt="" className='h-[20rem]' />
               </div>
-            )}
+              <div className='flex flex-col items-start justify-center'>
+                <h3 className=" font-bold text-4xl mb-2">Store Name : {storeName.toUpperCase()}</h3>
+                <h3 className="font-bold text-3xl">ORDER: {orderId}</h3>
+                <h3 className="font-bold text-3xl">Customer Name: {recieverName}</h3>
+              </div>
+            </div>
+
+            <div className='flex gap-[6rem] w-screen  ml-[8rem]'>
+              <div className=' '>
+                <img
+                  src={qrImageUrl}
+                  alt="QR"
+                  className="qr-code"
+                  onLoad={() => setIsImageLoaded(true)}
+                />
+              </div>
+              <div className="mt-2 flex flex-col justify-start items-start">
+
+
+                <h3 className="font-bold text-3xl">Order Items</h3>
+                {productItems.length > 0 && (
+                  <div className="">
+                    {productItems.map((item) => (
+                      <div key={item.id} className="flex text-3xl justify-between py-0.5 border-gray-300 gap-[2rem]">
+                        <span>{item.name} × {item.quantity}</span>
+                        <span className="font-medium">₹{item.total}</span>
+                      </div>
+                    ))}
+                    {/* <div className="border-t border-black mt-2 pt-2 font-bold flex justify-between text-sm">
+                      <span>Total</span>
+                      <span>₹{totalAmount}</span>
+                    </div> */}
+                  </div>
+                )}
+                {/* <div className="font-bold text-sm">ORDER: {orderId}</div>
+              <div className="font-bold text-sm">ORDER: {orderId}</div> */}
+                {/* <div className="font-bold text-base tracking-wider text-blue-600">CODE: {pickupCode}</div> */}
+              </div>
+            </div>
+
           </div>
         </div>
       </div>
@@ -699,8 +720,9 @@ const PrintQR: React.FC = () => {
             display: block !important;
           }
           .label-content {
+          backgroundcolor:"red"
             width: 100%;
-            max-width: 400px;
+            min-width: 8000px;
             margin: 0 auto;
             padding: 0.4in;
             box-sizing: border-box;
@@ -709,8 +731,9 @@ const PrintQR: React.FC = () => {
             line-height: 1.2;
           }
           .qr-code {
-            width: 180px;
-            height: 180px;
+            width: 280px;
+            height: 2
+            80px;
             margin: 10px auto;
             display: block;
             image-rendering: crisp-edges;
