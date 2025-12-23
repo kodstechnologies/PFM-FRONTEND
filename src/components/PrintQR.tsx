@@ -496,6 +496,7 @@ type ProductItem = {
   quantity?: number;
   price?: number;
   total: number;
+  unit: number;
 };
 
 const PrintQR: React.FC = () => {
@@ -517,6 +518,7 @@ const PrintQR: React.FC = () => {
     }
     return [];
   }, [orderDetailsParam]);
+  console.log("🚀 ~ PrintQR ~ orderDetails:", orderDetails)
 
   const productItems: ProductItem[] = useMemo(() => {
     return orderDetails.map((item: any) => ({
@@ -525,6 +527,7 @@ const PrintQR: React.FC = () => {
       quantity: item.quantity,
       price: item.price,
       total: item.price * item.quantity,
+      unit: item.unit
     }));
   }, [orderDetails]);
   const totalAmount = useMemo(() => {
@@ -643,57 +646,69 @@ const PrintQR: React.FC = () => {
         </div>
       </div>
       {/* Print-Only Layout: Compact Size */}
-      <div className="print-only">
+      <div className="print-only m-0 p-0 ">
         <div className="label-content">
           <div className="text-center">
             {/* <div className="font-bold text-3xl mb-1 ">Priya Fresh Meats</div> */}
-            <div className=' gap-[4rem] w-[70rem] flex justify-center '>
+            <div className=' '>
               <div>
-                <img src={logo} alt="" className='h-[20rem]' />
-              </div>
-              <div className='flex flex-col items-start justify-center'>
-                <h3 className=" font-bold text-4xl mb-2">Store Name : {storeName.toUpperCase()}</h3>
-                <h3 className="font-bold text-3xl">ORDER: {orderId}</h3>
-                <h3 className="font-bold text-3xl">Customer Name: {recieverName}</h3>
-              </div>
-            </div>
+                <div className='gap-[4rem] w-[70rem] flex  m-0 '>
+                  <div>
+                    <img src={logo} alt="" className='h-[20rem]' />
+                  </div>
+                  <div className='flex flex-col items-start justify-center'>
+                    <h3 className=" font-bold text-4xl mb-2">Store Name : {storeName.toUpperCase()}</h3>
+                    <h3 className="font-bold text-3xl">ORDER: {orderId}</h3>
+                    <h3 className="font-bold text-3xl">Customer Name: {recieverName}</h3>
+                  </div>
+                </div>
+                <div className='flex gap-[4rem] w-screen'>
+                  <div>
+                    <img
+                      src={qrImageUrl}
+                      alt="QR"
+                      className="qr-code"
+                      onLoad={() => setIsImageLoaded(true)}
+                    />
 
-            <div className='flex gap-[6rem] w-screen  ml-[8rem]'>
-              <div className=' '>
-                <img
-                  src={qrImageUrl}
-                  alt="QR"
-                  className="qr-code"
-                  onLoad={() => setIsImageLoaded(true)}
-                />
-              </div>
-              <div className="mt-2 flex flex-col justify-start items-start">
+                  </div>
+                  <div className="mt-2 flex flex-col justify-start items-start">
 
-
-                <h3 className="font-bold text-3xl">Order Items</h3>
-                {productItems.length > 0 && (
-                  <div className="">
-                    {productItems.map((item) => (
-                      <div key={item.id} className="flex text-3xl justify-between py-0.5 border-gray-300 gap-[2rem]">
-                        <span>{item.name} × {item.quantity}</span>
-                        <span className="font-medium">₹{item.total}</span>
-                      </div>
-                    ))}
-                    {/* <div className="border-t border-black mt-2 pt-2 font-bold flex justify-between text-sm">
+                    <h3 className="font-bold text-3xl">Order Items</h3>
+                    {productItems.length > 0 && (
+                      <div className="">
+                        {productItems.map((item) => (
+                          <div key={item.id} className="flex text-3xl items-baseline  py-0.5 border-gray-300 gap-[2rem]">
+                            <span>{item.name} </span>
+                            <span> × </span>
+                            <span> {item.quantity} {item.unit}</span>
+                            {/* <span className="font-medium">₹{item.total}</span> */}
+                          </div>
+                        ))}
+                        {/* <div className="border-t border-black mt-2 pt-2 font-bold flex justify-between text-sm">
                       <span>Total</span>
                       <span>₹{totalAmount}</span>
                     </div> */}
+                      </div>
+                    )}
                   </div>
-                )}
-                {/* <div className="font-bold text-sm">ORDER: {orderId}</div>
-              <div className="font-bold text-sm">ORDER: {orderId}</div> */}
-                {/* <div className="font-bold text-base tracking-wider text-blue-600">CODE: {pickupCode}</div> */}
+                </div>
+
               </div>
+
             </div>
 
+
+
+
+            {/* <div className="font-bold text-sm">ORDER: {orderId}</div>
+              <div className="font-bold text-sm">ORDER: {orderId}</div> */}
+            {/* <div className="font-bold text-base tracking-wider text-blue-600">CODE: {pickupCode}</div> */}
           </div>
         </div>
+
       </div>
+
       <style type="text/css">{`
         /* Hide print layout on screen */
         .print-only {
@@ -702,7 +717,7 @@ const PrintQR: React.FC = () => {
         @media print {
           @page {
             size: A4;
-            margin: 0.3in;
+          
           }
           body, html {
             margin: 0;
@@ -723,18 +738,18 @@ const PrintQR: React.FC = () => {
           backgroundcolor:"red"
             width: 100%;
             min-width: 8000px;
-            margin: 0 auto;
-            padding: 0.4in;
+          
+         
             box-sizing: border-box;
             font-family: 'Arial', 'Helvetica', sans-serif;
             font-size: 10px;
             line-height: 1.2;
           }
           .qr-code {
-            width: 280px;
-            height: 2
-            80px;
-            margin: 10px auto;
+            width: 400px;
+            height: 400px;
+          
+           
             display: block;
             image-rendering: crisp-edges;
             image-rendering: pixelated;
