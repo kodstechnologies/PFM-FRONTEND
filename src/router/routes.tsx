@@ -92,6 +92,7 @@ import type { AppRoute } from './types';
 import NotFoundPage from '../pages/NotFoundPage';
 import UserLogin from '../pages/UserLogin';
 import RazorpayTest from '../pages/Demo';
+import EmployeeLogin from '../pages/EmployeeLogin';
 
 const UserPrivacyPolicy = lazy(() => import('../pages/privacyPolicy/UserPrivacyPolicy'));
 const DeliveryPartnerPrivacyPolicy = lazy(() => import('../pages/privacyPolicy/DeliveryPartnerPrivacyPolicy'));
@@ -128,13 +129,18 @@ export const commonRoutes: AppRoute[] = [
     layout: 'blank',
   },
   {
+    path: '/employee-login',
+    element: <EmployeeLogin />,
+    layout: 'blank',
+  },
+  {
     path: '/manager-login',
-    element: <ManagerLogin />,
+    element: <EmployeeLogin />,
     layout: 'blank',
   },
   {
     path: '/store-login',
-    element: <StoreLogin />,
+    element: <EmployeeLogin />,
     layout: 'blank',
   },
   {
@@ -178,5 +184,5 @@ export const commonRoutes: AppRoute[] = [
     element: <RazorpayTest />,
     layout: 'blank', // Custom prop used by your app to apply a specific layout or no layout
   },
-  
+
 ];

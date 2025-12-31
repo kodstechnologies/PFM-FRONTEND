@@ -1,57 +1,4 @@
-// import { lazy } from 'react';
-// import type { AppRoute } from './types'; // ✅ Add this
-// import LiveOrders from '../pages/Vendor/LiveOrders';
-// import ManagerProfile from '../pages/Manager/Profile';
-// import PrintQR from '../components/PrintQR';
 
-// const AddPartner = lazy(() => import('../pages/Manager/DeliveryPartner/AddPartner'));
-// const PartnerDetails = lazy(() => import('../pages/Manager/DeliveryPartner/PartnerDetails'));
-// const DeliveryPartner = lazy(() => import('../pages/Manager/DeliveryPartner'));
-
-// export const managerRoutes: AppRoute[] = [ // ✅ Add the type
-//   {
-//     path: '/manager/profile',
-//     element: <ManagerProfile />,
-//     layout: 'default',
-//     role: 'manager',
-//   },
-//   {
-//     path: '/manager/live-orders',
-//     element: <LiveOrders />,
-//     layout: 'blank',
-//     role: 'manager',
-//   },
-//   {
-//     path: '/manager/print-qr/:orderId',
-//     element: <PrintQR />,
-//     layout: 'blank',
-//     role: 'manager',
-//   },
-
-//   {
-//     path: '/manager/delivery-partner',
-//     element: <DeliveryPartner />,
-//     layout: 'default',
-//     role: 'manager',
-//   },
-//   {
-//     path: '/manager/delivery-partner/add',
-//     element: <AddPartner />,
-//     layout: 'default',
-//     role: 'manager',
-//   },
-//   {
-//     path: '/manager/delivery-partner/details/:partnerId',
-//     element: <PartnerDetails />,
-//     layout: 'default',
-//     role: 'manager',
-//   },
-// ];
-
-
-// Updated managerRoutes with dashboard route and index redirect
-
-// src/routes/managerRoutes.tsx
 import { lazy } from 'react'; // Add Navigate import
 import type { AppRoute } from './types';
 import LiveOrders from '../pages/Vendor/LiveOrders';
@@ -76,7 +23,7 @@ export const managerRoutes: AppRoute[] = [
     layout: 'default',
     role: 'manager',
   },
-  {
+  { 
     path: '/manager',
     element: <Navigate to="/manager-dashboard" replace />,
     layout: 'default',

@@ -258,14 +258,14 @@ const AdminLogin = () => {
               </button>
             </form>
 
-            <div className="mt-2 mr-2 flex justify-end">
+            {/* <div className="mt-2 mr-2 flex justify-end">
               <Link
                 to=""
                 className="text-sm text-[#fff] transition "
               >
                 Forgotten password?
               </Link>
-            </div>
+            </div> */}
 
           </div>
         </div>

@@ -1,9 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import SocketService from '../../../services/socketService';
-// import SocketService from '../../services/socketService';
 import { API_CONFIG } from '../../../config/api.config';
-// import { API_CONFIG } from '../../config/api.config';
 import { toast, ToastContainer } from 'react-toastify';
 
 interface OrderDetail {
@@ -43,23 +41,28 @@ const LiveOrders3: React.FC = () => {
   const isManager = window.location.pathname.includes('/manager/');
   const userRole = isManager ? 'manager' : 'store';
   const userId = isManager ? 'manager-tv-screen' : 'store-tv-screen';
-  console.log("🚀 ~ LiveOrders2 ~ userId:", userId)
-  let managerId = "manager-tv-screen"
+  const managerId = "manager-tv-screen";
+
+  // Helper to get token from localStorage
+  const getToken = useCallback((): string | null => {
+    const managerUser = localStorage.getItem('managerUser');
+    const storeUser = localStorage.getItem('storeUser');
+    const accessToken = localStorage.getItem('accessToken');
+    return accessToken || (managerUser ? JSON.parse(managerUser).accessToken : null) ||
+      (storeUser ? JSON.parse(storeUser).accessToken : null);
+  }, []);
+
   // Socket connection
   useEffect(() => {
-    const connectSocket = () => {
-      try {
-        socketService.connect(userRole, userId);
-        if (!isManager) {
-          socketService.onNewOrder(() => fetchLiveOrders2());
-          socketService.onOrderStatusChange(() => fetchLiveOrders2());
-        }
-      } catch (error) {
-        console.error(`Failed to connect ${userRole} socket:`, error);
+    try {
+      socketService.connect(userRole, userId);
+      if (!isManager) {
+        socketService.onNewOrder(() => fetchLiveOrders());
+        socketService.onOrderStatusChange(() => fetchLiveOrders());
       }
-    };
-
-    connectSocket();
+    } catch (error) {
+      console.error(`Failed to connect ${userRole} socket:`, error);
+    }
 
     return () => {
       if (!isManager) {
@@ -72,12 +75,7 @@ const LiveOrders3: React.FC = () => {
 
   // Authentication check
   useEffect(() => {
-    const managerUser = localStorage.getItem('managerUser');
-    const storeUser = localStorage.getItem('storeUser');
-    const accessToken = localStorage.getItem('accessToken');
-    const token = accessToken || (managerUser ? JSON.parse(managerUser).accessToken : null) ||
-      (storeUser ? JSON.parse(storeUser).accessToken : null);
-
+    const token = getToken();
     if (!token) {
       setIsAuthenticated(false);
       setIsLoading(false);
@@ -90,8 +88,8 @@ const LiveOrders3: React.FC = () => {
     }
 
     setIsAuthenticated(true);
-    fetchLiveOrders2();
-  }, [isManager, navigate]);
+    fetchLiveOrders();
+  }, [isManager, navigate, getToken]);
 
   // Normalize endpoint helper
   const normalizeEndpoint = (endpoint: string): string => {
@@ -108,17 +106,12 @@ const LiveOrders3: React.FC = () => {
   };
 
   // Fetch live orders
-  const fetchLiveOrders2 = useCallback(async () => {
+  const fetchLiveOrders = useCallback(async () => {
     try {
       setIsLoading(true);
       setError(null);
 
-      const managerUser = localStorage.getItem('managerUser');
-      const storeUser = localStorage.getItem('storeUser');
-      const accessToken = localStorage.getItem('accessToken');
-      const token = accessToken || (managerUser ? JSON.parse(managerUser).accessToken : null) ||
-        (storeUser ? JSON.parse(storeUser).accessToken : null);
-
+      const token = getToken();
       if (!token) {
         setError('Authentication required. Please log in.');
         setOrders([]);
@@ -126,7 +119,26 @@ const LiveOrders3: React.FC = () => {
         return;
       }
 
-      const endpoint = isManager ? API_CONFIG.ENDPOINTS.MANAGER.LIVE_ORDERS : API_CONFIG.ENDPOINTS.STORE.ORDERS;
+      let endpoint: string;
+      if (isManager) {
+        endpoint = API_CONFIG.ENDPOINTS.MANAGER.LIVE_ORDERS;
+      } else {
+        // Extract employee ID from storeUser in localStorage
+        let employeeId: string | null = null;
+        try {
+          const parsedStoreUser = JSON.parse(localStorage.getItem('storeUser') || '{}');
+          employeeId = parsedStoreUser.id || parsedStoreUser.employeeId || null;
+        } catch (parseError) {
+          console.error('Error parsing storeUser:', parseError);
+        }
+        if (!employeeId) {
+          setError('Employee ID not found in localStorage. Please log in again.');
+          setOrders([]);
+          setIsLoading(false);
+          return;
+        }
+        endpoint = `${API_CONFIG.ENDPOINTS.STORE.ORDERS}/${employeeId}`;
+      }
       const fullUrl = getFullUrl(endpoint);
 
       const response = await fetch(fullUrl, {
@@ -135,12 +147,10 @@ const LiveOrders3: React.FC = () => {
           'Content-Type': 'application/json'
         }
       });
-      console.log("🚀 ~ LiveOrders2 ~ response:", response)
 
       if (response.ok) {
         const data = await response.json();
         if (data.success) {
-          console.log("🚀 ~ LiveOrders2 ~ data.data.details:", data.data.details.managerID)
           if (data.data.details) {
             setStoreInfo({
               name: data.data.details.name || (isManager ? 'Manager' : 'Store'),
@@ -148,7 +158,6 @@ const LiveOrders3: React.FC = () => {
               managerId: data.data.details.managerID || "manager id"
             });
           }
-          // console.log("🚀 ~ LiveOrders2 ~ data.data.orders:===================", data.data)
           if (data.data.orders) {
             const transformedOrders: Order[] = data.data.orders.map((order: any) => ({
               id: order._id,
@@ -158,7 +167,6 @@ const LiveOrders3: React.FC = () => {
               status: mapBackendStatusToFrontend(order.status),
               orderDetails: order.orderDetails || []
             }));
-            console.log("🚀 ~ LiveOrders2 ~ transformedOrders:", transformedOrders)
             setOrders(transformedOrders);
           } else {
             setOrders([]);
@@ -167,17 +175,25 @@ const LiveOrders3: React.FC = () => {
           setOrders([]);
         }
       } else {
-        setError('Failed to fetch orders from server');
+        let errorMessage = 'Failed to fetch orders from server';
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.message || errorMessage;
+        } catch {
+          errorMessage = `${response.status} ${response.statusText}`;
+        }
+        setError(errorMessage);
         setOrders([]);
       }
     } catch (error) {
       console.error('Error fetching live orders:', error);
-      setError('Network error. Please check your connection.');
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      setError(`Network error: ${errorMessage}. Please check your connection and try again.`);
       setOrders([]);
     } finally {
       setIsLoading(false);
     }
-  }, [isManager]);
+  }, [isManager, getToken]);
 
   // Fetch store info
   const fetchStoreInfo = useCallback(async () => {
@@ -207,7 +223,6 @@ const LiveOrders3: React.FC = () => {
           'Content-Type': 'application/json'
         }
       });
-
 
       if (response.ok) {
         const data = await response.json();
@@ -249,16 +264,12 @@ const LiveOrders3: React.FC = () => {
   // Refresh interval
   useEffect(() => {
     const interval = setInterval(() => {
-      const managerUser = localStorage.getItem('managerUser');
-      const storeUser = localStorage.getItem('storeUser');
-      const accessToken = localStorage.getItem('accessToken');
-      const token = accessToken || (managerUser ? JSON.parse(managerUser).accessToken : null) ||
-        (storeUser ? JSON.parse(storeUser).accessToken : null);
-      if (token) fetchLiveOrders2();
+      const token = getToken();
+      if (token) fetchLiveOrders();
     }, 30000);
 
     return () => clearInterval(interval);
-  }, [isManager, fetchLiveOrders2]);
+  }, [getToken, fetchLiveOrders]);
 
   // Time update
   useEffect(() => {
@@ -292,19 +303,13 @@ const LiveOrders3: React.FC = () => {
     try {
       setError(null);
 
-      const managerUser = localStorage.getItem('managerUser');
-      const storeUser = localStorage.getItem('storeUser');
-      const accessToken = localStorage.getItem('accessToken');
-      const token = accessToken || (managerUser ? JSON.parse(managerUser).accessToken : null) ||
-        (storeUser ? JSON.parse(storeUser).accessToken : null);
-
+      const token = getToken();
       if (!token) {
         setError('Authentication required for status update');
         return;
       }
 
       const order = orders.find(o => o.id === orderId);
-      console.log("🚀 ~ moveOrderToNextStage ~ order:", order)
       if (!order) return;
 
       let newStatus: string;
@@ -331,8 +336,14 @@ const LiveOrders3: React.FC = () => {
 
       if (!response.ok) {
         setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: order.status } : o));
-        const errorData = await response.json();
-        setError(`Failed to update order status: ${errorData.message || 'Unknown error'}`);
+        let errorMessage = 'Failed to update order status';
+        try {
+          const errorData = await response.json();
+          errorMessage += `: ${errorData.message || 'Unknown error'}`;
+        } catch {
+          errorMessage += `: ${response.status} ${response.statusText}`;
+        }
+        setError(errorMessage);
       }
     } catch (error) {
       console.error('Error updating order status:', error);
@@ -347,12 +358,7 @@ const LiveOrders3: React.FC = () => {
     try {
       setError(null);
 
-      const managerUser = localStorage.getItem('managerUser');
-      const storeUser = localStorage.getItem('storeUser');
-      const accessToken = localStorage.getItem('accessToken');
-      const token = accessToken || (managerUser ? JSON.parse(managerUser).accessToken : null) ||
-        (storeUser ? JSON.parse(storeUser).accessToken : null);
-
+      const token = getToken();
       if (!token) {
         setError('Authentication required for pickup confirmation');
         return;
@@ -372,8 +378,14 @@ const LiveOrders3: React.FC = () => {
 
       if (!response.ok) {
         setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: 'awaiting-pickup' } : o));
-        const errorData = await response.json();
-        setError(`Failed to confirm pickup: ${errorData.message || 'Unknown error'}`);
+        let errorMessage = 'Failed to confirm pickup';
+        try {
+          const errorData = await response.json();
+          errorMessage += `: ${errorData.message || 'Unknown error'}`;
+        } catch {
+          errorMessage += `: ${response.status} ${response.statusText}`;
+        }
+        setError(errorMessage);
       } else {
         hideQRCode();
       }
@@ -384,7 +396,6 @@ const LiveOrders3: React.FC = () => {
   };
 
   const handleDeliveryBoyPickup = (orderId: string) => {
-    console.log('📱 Delivery boy confirmed pickup for order:', orderId);
     confirmPickup(orderId);
   };
 
@@ -420,6 +431,7 @@ const LiveOrders3: React.FC = () => {
           transition: 'all 0.5s ease-in-out',
           willChange: 'transform, opacity'
         }}
+        onClick={handleOrderClick}
       >
         <div className="text-white flex flex-col md:flex-row justify-between items-start md:items-center">
           <div className="flex-1">
@@ -427,34 +439,25 @@ const LiveOrders3: React.FC = () => {
             <div className="text-sm opacity-90 mb-1">{order.items} items, ₹{order.total}</div>
             <div className="text-xs opacity-75 mb-2">{order.time}</div>
 
-            {/* Display all products */}
-            <div className="space-y-2">
-              {order.orderDetails?.map((item, idx) => (
-                <div key={idx} className="flex items-center space-x-3 bg-gray-800 p-2 rounded">
-                  {/* {item.img && (
-                    <img
-                      src={item.img}
-                      alt={item.name}
-                      className="w-12 h-12 object-cover rounded-md border border-gray-600"
-                      onError={(e) => (e.target as HTMLImageElement).src = '/placeholder-image.jpg'}
-                    />
-                  )} */}
-                  <div className="flex-1">
-                    <div className="text-sm font-medium">{item.name}</div>
-                    <div className="text-xs opacity-80">
-                      Qty: {item.quantity} {item.unit || ''} {item.weight ? ` x ${item.weight}` : ''}
-                    </div>
-                  </div>
-                  <div className="text-sm font-semibold">₹{item.price}</div>
+            {/* Simplified order details: Show only key info, collapse if too many */}
+            <div className="space-y-2 mb-3">
+              {order.orderDetails?.slice(0, 3).map((item, idx) => (
+                <div key={idx} className="flex items-center justify-between bg-gray-800 p-2 rounded text-xs">
+                  <span className="truncate flex-1">{item.name}</span>
+                  <span className="ml-2">x{item.quantity}</span>
+                  <span className="ml-2">₹{item.price}</span>
                 </div>
               ))}
+              {order.orderDetails && order.orderDetails.length > 3 && (
+                <div className="text-xs text-gray-400">... +{order.orderDetails.length - 3} more</div>
+              )}
             </div>
 
             {/* Manager action / Update button */}
             {(order.status === 'new' || order.status === 'preparing') && (
               <div className="mt-3">
                 <button
-                  onClick={handleOrderClick}
+                  onClick={(e) => { e.stopPropagation(); handleOrderClick(); }}
                   disabled={isUpdating}
                   className="bg-yellow-500 hover:bg-yellow-600 disabled:bg-gray-600 text-white px-4 py-2 rounded text-sm font-medium transition-colors flex items-center"
                 >
@@ -479,17 +482,26 @@ const LiveOrders3: React.FC = () => {
           {/* QR button */}
           {order.status === 'awaiting-pickup' && (
             <div className="ml-3 flex items-center mt-3 md:mt-0">
-              <a
-                href={`/${userRole}/print-qr/${order.id}?orderDetails=${encodeURIComponent(JSON.stringify(order.orderDetails || []))}`}
-                target="_blank"
-                rel="no-referrer"
-                onClick={(e) => e.stopPropagation()}
+              <button
+                onClick={(e) => { e.stopPropagation(); showQRCode(order.id); }}
                 className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm font-medium transition-colors flex items-center ml-2"
               >
                 <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M19 8H5a3 3 0 00-3 3v4h4v4h12v-4h4v-4a3 3 0 00-3-3zM7 17h10v2H7v-2zm13-2H4v-4a1 1 0 011-1h14a1 1 0 011 1v4zM17 3H7v3h10V3z" />
                 </svg>
-                Print QR
+                Show QR
+              </button>
+              <a
+                href={`/${userRole}/print-qr/${order.id}?orderDetails=${encodeURIComponent(JSON.stringify(order.orderDetails || []))}`}
+                target="_blank"
+                rel="no-referrer"
+                onClick={(e) => e.stopPropagation()}
+                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded text-sm font-medium transition-colors flex items-center ml-2"
+              >
+                <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v.01" />
+                </svg>
+                Print
               </a>
             </div>
           )}
@@ -512,7 +524,6 @@ const LiveOrders3: React.FC = () => {
               <div className="text-2xl font-bold text-white">
                 {storeInfo ? (storeInfo.location ? `${storeInfo.name} - ${storeInfo.location}` : storeInfo.name) : 'Live Orders'}
               </div>
-              {/* <div className="text-sm text-gray-300">Real-time Order Dashboard</div> */}
             </div>
           </div>
           <div className="flex items-center space-x-4">
@@ -526,7 +537,7 @@ const LiveOrders3: React.FC = () => {
             )}
             <div className="text-xl font-mono bg-gray-700 px-3 py-1 rounded-lg shadow-md">{currentTime}</div>
             {isAuthenticated && (
-              <button onClick={fetchLiveOrders2} disabled={isLoading} className="bg-green-600 hover:bg-green-700 disabled:bg-gray-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center shadow-md hover:shadow-lg">
+              <button onClick={fetchLiveOrders} disabled={isLoading} className="bg-green-600 hover:bg-green-700 disabled:bg-gray-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center shadow-md hover:shadow-lg">
                 <svg className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                 </svg>
@@ -615,7 +626,7 @@ const LiveOrders3: React.FC = () => {
                 <div className="flex-1 flex items-center justify-center">
                   <div className="text-center">
                     <div className="text-red-500 text-xl mb-4">⚠️ {error}</div>
-                    <button onClick={fetchLiveOrders2} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">
+                    <button onClick={fetchLiveOrders} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">
                       Retry
                     </button>
                   </div>

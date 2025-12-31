@@ -184,6 +184,11 @@
 // src/routes/superAdminRoutes.tsx
 import { lazy } from 'react';
 import type { AppRoute } from './types';
+import MeetCenterView from '../pages/SuperAdmin/MeatCenter/View';
+import ViewEmploye from '../pages/SuperAdmin/Employe/View';
+import EditEmploye from '../pages/SuperAdmin/Employe/Edit';
+import AddEmploye from '../pages/SuperAdmin/Employe/Add';
+import DisplayEmploye from '../pages/SuperAdmin/Employe/Display';
 
 // Lazy-loaded components
 const SuperAdminDashboard = lazy(() => import('../pages/SuperAdmin/Dashboard'));
@@ -237,6 +242,12 @@ export const superAdminRoutes: AppRoute[] = [
     role: 'super-admin',
   },
   {
+    path: '/meat-center/view/:id',
+    element: <MeetCenterView />,
+    layout: 'default',
+    role: 'super-admin',
+  },
+  {
     path: '/meat-center/add',
     element: <MeetCenterAdd />,
     layout: 'default',
@@ -248,6 +259,34 @@ export const superAdminRoutes: AppRoute[] = [
     layout: 'default',
     role: 'super-admin',
   },
+
+  // ======= == employe =============
+  {
+    path: '/employe',
+    element: <ViewEmploye />,
+    layout: 'default',
+    role: 'super-admin',
+  },
+  {
+    path: '/employe/view/:id',
+    element: <DisplayEmploye />,
+    layout: 'default',
+    role: 'super-admin',
+  },
+  {
+    path: '/employe/add',
+    element: <AddEmploye />,
+    layout: 'default',
+    role: 'super-admin',
+  },
+  {
+    path: '/employe/edit/:id',
+    element: <EditEmploye />,
+    layout: 'default',
+    role: 'super-admin',
+  },
+
+  // =======================
   {
     path: '/delivery-partner',
     element: <SuperAdminDeliveryPartnerDisplay />,
@@ -298,51 +337,51 @@ export const superAdminRoutes: AppRoute[] = [
     role: 'super-admin',
   },
   {
-    path: '/categories/edit',
+    path: '/categories/edit/:categoriesId',
     element: <CategoriesEdit />,
     layout: 'default',
     role: 'super-admin',
   },
   // Type Categories
   {
-    path: '/type/categories',
+    path: '/type/categories/:categoriesId',
     element: <TypeCategoriesDisplay />,
     layout: 'default',
     role: 'super-admin',
   },
   {
-    path: '/type/categories/add',
+    path: '/type/categories/add/:categoriesId',
     element: <TypeCategoriesAdd />,
     layout: 'default',
     role: 'super-admin',
   },
   {
-    path: '/type/categories/edit',
+    path: '/type/categories/edit/:typeCategoriesId',
     element: <TypeCategoriesEdit />,
     layout: 'default',
     role: 'super-admin',
   },
   // Sub Categories
   {
-    path: '/sub/categories',
+    path: '/sub/categories/:typeCategoriesId',
     element: <SubCategoriesDisplay />,
     layout: 'default',
     role: 'super-admin',
   },
   {
-    path: '/sub/categories/add',
+    path: '/sub/categories/add/:typeCategoriesId',
     element: <SubCategoriesAdd />,
     layout: 'default',
     role: 'super-admin',
   },
   {
-    path: '/sub/categories/edit',
+    path: '/sub/categories/edit/:subCategoriesId',
     element: <SubCategoriesEdit />,
     layout: 'default',
     role: 'super-admin',
   },
   {
-    path: '/sub/categories/full-details',
+    path: '/sub/categories/full-details/:subCategoriesId',
     element: <FullDetails />,
     layout: 'default',
     role: 'super-admin',

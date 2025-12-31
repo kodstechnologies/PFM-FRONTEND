@@ -44,6 +44,7 @@ import ConfirmationNumberIcon from '@mui/icons-material/ConfirmationNumber';
 import InventoryIcon from '@mui/icons-material/Inventory';
 import GradingIcon from '@mui/icons-material/Grading';
 import DashboardCustomizeSharpIcon from '@mui/icons-material/DashboardCustomizeSharp';
+import BadgeIcon from '@mui/icons-material/Badge';
 
 const Sidebar = () => {
     const [currentMenu, setCurrentMenu] = useState<string>('');
@@ -191,8 +192,8 @@ const Sidebar = () => {
                                         <li className="nav-item">
                                             <NavLink to="/meat-center" className="group">
                                                 <div className="flex items-center">
-                                                    <AddHomeIcon 
-                                                     className="!text-black group-hover:!text-[#f47c7c] shrink-0" 
+                                                    <AddHomeIcon
+                                                        className="!text-black group-hover:!text-[#f47c7c] shrink-0"
                                                     />
                                                     <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">
                                                         {t('Meat Center')}
@@ -201,9 +202,21 @@ const Sidebar = () => {
                                             </NavLink>
                                         </li>
                                         <li className="nav-item">
+                                            <NavLink to="/employe" className="group">
+                                                <div className="flex items-center">
+                                                    <BadgeIcon
+                                                        className="!text-black group-hover:!text-[#f47c7c] shrink-0"
+                                                    />
+                                                    <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">
+                                                        {t('All employe')}
+                                                    </span>
+                                                </div>
+                                            </NavLink>
+                                        </li>
+                                        <li className="nav-item">
                                             <NavLink to="/delivery-partner" className="group">
                                                 <div className="flex items-center">
-                                                    <HandshakeIcon  className="!text-black group-hover:!text-[#f47c7c] shrink-0" />
+                                                    <HandshakeIcon className="!text-black group-hover:!text-[#f47c7c] shrink-0" />
                                                     <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">
                                                         {t('Delivery Partner')}
                                                     </span>
@@ -214,7 +227,7 @@ const Sidebar = () => {
                                         <li className="nav-item">
                                             <NavLink to="/notification" className="group">
                                                 <div className="flex items-center">
-                                                    <NotificationsIcon  className="!text-black group-hover:!text-[#f47c7c] shrink-0" />
+                                                    <NotificationsIcon className="!text-black group-hover:!text-[#f47c7c] shrink-0" />
                                                     <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">
                                                         {t('Send Notification')}
                                                     </span>
@@ -224,7 +237,7 @@ const Sidebar = () => {
                                         <li className="nav-item">
                                             <NavLink to="/categories" className="group">
                                                 <div className="flex items-center">
-                                                    <CategoryIcon  className="!text-black group-hover:!text-[#f47c7c] shrink-0" />
+                                                    <CategoryIcon className="!text-black group-hover:!text-[#f47c7c] shrink-0" />
                                                     <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">
                                                         {t('Categories')}
                                                     </span>
@@ -234,7 +247,7 @@ const Sidebar = () => {
                                         <li className="nav-item">
                                             <NavLink to="/Coupons" className="group">
                                                 <div className="flex items-center">
-                                                    <ConfirmationNumberIcon  className="!text-black group-hover:!text-[#f47c7c] shrink-0" />
+                                                    <ConfirmationNumberIcon className="!text-black group-hover:!text-[#f47c7c] shrink-0" />
                                                     <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">
                                                         {t('Coupons')}
                                                     </span>
@@ -244,7 +257,7 @@ const Sidebar = () => {
                                         <li className="nav-item">
                                             <NavLink to="/order" className="group">
                                                 <div className="flex items-center">
-                                                    <GradingIcon  className="!text-black group-hover:!text-[#f47c7c] shrink-0" />
+                                                    <GradingIcon className="!text-black group-hover:!text-[#f47c7c] shrink-0" />
                                                     <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">
                                                         {t('Order')}
                                                     </span>
@@ -261,7 +274,7 @@ const Sidebar = () => {
                                         <li className="nav-item">
                                             <NavLink to="/manager-dashboard" className="group">
                                                 <div className="flex items-center">
-                                                    <DashboardIcon  className="!text-black group-hover:!text-[#f47c7c] shrink-0" />
+                                                    <DashboardIcon className="!text-black group-hover:!text-[#f47c7c] shrink-0" />
                                                     <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">
                                                         {t('Manager Dashboard')}
                                                     </span>
@@ -271,7 +284,7 @@ const Sidebar = () => {
                                         <li className="nav-item">
                                             <NavLink to="/manager/delivery-partner" className="group">
                                                 <div className="flex items-center">
-                                                    <HandshakeIcon  className="!text-black group-hover:!text-[#f47c7c] shrink-0" />
+                                                    <HandshakeIcon className="!text-black group-hover:!text-[#f47c7c] shrink-0" />
                                                     <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">
                                                         {t('Delivery Partner')}
                                                     </span>
@@ -281,7 +294,7 @@ const Sidebar = () => {
                                         <li className="nav-item">
                                             <NavLink to="/manager/order-management" className="group">
                                                 <div className="flex items-center">
-                                                    <IconMenuInvoice  className="!text-black group-hover:!text-[#f47c7c] shrink-0" />
+                                                    <IconMenuInvoice className="!text-black group-hover:!text-[#f47c7c] shrink-0" />
                                                     <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">
                                                         {t('Order Management')}
                                                     </span>
@@ -291,7 +304,7 @@ const Sidebar = () => {
                                         <li className="nav-item">
                                             <NavLink to="/manager/inventory" className="group">
                                                 <div className="flex items-center">
-                                                    <InventoryIcon  className="!text-black group-hover:!text-[#f47c7c] shrink-0" />
+                                                    <InventoryIcon className="!text-black group-hover:!text-[#f47c7c] shrink-0" />
                                                     <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">
                                                         {t('Inventory')}
                                                     </span>

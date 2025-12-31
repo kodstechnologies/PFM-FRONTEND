@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import bg_img from "../../../../src/assets/bg/pfm_bg.png"
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
-import StoreIcon from '@mui/icons-material/Store';
 
 function UserDashboard() {
     const navigate = useNavigate();
@@ -12,12 +11,8 @@ function UserDashboard() {
         navigate('/admin-login');
     };
 
-    const handleManagerClick = () => {
-        navigate('/manager-login');
-    };
-
-    const handleStoreClick = () => {
-        navigate('/store-login');
+    const handleEmployeeClick = () => {
+        navigate('/employee-login');
     };
 
     return (
@@ -61,7 +56,7 @@ function UserDashboard() {
                 </div>
 
                 {/* Role Selection Cards */}
-                <div className="grid md:grid-cols-3 gap-6 mb-8">
+                <div className="grid md:grid-cols-2 gap-6 mb-8">
                     {/* Admin Card */}
                     <div
                         className="relative bg-white bg-opacity-10 rounded-2xl shadow-2xl p-6 hover:shadow-3xl transition-all duration-500 cursor-pointer transform hover:-translate-y-3 backdrop-blur-lg border border-white border-opacity-20 hover:border-opacity-40"
@@ -82,10 +77,10 @@ function UserDashboard() {
                         <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-red-500/0 via-red-500/10 to-orange-500/0 opacity-0 hover:opacity-100 transition-opacity duration-500"></div>
                     </div>
 
-                    {/* Manager Card */}
+                    {/* Employee Card */}
                     <div
                         className="relative bg-white bg-opacity-10 rounded-2xl shadow-2xl p-6 hover:shadow-3xl transition-all duration-500 cursor-pointer transform hover:-translate-y-3 backdrop-blur-lg border border-white border-opacity-20 hover:border-opacity-40"
-                        onClick={handleManagerClick}
+                        onClick={handleEmployeeClick}
                     >
                         <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-2xl"></div>
                         <div className="relative z-10">
@@ -95,31 +90,11 @@ function UserDashboard() {
                                     className="text-white"
                                 />
                             </div>
-                            <h3 className="text-xl font-semibold text-white mb-2 drop-shadow-lg">Manager</h3>
-                            <p className="text-gray-200 drop-shadow-md">Access manager login</p>
+                            <h3 className="text-xl font-semibold text-white mb-2 drop-shadow-lg">Employee</h3>
+                            <p className="text-gray-200 drop-shadow-md">Access employee login</p>
                         </div>
                         {/* Hover Glow Effect */}
                         <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-blue-500/0 via-purple-500/10 to-purple-500/0 opacity-0 hover:opacity-100 transition-opacity duration-500"></div>
-                    </div>
-
-                    {/* Store Card */}
-                    <div
-                        className="relative bg-white bg-opacity-10 rounded-2xl shadow-2xl p-6 hover:shadow-3xl transition-all duration-500 cursor-pointer transform hover:-translate-y-3 backdrop-blur-lg border border-white border-opacity-20 hover:border-opacity-40"
-                        onClick={handleStoreClick}
-                    >
-                        <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-2xl"></div>
-                        <div className="relative z-10">
-                            <div className="flex justify-center mb-4 transform transition-transform duration-300 hover:scale-125">
-                                <StoreIcon
-                                    style={{ fontSize: 48 }}
-                                    className="text-white"
-                                />
-                            </div>
-                            <h3 className="text-xl font-semibold text-white mb-2 drop-shadow-lg">Store</h3>
-                            <p className="text-gray-200 drop-shadow-md">Access store login</p>
-                        </div>
-                        {/* Hover Glow Effect */}
-                        <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-green-500/0 via-emerald-500/10 to-green-500/0 opacity-0 hover:opacity-100 transition-opacity duration-500"></div>
                     </div>
                 </div>
 
