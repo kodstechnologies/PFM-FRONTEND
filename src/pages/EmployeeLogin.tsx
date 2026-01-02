@@ -1398,6 +1398,10 @@ const EmployeeLogin = () => {
     const [otpSent, setOtpSent] = useState(false);
     const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
 
+    useEffect(() => {
+        localStorage.removeItem("superAdminUser");
+    }, []);
+
     // Check if user is already logged in
     useEffect(() => {
         const managerUser = JSON.parse(localStorage.getItem('managerUser') || '{}');
@@ -1405,6 +1409,8 @@ const EmployeeLogin = () => {
         if (managerUser.role === 'manager') {
             navigate('/manager-dashboard', { replace: true });
         } else if (storeUser.role === 'store') {
+            navigate('/store', { replace: true });
+        } else if (storeUser.role === 'butcher') {
             navigate('/store', { replace: true });
         }
     }, [navigate]);
@@ -1543,7 +1549,7 @@ const EmployeeLogin = () => {
             // Use openScreen if provided, otherwise use role-based path
             console.log("🚀 ~ handleLogin ~ responseData.openScreen:", responseData.openScreen)
             if (responseData.openScreen) {
-            
+
 
                 // Map openScreen values to actual routes
                 if (responseData.openScreen === 'manager') {

@@ -3,6 +3,7 @@ import { lazy } from 'react';
 import type { AppRoute } from './types';
 import LiveOrders3 from '../pages/Manager/live/LiveOrders3';
 import StoreProfile from '../pages/Vendor/StoreProfile';
+import LiveOrdersPage from '../pages/Manager/live/LiveOrdersPage';
 
 // Lazy-loaded components
 const LiveOrders2 = lazy(() => import('../pages/Manager/live/LiveOrders2'));
@@ -30,7 +31,8 @@ export const storeRoutes: AppRoute[] = [
   },
   {
     path: '/store/front-desk',
-    element: <LiveOrders3 />,
+    element: <LiveOrdersPage />,
+    // element: <LiveOrders3 />,
     layout: 'blank',
     role: 'store',
   },

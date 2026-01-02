@@ -11,13 +11,13 @@ import Cookies from "js-cookie";
 const AdminLogin = () => {
   const navigate = useNavigate();
 
-  // Check if user is already logged in
-  // useEffect(() => {
-  //   const user = JSON.parse(localStorage.getItem('superAdminUser') || '{}');
-  //   if (user.role === 'super-admin') {
-  //     navigate('/super-admin');
-  //   }
-  // }, [navigate]);
+  useEffect(() => {
+    const adminUser = JSON.parse(localStorage.getItem('superAdminUser') || '{}');
+
+    if (adminUser.role === 'super-admin') {
+      navigate('/super-admin/dashboard', { replace: true });
+    }
+  }, [navigate])
 
   const [formData, setFormData] = useState({
     email: '',
