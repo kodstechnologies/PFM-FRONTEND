@@ -33,7 +33,7 @@ jobs:
             export NODE_OPTIONS="--max-old-space-size=4096"
 
             echo "📦 Installing dependencies"
-            npm install
+            npm install --production
 
             echo "🧹 Cleaning previous build"
             rm -rf dist
