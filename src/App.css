@@ -1,20 +1,42 @@
 .color_1 {
-background-color: #ffffff;
-/* background-color: #0E1726; */
-color: #374151;
--webkit-font-smoothing: antialiased;
--moz-osx-font-smoothing: grayscale;
+    background-color: #ffffff;
+    /* background-color: #0E1726; */
+    color: #374151;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 /* Browser compatibility fixes */
 .sidebar {
--webkit-transform: translateZ(0);
-transform: translateZ(0);
--webkit-backface-visibility: hidden;
-backface-visibility: hidden;
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
 }
 
 .sidebar * {
--webkit-transform: translateZ(0);
-transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+}
+
+@media print {
+    .print:hidden {
+        display: none !important;
+    }
+
+    .hidden.print\:block {
+        display: block !important;
+    }
+
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+    }
+
+    .print-only {
+        page-break-inside: avoid;
+        width: 100%;
+        max-width: 8.5in;
+        /* Letter size */
+    }
 }

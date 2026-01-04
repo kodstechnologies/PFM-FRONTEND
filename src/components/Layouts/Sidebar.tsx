@@ -45,6 +45,8 @@ import InventoryIcon from '@mui/icons-material/Inventory';
 import GradingIcon from '@mui/icons-material/Grading';
 import DashboardCustomizeSharpIcon from '@mui/icons-material/DashboardCustomizeSharp';
 import BadgeIcon from '@mui/icons-material/Badge';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import TextFieldsIcon from '@mui/icons-material/TextFields';
 
 const Sidebar = () => {
     const [currentMenu, setCurrentMenu] = useState<string>('');
@@ -209,6 +211,30 @@ const Sidebar = () => {
                                                     />
                                                     <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">
                                                         {t('All employe')}
+                                                    </span>
+                                                </div>
+                                            </NavLink>
+                                        </li>
+                                        <li className="nav-item">
+                                            <NavLink to="/text" className="group">
+                                                <div className="flex items-center">
+                                                    <TextFieldsIcon
+                                                        className="!text-black group-hover:!text-[#f47c7c] shrink-0"
+                                                    />
+                                                    <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">
+                                                        {t('Home Text')}
+                                                    </span>
+                                                </div>
+                                            </NavLink>
+                                        </li>
+                                        <li className="nav-item">
+                                            <NavLink to="/time" className="group">
+                                                <div className="flex items-center">
+                                                    <AccessTimeIcon
+                                                        className="!text-black group-hover:!text-[#f47c7c] shrink-0"
+                                                    />
+                                                    <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">
+                                                        {t('Time Context')}
                                                     </span>
                                                 </div>
                                             </NavLink>

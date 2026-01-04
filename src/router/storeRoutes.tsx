@@ -4,6 +4,7 @@ import type { AppRoute } from './types';
 import LiveOrders3 from '../pages/Manager/live/LiveOrders3';
 import StoreProfile from '../pages/Vendor/StoreProfile';
 import LiveOrdersPage from '../pages/Manager/live/LiveOrdersPage';
+import LiveOrdersPageNoBtn from '../pages/Manager/live/LiveOrdersPageNoBtn';
 
 // Lazy-loaded components
 const LiveOrders2 = lazy(() => import('../pages/Manager/live/LiveOrders2'));
@@ -25,7 +26,8 @@ export const storeRoutes: AppRoute[] = [
   },
   {
     path: '/store/live-orders',
-    element: <LiveOrders2 />,
+    element: <LiveOrdersPageNoBtn />,
+    // element: <LiveOrders2 />,
     layout: 'blank',
     role: 'store',
   },
