@@ -10,6 +10,9 @@ import Inventory from '../pages/Manager/Inventory';
 import InventoryTypes from '../pages/Manager/InventoryTypes';
 import InventorySubCategories from '../pages/Manager/InventorySubCategories';
 import EditPartner from '../pages/Manager/DeliveryPartner/EditPartner';
+import ViewEmployee from '../pages/Manager/employee/View';
+import AddEmployee from '../pages/Manager/employee/Add';
+import EditEmployee from '../pages/Manager/employee/Edit';
 
 const AddPartner = lazy(() => import('../pages/Manager/DeliveryPartner/AddPartner'));
 const PartnerDetails = lazy(() => import('../pages/Manager/DeliveryPartner/PartnerDetails'));
@@ -23,7 +26,7 @@ export const managerRoutes: AppRoute[] = [
     layout: 'default',
     role: 'manager',
   },
-  { 
+  {
     path: '/manager',
     element: <Navigate to="/manager-dashboard" replace />,
     layout: 'default',
@@ -93,6 +96,30 @@ export const managerRoutes: AppRoute[] = [
   {
     path: '/manager/delivery-partner/edit/:id',
     element: <EditPartner />,
+    layout: 'default',
+    role: 'manager',
+  },
+  {
+    path: '/manager/print-qr/:orderId',
+    element: <PrintQR />,
+    layout: 'blank',
+    role: 'manager',
+  },
+  {
+    path: '/manager/employee',
+    element: <ViewEmployee />,
+    layout: 'default',
+    role: 'manager',
+  },
+  {
+    path: '/manager/employee/add',
+    element: <AddEmployee />,
+    layout: 'default',
+    role: 'manager',
+  },
+  {
+    path: '/manager/employee/:id',
+    element: <EditEmployee />,
     layout: 'default',
     role: 'manager',
   },

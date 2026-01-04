@@ -143,6 +143,7 @@
 
 import React from "react";
 import OrderCard from "./OrderCard"; // Adjust path as needed
+import MOrderCard from "./MOrderCard";
 
 /* ================= TYPES ================= */
 export type OrderStatus = "new" | "preparing" | "awaiting-pickup";
@@ -199,8 +200,8 @@ const OrderColumn: React.FC<Props> = ({
                     </div>
                 ) : (
                     orders.map((order) => (
-                        <OrderCard
-                            key={order.id}
+                        <MOrderCard
+                            key={order.id}      
                             order={order}
                             isManager={isManager}
                             onNext={onNext}

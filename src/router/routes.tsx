@@ -5,6 +5,7 @@ import NotFoundPage from '../pages/NotFoundPage';
 import UserLogin from '../pages/UserLogin';
 import RazorpayTest from '../pages/Demo';
 import EmployeeLogin from '../pages/EmployeeLogin';
+import PrintQR from '../components/PrintQR';
 
 const UserPrivacyPolicy = lazy(() => import('../pages/privacyPolicy/UserPrivacyPolicy'));
 const DeliveryPartnerPrivacyPolicy = lazy(() => import('../pages/privacyPolicy/DeliveryPartnerPrivacyPolicy'));
@@ -95,6 +96,12 @@ export const commonRoutes: AppRoute[] = [
     path: '/demo',
     element: <RazorpayTest />,
     layout: 'blank', // Custom prop used by your app to apply a specific layout or no layout
+  },
+  {
+    path: '/print-qr/:orderId',
+    element: <PrintQR />,
+    layout: 'blank',
+    role: 'store',
   },
 
 ];
