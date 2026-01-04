@@ -25,6 +25,8 @@ interface SubCategory {
     type: string[];
     quality: string;
     unit: string;
+    weight: number;
+    pieces: number;
     serves: number;
     totalEnergy: number;
     carbohydrate: number;
@@ -34,6 +36,11 @@ interface SubCategory {
     img?: string;
     price: number;
     discount: number;
+    discountPrice?: number;
+    isCommingSoon?: boolean;
+    bestSellers: boolean;
+    available: boolean;
+    quantity: any[];
 }
 
 interface FormInputs {
@@ -51,6 +58,7 @@ interface FormInputs {
     subCategoryImage: FileList | null;
     price: string;
     discount: string;
+    isCommingSoon?: boolean; // Optional for now
 }
 
 interface UserData {
@@ -81,6 +89,7 @@ const SubCategoriesAdd: React.FC = () => {
             subCategoryImage: null,
             price: '',
             discount: '',
+            isCommingSoon: false,
         },
     });
 
@@ -191,6 +200,7 @@ const SubCategoriesAdd: React.FC = () => {
             }
             formData.append('price', data.price);
             formData.append('discount', data.discount);
+            // isCommingSoon defaults to false in backend if not sent
 
             const response: AxiosResponse<ApiResponse<SubCategory>> = await callApi(
                 `/admin/sub-product-categories/${typeId}`,
@@ -297,7 +307,7 @@ const SubCategoriesAdd: React.FC = () => {
                         </div>
 
                         {/* Types */}
-                        <div>
+                        <div className={types.length === 0 ? 'border border-red-300 rounded p-2' : ''}>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
                                 Types *
                             </label>
@@ -313,24 +323,27 @@ const SubCategoriesAdd: React.FC = () => {
                                 <button
                                     type="button"
                                     onClick={handleAddType}
-                                    className="px-3 py-2 bg-blue-500 text-white rounded-lg"
+                                    className="px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
                                 >
                                     Add
                                 </button>
                             </div>
+                            {types.length === 0 && (
+                                <p className="mt-1 text-xs text-red-600">At least one type is required</p>
+                            )}
                             <div className="flex flex-wrap gap-2">
                                 {types.map((type) => (
                                     <span
                                         key={type}
-                                        className="bg-gray-200 px-3 py-1 rounded-full flex items-center gap-1"
+                                        className="bg-gray-200 px-3 py-1 rounded-full flex items-center gap-1 text-sm"
                                     >
                                         {type}
                                         <button
                                             type="button"
                                             onClick={() => handleRemoveType(type)}
-                                            className="text-red-500 font-bold"
+                                            className="text-red-500 font-bold hover:text-red-700"
                                         >
-                                            x
+                                            ×
                                         </button>
                                     </span>
                                 ))}
@@ -429,6 +442,7 @@ const SubCategoriesAdd: React.FC = () => {
                             <input
                                 id="serves"
                                 type="number"
+                                min="1"
                                 {...register('serves', {
                                     required: 'Serves is required',
                                     min: { value: 1, message: 'Serves must be at least 1' },
@@ -455,6 +469,7 @@ const SubCategoriesAdd: React.FC = () => {
                             <input
                                 id="totalEnergy"
                                 type="number"
+                                min="0"
                                 {...register('totalEnergy', {
                                     required: 'Total energy is required',
                                     min: { value: 0, message: 'Total energy must be at least 0' },
@@ -481,6 +496,7 @@ const SubCategoriesAdd: React.FC = () => {
                             <input
                                 id="carbohydrate"
                                 type="number"
+                                min="0"
                                 {...register('carbohydrate', {
                                     required: 'Carbohydrate is required',
                                     min: { value: 0, message: 'Carbohydrate must be at least 0' },
@@ -507,6 +523,7 @@ const SubCategoriesAdd: React.FC = () => {
                             <input
                                 id="fat"
                                 type="number"
+                                min="0"
                                 {...register('fat', {
                                     required: 'Fat is required',
                                     min: { value: 0, message: 'Fat must be at least 0' },
@@ -533,6 +550,7 @@ const SubCategoriesAdd: React.FC = () => {
                             <input
                                 id="protein"
                                 type="number"
+                                min="0"
                                 {...register('protein', {
                                     required: 'Protein is required',
                                     min: { value: 0, message: 'Protein must be at least 0' },
@@ -585,6 +603,7 @@ const SubCategoriesAdd: React.FC = () => {
                             <input
                                 id="price"
                                 type="number"
+                                min="0"
                                 {...register('price', {
                                     required: 'Price is required',
                                     min: { value: 0, message: 'Price must be at least 0' },
@@ -611,6 +630,8 @@ const SubCategoriesAdd: React.FC = () => {
                             <input
                                 id="discount"
                                 type="number"
+                                min="0"
+                                max="100"
                                 {...register('discount', {
                                     required: 'Discount is required',
                                     min: { value: 0, message: 'Discount must be at least 0%' },
@@ -627,6 +648,18 @@ const SubCategoriesAdd: React.FC = () => {
                             )}
                         </div>
 
+                        {/* Coming Soon Checkbox (Optional) */}
+                        <div>
+                            <label className="flex items-center text-sm font-medium text-gray-700">
+                                <input
+                                    type="checkbox"
+                                    {...register('isCommingSoon')}
+                                    className="mr-2 h-4 w-4 text-blue-600 focus:ring-blue-300 border-gray-300 rounded"
+                                />
+                                Mark as Coming Soon
+                            </label>
+                        </div>
+
                         {/* Subcategory Image Upload */}
                         <div>
                             <label
@@ -640,13 +673,8 @@ const SubCategoriesAdd: React.FC = () => {
                                 type="file"
                                 accept="image/*"
                                 {...register('subCategoryImage')}
-                                className={`block w-full px-3 py-2 border rounded-lg text-sm cursor-pointer focus:outline-none ${errors.subCategoryImage ? 'border-red-400' : 'border-gray-300'}`}
+                                className="block w-full px-3 py-2 border rounded-lg text-sm cursor-pointer focus:outline-none border-gray-300"
                             />
-                            {errors.subCategoryImage && (
-                                <p className="mt-1 text-xs text-red-600" role="alert">
-                                    {errors.subCategoryImage.message}
-                                </p>
-                            )}
 
                             {/* Image Preview */}
                             {preview && (

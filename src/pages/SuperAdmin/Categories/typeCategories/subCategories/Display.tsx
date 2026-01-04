@@ -363,7 +363,7 @@ const SubCategoriesDisplay: React.FC = () => {
                                         {item.discount && item.discount > 0 && (
                                             <span className="text-green-600 text-xs">Save {item.discount}%</span>
                                         )}
-                                        <div className="text-xs">{getQuantity(item)}</div>
+                                        {/* <div className="text-xs">{getQuantity(item)}</div> */}
                                     </div>
                                     <div className="flex items-center gap-2 justify-between">
                                         <div className="flex items-center gap-2 flex-wrap">
