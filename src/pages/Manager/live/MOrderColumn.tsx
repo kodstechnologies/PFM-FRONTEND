@@ -35,7 +35,7 @@ interface Props {
 }
 
 /* ================= COMPONENT ================= */
-const OrderColumn: React.FC<Props> = ({
+const MOrderColumn: React.FC<Props> = ({
     title,
     orders,
     isManager,
@@ -59,7 +59,7 @@ const OrderColumn: React.FC<Props> = ({
                     </div>
                 ) : (
                     orders.map((order) => (
-                        <OrderCard
+                        <MOrderCard
                             key={order.id}
                             order={order}
                             isManager={isManager}
@@ -75,4 +75,4 @@ const OrderColumn: React.FC<Props> = ({
     );
 };
 
-export default OrderColumn;
+export default MOrderColumn;

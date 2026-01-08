@@ -1,567 +1,3 @@
-
-
-
-// // // // import React, { useEffect, useState } from "react";
-// // // // import { useNavigate, useParams } from "react-router-dom";
-// // // // import { toast } from "react-hot-toast";
-// // // // import { callApi } from "../../../util/admin_api";
-
-// // // // /* ================= TYPES ================= */
-
-// // // // interface Employee {
-// // // //     _id: string;
-// // // //     firstName: string;
-// // // //     lastName: string;
-// // // //     phone: string;
-// // // //     role: string;
-// // // //     isActive: boolean;
-// // // // }
-
-// // // // /* ================= COMPONENT ================= */
-
-// // // // const EditEmployee: React.FC = () => {
-// // // //     const { id } = useParams<{ id: string }>();
-// // // //     const navigate = useNavigate();
-
-// // // //     const [employee, setEmployee] = useState<Employee | null>(null);
-// // // //     const [loading, setLoading] = useState(false);
-
-// // // //     /* ================= FETCH EMPLOYEE ================= */
-
-// // // //     const fetchEmployee = async () => {
-// // // //         if (!id) return;
-
-// // // //         try {
-// // // //             setLoading(true);
-
-// // // //             const res = await callApi({
-// // // //                 method: "GET",
-// // // //                 endpoint: `/employee/${id}`,
-// // // //             });
-
-// // // //             console.log("🚀 Employee Fetch Response:", res);
-
-// // // //             if (res?.data) {
-// // // //                 setEmployee(res.data);
-// // // //             } else {
-// // // //                 throw new Error("Invalid response data");
-// // // //             }
-// // // //         } catch (err: any) {
-// // // //             console.error("Fetch employee error:", err);
-// // // //             toast.error(err.message || "Unable to load employee");
-// // // //             // Optionally navigate back on error
-// // // //             // navigate("/manager/employee");
-// // // //         } finally {
-// // // //             setLoading(false);
-// // // //         }
-// // // //     };
-
-// // // //     /* ================= UPDATE EMPLOYEE ================= */
-
-// // // //     const updateEmployee = async () => {
-// // // //         if (!employee) return;
-
-// // // //         try {
-// // // //             setLoading(true);
-
-// // // //             const res = await callApi({
-// // // //                 method: "PATCH",
-// // // //                 endpoint: `/employee/${id}`,
-// // // //                 body: {
-// // // //                     firstName: employee.firstName,
-// // // //                     lastName: employee.lastName,
-// // // //                     phone: employee.phone,
-// // // //                     role: employee.role,
-// // // //                     isActive: employee.isActive,
-// // // //                 },
-// // // //             });
-
-// // // //             if (!res?.data?.success) {
-// // // //                 throw new Error(res?.data?.message || "Update failed");
-// // // //             }
-
-// // // //             toast.success("Employee updated successfully");
-
-// // // //             // ✅ Redirect after update
-// // // //             navigate("/manager/employee");
-// // // //         } catch (err: any) {
-// // // //             console.error("Update employee error:", err);
-// // // //             toast.error(err.message || "Update failed");
-// // // //         } finally {
-// // // //             setLoading(false);
-// // // //         }
-// // // //     };
-
-// // // //     /* ================= INIT ================= */
-
-// // // //     useEffect(() => {
-// // // //         console.log("🚀 ~ EditEmployee ~ id:", id);
-// // // //         if (id) {
-// // // //             fetchEmployee();
-// // // //         }
-// // // //     }, [id]);
-
-// // // //     /* ================= UI ================= */
-
-// // // //     if (loading) {
-// // // //         return <div className="p-4">Loading employee...</div>;
-// // // //     }
-
-// // // //     if (!employee) {
-// // // //         return <div className="p-4">Employee not found or error loading data.</div>;
-// // // //     }
-
-// // // //     return (
-// // // //         <div className="max-w-xl p-4 space-y-4">
-// // // //             <h2 className="text-xl font-semibold">Edit Employee</h2>
-
-// // // //             <input
-// // // //                 type="text"
-// // // //                 className="w-full border p-2 rounded"
-// // // //                 placeholder="First Name"
-// // // //                 value={employee.firstName}
-// // // //                 onChange={(e) =>
-// // // //                     setEmployee({ ...employee, firstName: e.target.value })
-// // // //                 }
-// // // //             />
-
-// // // //             <input
-// // // //                 type="text"
-// // // //                 className="w-full border p-2 rounded"
-// // // //                 placeholder="Last Name"
-// // // //                 value={employee.lastName}
-// // // //                 onChange={(e) =>
-// // // //                     setEmployee({ ...employee, lastName: e.target.value })
-// // // //                 }
-// // // //             />
-
-// // // //             <input
-// // // //                 type="text"
-// // // //                 className="w-full border p-2 rounded"
-// // // //                 placeholder="Phone"
-// // // //                 value={employee.phone}
-// // // //                 onChange={(e) =>
-// // // //                     setEmployee({ ...employee, phone: e.target.value })
-// // // //                 }
-// // // //             />
-
-// // // //             <select
-// // // //                 className="w-full border p-2 rounded"
-// // // //                 value={employee.role}
-// // // //                 onChange={(e) =>
-// // // //                     setEmployee({ ...employee, role: e.target.value })
-// // // //                 }
-// // // //             >
-// // // //                 <option value="ACCOUNTANT">Accountant</option>
-// // // //                 <option value="BUTCHER">Butcher</option>
-// // // //                 <option value="SALESMAN">Salesman</option>
-// // // //                 <option value="CLEANER">Cleaner</option>
-// // // //             </select>
-
-// // // //             <label className="flex items-center gap-2">
-// // // //                 <input
-// // // //                     type="checkbox"
-// // // //                     checked={employee.isActive}
-// // // //                     onChange={(e) =>
-// // // //                         setEmployee({ ...employee, isActive: e.target.checked })
-// // // //                     }
-// // // //                 />
-// // // //                 Active
-// // // //             </label>
-
-// // // //             <button
-// // // //                 onClick={updateEmployee}
-// // // //                 disabled={loading}
-// // // //                 className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded disabled:opacity-50"
-// // // //             >
-// // // //                 {loading ? "Updating..." : "Update Employee"}
-// // // //             </button>
-// // // //         </div>
-// // // //     );
-// // // // };
-
-// // // // export default EditEmployee;
-
-// // // import React, { useEffect, useState } from "react";
-// // // import { useNavigate, useParams } from "react-router-dom";
-// // // import { toast } from "react-hot-toast";
-// // // import { callApi } from "../../../util/admin_api";
-
-// // // /* ================= TYPES ================= */
-
-// // // interface Employee {
-// // //     _id: string;
-// // //     firstName: string;
-// // //     lastName: string;
-// // //     phone: string;
-// // //     role: string;
-// // //     isActive: boolean;
-// // // }
-
-// // // /* ================= COMPONENT ================= */
-
-// // // const EditEmployee: React.FC = () => {
-// // //     const { id } = useParams<{ id: string }>();
-// // //     const navigate = useNavigate();
-
-// // //     const [employee, setEmployee] = useState<Employee | null>(null);
-// // //     const [loading, setLoading] = useState(false);
-
-// // //     /* ================= FETCH EMPLOYEE ================= */
-
-// // //     const fetchEmployee = async () => {
-// // //         if (!id) return;
-
-// // //         try {
-// // //             setLoading(true);
-
-// // //             const res = await callApi({
-// // //                 method: "GET",
-// // //                 endpoint: `/employee/${id}`,
-// // //             });
-
-// // //             console.log("🚀 Employee Fetch Response:", res);
-
-// // //             if (res?.data) {
-// // //                 setEmployee(res.data);
-// // //             } else {
-// // //                 throw new Error("Invalid response data");
-// // //             }
-// // //         } catch (err: any) {
-// // //             console.error("Fetch employee error:", err);
-// // //             toast.error(err.message || "Unable to load employee");
-// // //             // Optionally navigate back on error
-// // //             // navigate("/manager/employee");
-// // //         } finally {
-// // //             setLoading(false);
-// // //         }
-// // //     };
-
-// // //     /* ================= UPDATE EMPLOYEE ================= */
-
-// // //     const updateEmployee = async () => {
-// // //         if (!employee) return;
-
-// // //         try {
-// // //             setLoading(true);
-
-// // //             const res = await callApi({
-// // //                 method: "PATCH",
-// // //                 endpoint: `/employee/${id}`,
-// // //                 body: {
-// // //                     firstName: employee.firstName,
-// // //                     lastName: employee.lastName,
-// // //                     phone: employee.phone,
-// // //                     role: employee.role,
-// // //                     isActive: employee.isActive,
-// // //                 },
-// // //             });
-
-// // //             if (!res?.data?.success) {
-// // //                 throw new Error(res?.data?.message || "Update failed");
-// // //             }
-
-// // //             toast.success("Employee updated successfully");
-
-// // //             // ✅ Redirect after update
-// // //             navigate("/manager/employee");
-// // //         } catch (err: any) {
-// // //             console.error("Update employee error:", err);
-// // //             toast.error(err.message || "Update failed");
-// // //         } finally {
-// // //             setLoading(false);
-// // //         }
-// // //     };
-
-// // //     /* ================= INIT ================= */
-
-// // //     useEffect(() => {
-// // //         console.log("🚀 ~ EditEmployee ~ id:", id);
-// // //         if (id) {
-// // //             fetchEmployee();
-// // //         }
-// // //     }, [id]);
-
-// // //     /* ================= UI ================= */
-
-// // //     if (loading) {
-// // //         return <div className="p-4">Loading employee...</div>;
-// // //     }
-
-// // //     if (!employee) {
-// // //         return <div className="p-4">Employee not found or error loading data.</div>;
-// // //     }
-
-// // //     return (
-// // //         <div className="max-w-xl p-4 space-y-4">
-// // //             <h2 className="text-xl font-semibold">Edit Employee</h2>
-
-// // //             <input
-// // //                 type="text"
-// // //                 className="w-full border p-2 rounded"
-// // //                 placeholder="First Name"
-// // //                 value={employee.firstName}
-// // //                 onChange={(e) =>
-// // //                     setEmployee({ ...employee, firstName: e.target.value })
-// // //                 }
-// // //             />
-
-// // //             <input
-// // //                 type="text"
-// // //                 className="w-full border p-2 rounded"
-// // //                 placeholder="Last Name"
-// // //                 value={employee.lastName}
-// // //                 onChange={(e) =>
-// // //                     setEmployee({ ...employee, lastName: e.target.value })
-// // //                 }
-// // //             />
-
-// // //             <input
-// // //                 type="text"
-// // //                 className="w-full border p-2 rounded"
-// // //                 placeholder="Phone"
-// // //                 value={employee.phone}
-// // //                 onChange={(e) =>
-// // //                     setEmployee({ ...employee, phone: e.target.value })
-// // //                 }
-// // //             />
-
-// // //             <select
-// // //                 className="w-full border p-2 rounded"
-// // //                 value={employee.role}
-// // //                 onChange={(e) =>
-// // //                     setEmployee({ ...employee, role: e.target.value })
-// // //                 }
-// // //             >
-// // //                 <option value="ACCOUNTANT">Accountant</option>
-// // //                 <option value="BUTCHER">Butcher</option>
-// // //                 <option value="SALESMAN">Salesman</option>
-// // //                 <option value="CLEANER">Cleaner</option>
-// // //             </select>
-
-// // //             <label className="flex items-center gap-2">
-// // //                 <input
-// // //                     type="checkbox"
-// // //                     checked={employee.isActive}
-// // //                     onChange={(e) =>
-// // //                         setEmployee({ ...employee, isActive: e.target.checked })
-// // //                     }
-// // //                 />
-// // //                 Active
-// // //             </label>
-
-// // //             <button
-// // //                 onClick={updateEmployee}
-// // //                 disabled={loading}
-// // //                 className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded disabled:opacity-50"
-// // //             >
-// // //                 {loading ? "Updating..." : "Update Employee"}
-// // //             </button>
-// // //         </div>
-// // //     );
-// // // };
-
-// // // export default EditEmployee;
-
-// // import React, { useEffect, useState } from "react";
-// // import { useNavigate, useParams } from "react-router-dom";
-// // import { toast } from "react-hot-toast";
-// // import { callApi } from "../../../util/admin_api";
-
-// // /* ================= TYPES ================= */
-
-// // interface Employee {
-// //     _id: string;
-// //     firstName: string;
-// //     lastName: string;
-// //     phone: string;
-// //     role: string;
-// //     isActive: boolean;
-// // }
-
-// // /* ================= COMPONENT ================= */
-
-// // const EditEmployee: React.FC = () => {
-// //     const { id } = useParams<{ id: string }>();
-// //     const navigate = useNavigate();
-
-// //     const [employee, setEmployee] = useState<Employee | null>(null);
-// //     const [loading, setLoading] = useState(false);
-
-// //     /* ================= FETCH EMPLOYEE ================= */
-
-// //     const fetchEmployee = async () => {
-// //         if (!id) return;
-
-// //         try {
-// //             setLoading(true);
-
-// //             const res = await fetch(`${callApi}/api/employee/${id}`, {
-// //                 method: "GET",
-// //                 headers: {
-// //                     "Content-Type": "application/json",
-// //                     // Add auth header if needed, e.g., Authorization: `Bearer ${token}`
-// //                 },
-// //             });
-
-// //             if (!res.ok) {
-// //                 throw new Error(`HTTP error! status: ${res.status}`);
-// //             }
-
-// //             const data = await res.json();
-// //             console.log("🚀 Employee Fetch Response:", data);
-
-// //             if (data?.data) {
-// //                 setEmployee(data.data);
-// //             } else {
-// //                 throw new Error("Invalid response data");
-// //             }
-// //         } catch (err: any) {
-// //             console.error("Fetch employee error:", err);
-// //             toast.error(err.message || "Unable to load employee");
-// //             // Optionally navigate back on error
-// //             // navigate("/manager/employee");
-// //         } finally {
-// //             setLoading(false);
-// //         }
-// //     };
-
-// //     /* ================= UPDATE EMPLOYEE ================= */
-
-// //     const updateEmployee = async () => {
-// //         if (!employee) return;
-
-// //         try {
-// //             setLoading(true);
-
-// //             const res = await fetch(`/employee/${id}`, {
-// //                 method: "PATCH",
-// //                 headers: {
-// //                     "Content-Type": "application/json",
-// //                     // Add auth header if needed, e.g., Authorization: `Bearer ${token}`
-// //                 },
-// //                 body: JSON.stringify({
-// //                     firstName: employee.firstName,
-// //                     lastName: employee.lastName,
-// //                     phone: employee.phone,
-// //                     role: employee.role,
-// //                     isActive: employee.isActive,
-// //                 }),
-// //             });
-
-// //             if (!res.ok) {
-// //                 const errorData = await res.json();
-// //                 throw new Error(errorData?.message || `HTTP error! status: ${res.status}`);
-// //             }
-
-// //             const data = await res.json();
-
-// //             if (!data?.success) {
-// //                 throw new Error(data?.message || "Update failed");
-// //             }
-
-// //             toast.success("Employee updated successfully");
-
-// //             // ✅ Redirect after update
-// //             navigate("/manager/employee");
-// //         } catch (err: any) {
-// //             console.error("Update employee error:", err);
-// //             toast.error(err.message || "Update failed");
-// //         } finally {
-// //             setLoading(false);
-// //         }
-// //     };
-
-// //     /* ================= INIT ================= */
-
-// //     useEffect(() => {
-// //         console.log("🚀 ~ EditEmployee ~ id:", id);
-// //         if (id) {
-// //             fetchEmployee();
-// //         }
-// //     }, [id]);
-
-// //     /* ================= UI ================= */
-
-// //     if (loading) {
-// //         return <div className="p-4">Loading employee...</div>;
-// //     }
-
-// //     if (!employee) {
-// //         return <div className="p-4">Employee not found or error loading data.</div>;
-// //     }
-
-// //     return (
-// //         <div className="max-w-xl p-4 space-y-4">
-// //             <h2 className="text-xl font-semibold">Edit Employee</h2>
-
-// //             <input
-// //                 type="text"
-// //                 className="w-full border p-2 rounded"
-// //                 placeholder="First Name"
-// //                 value={employee.firstName}
-// //                 onChange={(e) =>
-// //                     setEmployee({ ...employee, firstName: e.target.value })
-// //                 }
-// //             />
-
-// //             <input
-// //                 type="text"
-// //                 className="w-full border p-2 rounded"
-// //                 placeholder="Last Name"
-// //                 value={employee.lastName}
-// //                 onChange={(e) =>
-// //                     setEmployee({ ...employee, lastName: e.target.value })
-// //                 }
-// //             />
-
-// //             <input
-// //                 type="text"
-// //                 className="w-full border p-2 rounded"
-// //                 placeholder="Phone"
-// //                 value={employee.phone}
-// //                 onChange={(e) =>
-// //                     setEmployee({ ...employee, phone: e.target.value })
-// //                 }
-// //             />
-
-// //             <select
-// //                 className="w-full border p-2 rounded"
-// //                 value={employee.role}
-// //                 onChange={(e) =>
-// //                     setEmployee({ ...employee, role: e.target.value })
-// //                 }
-// //             >
-// //                 <option value="ACCOUNTANT">Accountant</option>
-// //                 <option value="BUTCHER">Butcher</option>
-// //                 <option value="SALESMAN">Salesman</option>
-// //                 <option value="CLEANER">Cleaner</option>
-// //             </select>
-
-// //             <label className="flex items-center gap-2">
-// //                 <input
-// //                     type="checkbox"
-// //                     checked={employee.isActive}
-// //                     onChange={(e) =>
-// //                         setEmployee({ ...employee, isActive: e.target.checked })
-// //                     }
-// //                 />
-// //                 Active
-// //             </label>
-
-// //             <button
-// //                 onClick={updateEmployee}
-// //                 disabled={loading}
-// //                 className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded disabled:opacity-50"
-// //             >
-// //                 {loading ? "Updating..." : "Update Employee"}
-// //             </button>
-// //         </div>
-// //     );
-// // };
-
-// // export default EditEmployee;
-
 // import React, { useEffect, useState } from "react";
 // import { useNavigate, useParams } from "react-router-dom";
 // import { toast } from "react-hot-toast";
@@ -587,7 +23,7 @@
 //     const [employee, setEmployee] = useState<Employee | null>(null);
 //     const [loading, setLoading] = useState(false);
 
-//     /* ================= FETCH EMPLOYEE ================= */
+//     /* ================= FETCH ================= */
 
 //     const fetchEmployee = async () => {
 //         if (!id) return;
@@ -600,27 +36,23 @@
 //                 endpoint: `/employee/${id}`,
 //             });
 
-//             console.log("🚀 Employee Fetch Response:", res);
+//             console.log("🚀 Employee Fetch Response:", res.data);
 
-//             if (res?.data) {
-//                 setEmployee(res.data);
-//             } else {
-//                 throw new Error("Invalid response data");
-//             }
+//             setEmployee(res.data); // ✅ DIRECT OBJECT
 //         } catch (err: any) {
 //             console.error("Fetch employee error:", err);
-//             toast.error(err.message || "Unable to load employee");
-//             // Optionally navigate back on error
-//             // navigate("/manager/employee");
+//             toast.error("Unable to load employee");
 //         } finally {
 //             setLoading(false);
 //         }
 //     };
 
-//     /* ================= UPDATE EMPLOYEE ================= */
+//     /* ================= UPDATE ================= */
 
 //     const updateEmployee = async () => {
 //         if (!employee) return;
+
+//         console.log("🚀 Sending update payload:", employee);
 
 //         try {
 //             setLoading(true);
@@ -628,7 +60,7 @@
 //             const res = await callApi({
 //                 method: "PATCH",
 //                 endpoint: `/employee/${id}`,
-//                 body: {
+//                 data: {
 //                     firstName: employee.firstName,
 //                     lastName: employee.lastName,
 //                     phone: employee.phone,
@@ -637,210 +69,18 @@
 //                 },
 //             });
 
-//             if (!res?.data?.success) {
-//                 throw new Error(res?.data?.message || "Update failed");
-//             }
+//             console.log("🚀 Update response:", res.data);
 
+//             setEmployee(res.data); // ✅ DIRECT OBJECT
 //             toast.success("Employee updated successfully");
 
-//             // ✅ Redirect after update
-//             navigate("/manager/employee");
-//         } catch (err: any) {
-//             console.error("Update employee error:", err);
-//             toast.error(err.message || "Update failed");
-//         } finally {
-//             setLoading(false);
-//         }
-//     };
-
-//     /* ================= INIT ================= */
-
-//     useEffect(() => {
-//         console.log("🚀 ~ EditEmployee ~ id:", id);
-//         if (id) {
-//             fetchEmployee();
-//         }
-//     }, [id]);
-
-//     /* ================= UI ================= */
-
-//     if (loading) {
-//         return <div className="p-4">Loading employee...</div>;
-//     }
-
-//     if (!employee) {
-//         return <div className="p-4">Employee not found or error loading data.</div>;
-//     }
-
-//     return (
-//         <div className="max-w-xl p-4 space-y-4">
-//             <h2 className="text-xl font-semibold">Edit Employee</h2>
-
-//             <input
-//                 type="text"
-//                 className="w-full border p-2 rounded"
-//                 placeholder="First Name"
-//                 value={employee.firstName}
-//                 onChange={(e) =>
-//                     setEmployee({ ...employee, firstName: e.target.value })
-//                 }
-//             />
-
-//             <input
-//                 type="text"
-//                 className="w-full border p-2 rounded"
-//                 placeholder="Last Name"
-//                 value={employee.lastName}
-//                 onChange={(e) =>
-//                     setEmployee({ ...employee, lastName: e.target.value })
-//                 }
-//             />
-
-//             <input
-//                 type="text"
-//                 className="w-full border p-2 rounded"
-//                 placeholder="Phone"
-//                 value={employee.phone}
-//                 onChange={(e) =>
-//                     setEmployee({ ...employee, phone: e.target.value })
-//                 }
-//             />
-
-//             <select
-//                 className="w-full border p-2 rounded"
-//                 value={employee.role}
-//                 onChange={(e) =>
-//                     setEmployee({ ...employee, role: e.target.value })
-//                 }
-//             >
-//                 <option value="ACCOUNTANT">Accountant</option>
-//                 <option value="BUTCHER">Butcher</option>
-//                 <option value="SALESMAN">Salesman</option>
-//                 <option value="CLEANER">Cleaner</option>
-//             </select>
-
-//             <label className="flex items-center gap-2">
-//                 <input
-//                     type="checkbox"
-//                     checked={employee.isActive}
-//                     onChange={(e) =>
-//                         setEmployee({ ...employee, isActive: e.target.checked })
-//                     }
-//                 />
-//                 Active
-//             </label>
-
-//             <button
-//                 onClick={updateEmployee}
-//                 disabled={loading}
-//                 className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded disabled:opacity-50"
-//             >
-//                 {loading ? "Updating..." : "Update Employee"}
-//             </button>
-//         </div>
-//     );
-// };
-
-// export default EditEmployee;
-
-// import React, { useEffect, useState } from "react";
-// import { useNavigate, useParams } from "react-router-dom";
-// import { toast } from "react-hot-toast";
-// import { callApi } from "../../../util/admin_api";
-
-// /* ================= TYPES ================= */
-
-// interface Employee {
-//     _id: string;
-//     firstName: string;
-//     lastName: string;
-//     phone: string;
-//     role: string;
-//     isActive: boolean;
-// }
-
-// /* ================= COMPONENT ================= */
-
-// const EditEmployee: React.FC = () => {
-//     const { id } = useParams<{ id: string }>();
-//     const navigate = useNavigate();
-
-//     const [employee, setEmployee] = useState<Employee | null>(null);
-//     const [loading, setLoading] = useState(false);
-
-//     /* ================= FETCH EMPLOYEE ================= */
-
-//     const fetchEmployee = async () => {
-//         if (!id) return;
-
-//         try {
-//             setLoading(true);
-
-//             const res = await callApi({
-//                 method: "GET",
-//                 endpoint: `/employee/${id}`,
-//             });
-
-//             console.log("🚀 Employee Fetch Response:", res);
-
-//             if (res?.data) {
-//                 setEmployee(res.data.data || res.data); // Handle if data is nested or direct
-//             } else {
-//                 throw new Error("Invalid response data");
-//             }
-//         } catch (err: any) {
-//             console.error("Fetch employee error:", err);
-//             toast.error(err.message || "Unable to load employee");
-//             // Optionally navigate back on error
-//             // navigate("/manager/employee");
-//         } finally {
-//             setLoading(false);
-//         }
-//     };
-
-//     /* ================= UPDATE EMPLOYEE ================= */
-
-//     const updateEmployee = async () => {
-//         console.log("🚀 ~ updateEmployee ~ employee:", employee)
-//         if (!employee) return;
-
-//         try {
-//             setLoading(true);
-
-//          const res = await callApi({
-//     method: "PATCH",
-//     endpoint: `/employee/${id}`,
-//     data: {
-//         firstName: employee.firstName,
-//         lastName: employee.lastName,
-//         phone: employee.phone,
-//         role: employee.role,
-//         isActive: employee.isActive,
-//     },
-// });
-
-
-//             console.log("🚀 Update Employee Response:", res); // Debug log
-
-//             if (!res?.data?.success) {
-//                 throw new Error(res?.data?.message || "Update failed");
-//             }
-
-//             // ✅ Update local state with response data to reflect changes immediately
-//             if (res?.data?.data) {
-//                 setEmployee(res.data.data);
-//             }
-
-//             toast.success("Employee updated successfully");
-
-//             // ✅ Optional: Delay navigate to see the update in UI
 //             setTimeout(() => {
 //                 navigate("/manager/employee");
-//             }, 1500); // 1.5s delay to show success and updated form
+//             }, 1000);
 
 //         } catch (err: any) {
 //             console.error("Update employee error:", err);
-//             toast.error(err.message || "Update failed");
+//             toast.error("Update failed");
 //         } finally {
 //             setLoading(false);
 //         }
@@ -849,30 +89,20 @@
 //     /* ================= INIT ================= */
 
 //     useEffect(() => {
-//         console.log("🚀 ~ EditEmployee ~ id:", id);
-//         if (id) {
-//             fetchEmployee();
-//         }
+//         fetchEmployee();
 //     }, [id]);
 
 //     /* ================= UI ================= */
 
-//     if (loading) {
-//         return <div className="p-4">Loading employee...</div>;
-//     }
-
-//     if (!employee) {
-//         return <div className="p-4">Employee not found or error loading data.</div>;
-//     }
+//     if (loading) return <div className="p-4">Loading...</div>;
+//     if (!employee) return <div className="p-4">Employee not found</div>;
 
 //     return (
 //         <div className="max-w-xl p-4 space-y-4">
 //             <h2 className="text-xl font-semibold">Edit Employee</h2>
 
 //             <input
-//                 type="text"
 //                 className="w-full border p-2 rounded"
-//                 placeholder="First Name"
 //                 value={employee.firstName}
 //                 onChange={(e) =>
 //                     setEmployee({ ...employee, firstName: e.target.value })
@@ -880,9 +110,7 @@
 //             />
 
 //             <input
-//                 type="text"
 //                 className="w-full border p-2 rounded"
-//                 placeholder="Last Name"
 //                 value={employee.lastName}
 //                 onChange={(e) =>
 //                     setEmployee({ ...employee, lastName: e.target.value })
@@ -890,9 +118,7 @@
 //             />
 
 //             <input
-//                 type="text"
 //                 className="w-full border p-2 rounded"
-//                 placeholder="Phone"
 //                 value={employee.phone}
 //                 onChange={(e) =>
 //                     setEmployee({ ...employee, phone: e.target.value })
@@ -926,21 +152,29 @@
 //             <button
 //                 onClick={updateEmployee}
 //                 disabled={loading}
-//                 className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded disabled:opacity-50"
+//                 className="bg-blue-600 text-white px-4 py-2 rounded"
 //             >
 //                 {loading ? "Updating..." : "Update Employee"}
 //             </button>
 //         </div>
 //     );
 // };
-//                 console.log("🚀 ~ updateEmployee ~ body:", body)
 
 // export default EditEmployee;
+
 
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-hot-toast";
 import { callApi } from "../../../util/admin_api";
+import {
+    User,
+    Phone,
+    Briefcase,
+    ToggleLeft,
+    ToggleRight,
+    Save,
+} from "lucide-react";
 
 /* ================= TYPES ================= */
 
@@ -969,17 +203,12 @@ const EditEmployee: React.FC = () => {
 
         try {
             setLoading(true);
-
             const res = await callApi({
                 method: "GET",
                 endpoint: `/employee/${id}`,
             });
-
-            console.log("🚀 Employee Fetch Response:", res.data);
-
-            setEmployee(res.data); // ✅ DIRECT OBJECT
-        } catch (err: any) {
-            console.error("Fetch employee error:", err);
+            setEmployee(res.data);
+        } catch {
             toast.error("Unable to load employee");
         } finally {
             setLoading(false);
@@ -991,12 +220,10 @@ const EditEmployee: React.FC = () => {
     const updateEmployee = async () => {
         if (!employee) return;
 
-        console.log("🚀 Sending update payload:", employee);
-
         try {
             setLoading(true);
 
-            const res = await callApi({
+            await callApi({
                 method: "PATCH",
                 endpoint: `/employee/${id}`,
                 data: {
@@ -1008,17 +235,9 @@ const EditEmployee: React.FC = () => {
                 },
             });
 
-            console.log("🚀 Update response:", res.data);
-
-            setEmployee(res.data); // ✅ DIRECT OBJECT
             toast.success("Employee updated successfully");
-
-            setTimeout(() => {
-                navigate("/manager/employee");
-            }, 1000);
-
-        } catch (err: any) {
-            console.error("Update employee error:", err);
+            setTimeout(() => navigate("/manager/employee"), 800);
+        } catch {
             toast.error("Update failed");
         } finally {
             setLoading(false);
@@ -1031,70 +250,166 @@ const EditEmployee: React.FC = () => {
         fetchEmployee();
     }, [id]);
 
+    /* ================= UI STATES ================= */
+
+    if (loading && !employee) {
+        return (
+            <div className="min-h-screen flex items-center justify-center">
+                <div className="animate-pulse text-gray-500">
+                    Loading employee details...
+                </div>
+            </div>
+        );
+    }
+
+    if (!employee) {
+        return (
+            <div className="min-h-screen flex items-center justify-center text-gray-500">
+                Employee not found
+            </div>
+        );
+    }
+
     /* ================= UI ================= */
 
-    if (loading) return <div className="p-4">Loading...</div>;
-    if (!employee) return <div className="p-4">Employee not found</div>;
-
     return (
-        <div className="max-w-xl p-4 space-y-4">
-            <h2 className="text-xl font-semibold">Edit Employee</h2>
+        <div className=" bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex justify-center px-4">
+            <div className="w-full max-w-lg bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden">
 
-            <input
-                className="w-full border p-2 rounded"
-                value={employee.firstName}
-                onChange={(e) =>
-                    setEmployee({ ...employee, firstName: e.target.value })
-                }
-            />
+                {/* Header */}
+                <div className="bg-gradient-to-r from-indigo-600 to-blue-600 p-6 text-white">
+                    <h2 className="text-2xl font-bold">Edit Employee</h2>
+                    <p className="text-sm text-indigo-100 mt-1">
+                        Update employee information and status
+                    </p>
+                </div>
 
-            <input
-                className="w-full border p-2 rounded"
-                value={employee.lastName}
-                onChange={(e) =>
-                    setEmployee({ ...employee, lastName: e.target.value })
-                }
-            />
+                {/* Form */}
+                <div className="p-6 space-y-5">
 
-            <input
-                className="w-full border p-2 rounded"
-                value={employee.phone}
-                onChange={(e) =>
-                    setEmployee({ ...employee, phone: e.target.value })
-                }
-            />
+                    {/* First Name */}
+                    <div>
+                        <label className="text-sm font-medium text-gray-700">
+                            First Name
+                        </label>
+                        <div className="relative mt-1">
+                            <User className="absolute left-3 top-3.5 h-5 w-5 text-gray-400" />
+                            <input
+                                className="w-full pl-10 pr-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                                value={employee.firstName}
+                                onChange={(e) =>
+                                    setEmployee({
+                                        ...employee,
+                                        firstName: e.target.value,
+                                    })
+                                }
+                            />
+                        </div>
+                    </div>
 
-            <select
-                className="w-full border p-2 rounded"
-                value={employee.role}
-                onChange={(e) =>
-                    setEmployee({ ...employee, role: e.target.value })
-                }
-            >
-                <option value="ACCOUNTANT">Accountant</option>
-                <option value="BUTCHER">Butcher</option>
-                <option value="SALESMAN">Salesman</option>
-                <option value="CLEANER">Cleaner</option>
-            </select>
+                    {/* Last Name */}
+                    <div>
+                        <label className="text-sm font-medium text-gray-700">
+                            Last Name
+                        </label>
+                        <div className="relative mt-1">
+                            <User className="absolute left-3 top-3.5 h-5 w-5 text-gray-400" />
+                            <input
+                                className="w-full pl-10 pr-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                                value={employee.lastName}
+                                onChange={(e) =>
+                                    setEmployee({
+                                        ...employee,
+                                        lastName: e.target.value,
+                                    })
+                                }
+                            />
+                        </div>
+                    </div>
 
-            <label className="flex items-center gap-2">
-                <input
-                    type="checkbox"
-                    checked={employee.isActive}
-                    onChange={(e) =>
-                        setEmployee({ ...employee, isActive: e.target.checked })
-                    }
-                />
-                Active
-            </label>
+                    {/* Phone */}
+                    <div>
+                        <label className="text-sm font-medium text-gray-700">
+                            Phone Number
+                        </label>
+                        <div className="relative mt-1">
+                            <Phone className="absolute left-3 top-3.5 h-5 w-5 text-gray-400" />
+                            <input
+                                className="w-full pl-10 pr-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                                value={employee.phone}
+                                onChange={(e) =>
+                                    setEmployee({
+                                        ...employee,
+                                        phone: e.target.value,
+                                    })
+                                }
+                            />
+                        </div>
+                    </div>
 
-            <button
-                onClick={updateEmployee}
-                disabled={loading}
-                className="bg-blue-600 text-white px-4 py-2 rounded"
-            >
-                {loading ? "Updating..." : "Update Employee"}
-            </button>
+                    {/* Role */}
+                    <div>
+                        <label className="text-sm font-medium text-gray-700">
+                            Role
+                        </label>
+                        <div className="relative mt-1">
+                            <Briefcase className="absolute left-3 top-3.5 h-5 w-5 text-gray-400" />
+                            <select
+                                className="w-full pl-10 pr-3 py-2.5 border rounded-lg bg-white focus:ring-2 focus:ring-blue-500"
+                                value={employee.role}
+                                onChange={(e) =>
+                                    setEmployee({
+                                        ...employee,
+                                        role: e.target.value,
+                                    })
+                                }
+                            >
+                                <option value="ACCOUNTANT">Accountant</option>
+                                <option value="BUTCHER">Butcher</option>
+                                <option value="SALESMAN">Salesman</option>
+                                <option value="CLEANER">Cleaner</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    {/* Active Toggle */}
+                    {/* <div className="flex items-center justify-between bg-gray-50 border rounded-lg px-4 py-3">
+                        <div>
+                            <p className="font-medium text-gray-700">Status</p>
+                            <p className="text-sm text-gray-500">
+                                {employee.isActive ? "Active employee" : "Inactive employee"}
+                            </p>
+                        </div>
+
+                        <button
+                            type="button"
+                            onClick={() =>
+                                setEmployee({
+                                    ...employee,
+                                    isActive: !employee.isActive,
+                                })
+                            }
+                            className="text-blue-600"
+                        >
+                            {employee.isActive ? (
+                                <ToggleRight size={36} />
+                            ) : (
+                                <ToggleLeft size={36} />
+                            )}
+                        </button>
+                    </div> */}
+
+                    {/* Actions */}
+                    <button
+                        onClick={updateEmployee}
+                        disabled={loading}
+                        className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-semibold py-3 rounded-lg transition-all"
+                    >
+                        <Save size={18} />
+                        {loading ? "Updating..." : "Save Changes"}
+                    </button>
+                </div>
+            </div>
         </div>
     );
 };

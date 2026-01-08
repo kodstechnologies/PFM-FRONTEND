@@ -137,21 +137,21 @@ const ViewEmployee: React.FC = () => {
             sortable: true,
             render: (row: Employee) => <div className="capitalize">{row.role || "-"}</div>,
         },
-        {
-            accessor: "status",
-            title: "Status",
-            sortable: true,
-            render: (row: Employee) => (
-                <span
-                    className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${row.isActive
-                        ? "bg-green-100 text-green-800"
-                        : "bg-red-100 text-red-800"
-                        }`}
-                >
-                    {row.isActive ? "Active" : "Inactive"}
-                </span>
-            ),
-        },
+        // {
+        //     accessor: "status",
+        //     title: "Status",
+        //     sortable: true,
+        //     render: (row: Employee) => (
+        //         <span
+        //             className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${row.isActive
+        //                 ? "bg-green-100 text-green-800"
+        //                 : "bg-red-100 text-red-800"
+        //                 }`}
+        //         >
+        //             {row.isActive ? "Active" : "Inactive"}
+        //         </span>
+        //     ),
+        // },
         {
             accessor: "actions",
             title: "Actions",

@@ -7,6 +7,7 @@ import axios from "axios";
 // import OrderColumn from "./OrderColumn";
 import API_CONFIG from "../../config/api.config";
 import OrderColumn from "../Manager/live/OrderColumn";
+import MOrderColumn from "../Manager/live/MOrderColumn";
 // import { API_CONFIG } from "../../../config/api.config";
 
 /* ================= TYPES ================= */
@@ -235,7 +236,7 @@ const LiveOrders: React.FC = () => {
 
       {/* 🔹 ORDERS COLUMNS */}
       <div className="flex flex-1 overflow-hidden">
-        <OrderColumn
+        <MOrderColumn
           title="NEW ORDERS"
           orders={getOrdersByStatus("new")}
           isManager={isManager}
@@ -243,7 +244,7 @@ const LiveOrders: React.FC = () => {
           loading={loading}
         />
 
-        <OrderColumn
+        <MOrderColumn
           title="PREPARING"
           orders={getOrdersByStatus("preparing")}
           isManager={isManager}
@@ -251,7 +252,7 @@ const LiveOrders: React.FC = () => {
           loading={loading}
         />
 
-        <OrderColumn
+        <MOrderColumn
           title="AWAITING PICKUP"
           orders={getOrdersByStatus("awaiting-pickup")}
           isManager={isManager}

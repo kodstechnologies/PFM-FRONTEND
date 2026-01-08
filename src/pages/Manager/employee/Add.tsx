@@ -1,3 +1,5 @@
+
+
 // import React, { useState } from "react";
 // import axios from "axios";
 // import { useNavigate } from "react-router-dom";
@@ -7,7 +9,7 @@
 //     const [firstName, setFirstName] = useState("");
 //     const [lastName, setLastName] = useState("");
 //     const [phone, setPhone] = useState("");
-//     const [role, setRole] = useState("MANAGER");
+//     const [role, setRole] = useState("BUTCHER");
 //     const [loading, setLoading] = useState(false);
 //     const [error, setError] = useState("");
 
@@ -39,7 +41,6 @@
 //                     role,
 //                     storeId, // ✅ FIX: storeId sent
 //                 },
-
 //             );
 
 //             // ✅ Success → redirect
@@ -54,68 +55,117 @@
 //     };
 
 //     return (
-//         <div className="max-w-md mx-auto p-4 border rounded space-y-4">
-//             <h2 className="text-lg font-semibold">Add Employee</h2>
+//         <div className="min-h-screen bg-gray-50  flex items-center justify-center">
+//             <div className="max-w-md w-full mx-auto p-6 bg-white shadow-xl rounded-xl border border-gray-200 space-y-6">
+//                 <div className="text-center space-y-2">
+//                     <h2 className="text-2xl font-bold text-gray-900">Add New Employee</h2>
+//                     <p className="text-sm text-gray-500">Fill in the details to onboard a new team member.</p>
+//                 </div>
 
-//             <form onSubmit={handleSubmit} className="space-y-3">
-//                 <input
-//                     type="text"
-//                     placeholder="First Name"
-//                     value={firstName}
-//                     onChange={(e) => setFirstName(e.target.value)}
-//                     className="w-full border p-2 rounded"
-//                 />
+//                 <form onSubmit={handleSubmit} className="space-y-4">
+//                     <div>
+//                         <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">
+//                             First Name *
+//                         </label>
+//                         <input
+//                             id="firstName"
+//                             type="text"
+//                             placeholder="Enter first name"
+//                             value={firstName}
+//                             onChange={(e) => setFirstName(e.target.value)}
+//                             required
+//                             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+//                         />
+//                     </div>
 
-//                 <input
-//                     type="text"
-//                     placeholder="Last Name"
-//                     value={lastName}
-//                     onChange={(e) => setLastName(e.target.value)}
-//                     className="w-full border p-2 rounded"
-//                 />
+//                     <div>
+//                         <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">
+//                             Last Name
+//                         </label>
+//                         <input
+//                             id="lastName"
+//                             type="text"
+//                             placeholder="Enter last name"
+//                             value={lastName}
+//                             onChange={(e) => setLastName(e.target.value)}
+//                             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+//                         />
+//                     </div>
 
-//                 <input
-//                     type="text"
-//                     placeholder="Phone"
-//                     value={phone}
-//                     onChange={(e) => setPhone(e.target.value)}
-//                     className="w-full border p-2 rounded"
-//                 />
+//                     <div>
+//                         <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
+//                             Phone Number *
+//                         </label>
+//                         <input
+//                             id="phone"
+//                             type="tel"
+//                             placeholder="Enter phone number (e.g., +1 123-456-7890)"
+//                             value={phone}
+//                             onChange={(e) => setPhone(e.target.value)}
+//                             required
+//                             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+//                         />
+//                     </div>
 
-//                 <select
-//                     value={role}
-//                     onChange={(e) => setRole(e.target.value)}
-//                     className="w-full border p-2 rounded"
-//                 >
-//                     {/* <option value="MANAGER">MANAGER</option> */}
-//                     <option value="BUTCHER">BUTCHER</option>
-//                 </select>
+//                     <div>
+//                         <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-1">
+//                             Role *
+//                         </label>
+//                         <select
+//                             id="role"
+//                             value={role}
+//                             onChange={(e) => setRole(e.target.value)}
+//                             required
+//                             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 bg-white"
+//                         >
+//                             {/* <option value="MANAGER">Manager</option> */}
+//                             <option value="BUTCHER">Butcher</option>
+//                         </select>
+//                     </div>
 
-//                 <button
-//                     type="submit"
-//                     disabled={loading}
-//                     className="bg-blue-600 text-white px-4 py-2 rounded disabled:opacity-50"
-//                 >
-//                     {loading ? "Saving..." : "Add Employee"}
-//                 </button>
-//             </form>
+//                     <button
+//                         type="submit"
+//                         disabled={loading}
+//                         className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed text-white font-medium py-3 px-4 rounded-lg transition duration-200 flex items-center justify-center space-x-2"
+//                     >
+//                         {loading ? (
+//                             <>
+//                                 <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+//                                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+//                                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+//                                 </svg>
+//                                 <span>Saving...</span>
+//                             </>
+//                         ) : (
+//                             <>
+//                                 <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+//                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+//                                 </svg>
+//                                 <span>Add Employee</span>
+//                             </>
+//                         )}
+//                     </button>
+//                 </form>
 
-//             {error && (
-//                 <p className="text-sm text-center text-red-500">
-//                     {error}
-//                 </p>
-//             )}
+//                 {error && (
+//                     <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+//                         <p className="text-sm text-red-700 text-center">
+//                             {error}
+//                         </p>
+//                     </div>
+//                 )}
+//             </div>
 //         </div>
 //     );
 // };
 
 // export default AddEmployee;
 
-
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { API_CONFIG } from "../../../config/api.config";
+import { User, Phone, Briefcase, Plus } from "lucide-react";
 
 const AddEmployee: React.FC = () => {
     const [firstName, setFirstName] = useState("");
@@ -127,16 +177,15 @@ const AddEmployee: React.FC = () => {
 
     const navigate = useNavigate();
 
-    // ✅ Store ID (can be dynamic later)
-    const storedUser = localStorage.getItem("managerUser");
-    const storeId = storedUser ? JSON.parse(storedUser)?.storeId : null;
-    console.log("🚀 ~ ViewEmployee ~ storeId:", storeId)
+    const storeId = JSON.parse(
+        localStorage.getItem("managerUser") || "{}"
+    )?.storeId;
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
         if (!firstName || !phone || !role) {
-            setError("Required fields are missing");
+            setError("Please fill all required fields");
             return;
         }
 
@@ -144,126 +193,127 @@ const AddEmployee: React.FC = () => {
             setLoading(true);
             setError("");
 
-            await axios.post(
-                `${API_CONFIG.BASE_URL}/employee`,
-                {
-                    firstName: firstName.trim(),
-                    lastName: lastName.trim(),
-                    phone: phone.trim(),
-                    role,
-                    storeId, // ✅ FIX: storeId sent
-                },
-            );
+            await axios.post(`${API_CONFIG.BASE_URL}/employee`, {
+                firstName: firstName.trim(),
+                lastName: lastName.trim(),
+                phone: phone.trim(),
+                role,
+                storeId,
+            });
 
-            // ✅ Success → redirect
             navigate("/manager/employee");
         } catch (err: any) {
-            setError(
-                err?.response?.data?.message || "Failed to add employee"
-            );
+            setError(err?.response?.data?.message || "Failed to add employee");
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <div className="min-h-screen bg-gray-50  flex items-center justify-center">
-            <div className="max-w-md w-full mx-auto p-6 bg-white shadow-xl rounded-xl border border-gray-200 space-y-6">
-                <div className="text-center space-y-2">
-                    <h2 className="text-2xl font-bold text-gray-900">Add New Employee</h2>
-                    <p className="text-sm text-gray-500">Fill in the details to onboard a new team member.</p>
+        <div className=" flex justify-center bg-gradient-to-br from-blue-50 via-white to-indigo-50 px-4">
+            <div className="w-full max-w-md rounded-2xl bg-white shadow-2xl border border-gray-100 overflow-hidden">
+
+                {/* Header */}
+                <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-6 text-white">
+                    <h2 className="text-2xl font-bold">Add New Employee</h2>
+                    <p className="text-sm text-blue-100 mt-1">
+                        Onboard a new team member to your store
+                    </p>
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-4">
+                {/* Form */}
+                <form onSubmit={handleSubmit} className="p-6 space-y-5">
+
+                    {/* First Name */}
                     <div>
-                        <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
                             First Name *
                         </label>
-                        <input
-                            id="firstName"
-                            type="text"
-                            placeholder="Enter first name"
-                            value={firstName}
-                            onChange={(e) => setFirstName(e.target.value)}
-                            required
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
-                        />
+                        <div className="relative">
+                            <User className="absolute left-3 top-3.5 h-5 w-5 text-gray-400" />
+                            <input
+                                type="text"
+                                value={firstName}
+                                onChange={(e) => setFirstName(e.target.value)}
+                                placeholder="Enter first name"
+                                className="w-full pl-10 pr-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                required
+                            />
+                        </div>
                     </div>
 
+                    {/* Last Name */}
                     <div>
-                        <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
                             Last Name
                         </label>
-                        <input
-                            id="lastName"
-                            type="text"
-                            placeholder="Enter last name"
-                            value={lastName}
-                            onChange={(e) => setLastName(e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
-                        />
+                        <div className="relative">
+                            <User className="absolute left-3 top-3.5 h-5 w-5 text-gray-400" />
+                            <input
+                                type="text"
+                                value={lastName}
+                                onChange={(e) => setLastName(e.target.value)}
+                                placeholder="Enter last name"
+                                className="w-full pl-10 pr-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                        </div>
                     </div>
 
+                    {/* Phone */}
                     <div>
-                        <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
                             Phone Number *
                         </label>
-                        <input
-                            id="phone"
-                            type="tel"
-                            placeholder="Enter phone number (e.g., +1 123-456-7890)"
-                            value={phone}
-                            onChange={(e) => setPhone(e.target.value)}
-                            required
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
-                        />
+                        <div className="relative">
+                            <Phone className="absolute left-3 top-3.5 h-5 w-5 text-gray-400" />
+                            <input
+                                type="tel"
+                                value={phone}
+                                onChange={(e) => setPhone(e.target.value)}
+                                placeholder="Enter phone number"
+                                className="w-full pl-10 pr-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                required
+                            />
+                        </div>
                     </div>
 
+                    {/* Role */}
                     <div>
-                        <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-1">
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
                             Role *
                         </label>
-                        <select
-                            id="role"
-                            value={role}
-                            onChange={(e) => setRole(e.target.value)}
-                            required
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 bg-white"
-                        >
-                            {/* <option value="MANAGER">Manager</option> */}
-                            <option value="BUTCHER">Butcher</option>
-                        </select>
+                        <div className="relative">
+                            <Briefcase className="absolute left-3 top-3.5 h-5 w-5 text-gray-400" />
+                            <select
+                                value={role}
+                                onChange={(e) => setRole(e.target.value)}
+                                className="w-full pl-10 pr-3 py-2.5 border rounded-lg bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                required
+                            >
+                                <option value="BUTCHER">Butcher</option>
+                            </select>
+                        </div>
                     </div>
 
+                    {/* Button */}
                     <button
                         type="submit"
                         disabled={loading}
-                        className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed text-white font-medium py-3 px-4 rounded-lg transition duration-200 flex items-center justify-center space-x-2"
+                        className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-semibold py-3 rounded-lg transition-all"
                     >
-                        {loading ? (
+                        {loading ? "Saving..." : (
                             <>
-                                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                </svg>
-                                <span>Saving...</span>
-                            </>
-                        ) : (
-                            <>
-                                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                                </svg>
-                                <span>Add Employee</span>
+                                <Plus size={18} />
+                                Add Employee
                             </>
                         )}
                     </button>
                 </form>
 
+                {/* Error */}
                 {error && (
-                    <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-                        <p className="text-sm text-red-700 text-center">
-                            {error}
-                        </p>
+                    <div className="mx-6 mb-6 bg-red-50 border border-red-200 text-red-700 rounded-lg p-3 text-sm text-center animate-pulse">
+                        {error}
                     </div>
                 )}
             </div>

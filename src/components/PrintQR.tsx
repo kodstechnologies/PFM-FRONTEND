@@ -267,79 +267,88 @@ const PrintQR: React.FC = () => {
       </div>
 
       {/* ================= PRINT VIEW ================= */}
-      <div className="print-only hidden print:block  "
-      >
-        <div className="flex flex-col justify-start items-center border w-[30rem] ">
+      <div className="print-only hidden print:block">
+        <div className="flex flex-col items-center border-2 border-black w-[30rem] px-6 py-4 space-y-3">
 
-
-          <img
-            src={logo}
-            alt="Store Logo"
-            className="h-[4.5rem] object-contain"
-          />
-          <h3 className="text-xl font-bold mb-3 text-center">
-            Store Name : {order?.store?.name ?? "Store"}
+          {/* Logo */}
+          <h2 className="text-4xl font-extrabold text-center uppercase tracking-wide">
+            PRIYA FARM MANDIS
+          </h2>
+          {/* Store Name */}
+          <h3 className="text-2xl font-extrabold text-center uppercase tracking-wide">
+            Store Name: {order?.store?.name ?? "Store"}
           </h3>
 
-          <p className="text-xs font-mono text-gray-600">
+          {/* Order ID */}
+          <p className="text-lg font-bold font-mono text-gray-800">
             Order ID: #{order.orderId}
           </p>
-          <div>
-            <p className="font-semibold text-gray-700 mb-1">
-              Customer Name :
-              {/* </p> */}
-              {/* <p> */}
-              {" "} {order?.customer?.name}</p>
-            {/* <p className="text-gray-600">
-                  {order?.customer?.phone}
-                </p> */}
+
+          {/* Customer */}
+          <div className="w-full text-left">
+            <p className="text-lg font-bold text-gray-800">
+              Customer Name:
+              <span className="ml-2 font-extrabold">
+                {order?.customer?.name}
+              </span>
+            </p>
           </div>
 
+          {/* Manager */}
           {order?.manager?.EmployeeeId && (
-            <div>
-              <p className="font-semibold text-gray-700 mb-1">
-                Store Manager :
-                {/* </p>
-                  <p className="font-mono"> */}
-                {" "} {order.manager.EmployeeeId}
+            <div className="w-full text-left">
+              <p className="text-lg font-bold text-gray-800">
+                Store Manager:
+                <span className="ml-2 font-extrabold">
+                  {order.manager.EmployeeeId}
+                </span>
               </p>
             </div>
           )}
 
-          <QRCodeView value={qrPayload} size={150} type="canvas" />
+          {/* QR Code */}
+          <div className="my-4">
+            <QRCodeView value={qrPayload} size={180} type="canvas" />
+          </div>
 
-          {/* ==================== */}
-          <h4 className="text-md font-semibold mb-2">
-            Order Items
+          {/* Divider */}
+          <div className="w-full border-t-2 border-dashed border-black my-2" />
+
+          {/* Items Header */}
+          <h4 className="text-xl font-extrabold tracking-wide mb-2">
+            ORDER ITEMS
           </h4>
-          {order?.items?.map((item, index) => {
-            const totalQty = formatTotalQuantity(
-              item.quantity,
-              item.unit,
-              item.weight
-            );
 
-            if (!totalQty) return null;
+          {/* Items */}
+          <div className="w-full space-y-2">
+            {order?.items?.map((item, index) => {
+              const totalQty = formatTotalQuantity(
+                item.quantity,
+                item.unit,
+                item.weight
+              );
 
-            return (
-              <div
-                key={index}
-                className="flex items-center justify-between bg-gray-50 px-3 py-2 rounded mb-2"
-              >
-                <span className="font-medium">
-                  {item.name}
-                </span>
-                {" "}
-                <span className="font-semibold text-gray-700">
-                  {totalQty}
-                </span>
-              </div>
-            );
-          })}
+              if (!totalQty) return null;
+
+              return (
+                <div
+                  key={index}
+                  className="flex justify-between items-center px-3 py-2 border-b border-gray-300"
+                >
+                  <span className="text-lg font-bold">
+                    {item.name}
+                  </span>
+                  <span className="text-lg font-extrabold">
+                    {totalQty}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+
         </div>
-
-
       </div>
+
 
 
 
