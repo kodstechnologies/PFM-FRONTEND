@@ -366,10 +366,10 @@ const Header = () => {
         setTimeout(() => {
             localStorage.clear();
 
-            const redirect =
-                userRole === 'super-admin' ? '/admin-login' :
-                    userRole === 'manager' ? '/manager-login' :
-                        '/store-login';
+            const redirect = "/";
+            // userRole === 'super-admin' ? '/admin-login' :
+            //     userRole === 'manager' ? '/manager-login' :
+            //         '/store-login';
 
             navigate(redirect, { replace: true });
         }, 1500);

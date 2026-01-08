@@ -200,7 +200,7 @@ const OrderColumn: React.FC<Props> = ({
                     </div>
                 ) : (
                     orders.map((order) => (
-                        <MOrderCard
+                        <OrderCard
                             key={order.id}      
                             order={order}
                             isManager={isManager}
