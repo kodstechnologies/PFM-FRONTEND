@@ -742,7 +742,7 @@ const EditEmployee: React.FC = () => {
                                 disabled={storeLoading}
                                 options={storeOptions}
                             />
-                            <SelectField
+                            {/* <SelectField
                                 icon={<PowerSettingsNewIcon />}
                                 label="Status"
                                 id="isActive"
@@ -754,7 +754,7 @@ const EditEmployee: React.FC = () => {
                                     { value: "false", label: "Inactive" }
                                 ]}
                                 statusColor={statusColor}
-                            />
+                            /> */}
                             {/* <ReadOnlySection
                                 icon={<AssignmentIcon />}
                                 title="Read-Only Information"

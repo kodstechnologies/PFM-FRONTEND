@@ -32,6 +32,11 @@ export const commonRoutes: AppRoute[] = [
     layout: 'blank',
   },
   {
+    path: '/login',
+    element: <UserDashboard />,
+    layout: 'blank',
+  },
+  {
     path: '*', // Catch-all for unknown routes
     element: <NotFoundPage />,
     layout: 'blank',

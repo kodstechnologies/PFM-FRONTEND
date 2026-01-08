@@ -756,17 +756,17 @@ const ViewEmploye: React.FC = () => {
                 size: 120,
                 enableSorting: true,
             }),
-            columnHelper.accessor("isActive", {
-                header: "Status",
-                cell: (info) => (
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${info.getValue() ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                        }`}>
-                        {info.getValue() ? 'Active' : 'Inactive'}
-                    </span>
-                ),
-                size: 120,
-                enableSorting: true,
-            }),
+            // columnHelper.accessor("isActive", {
+            //     header: "Status",
+            //     cell: (info) => (
+            //         <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${info.getValue() ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+            //             }`}>
+            //             {info.getValue() ? 'Active' : 'Inactive'}
+            //         </span>
+            //     ),
+            //     size: 120,
+            //     enableSorting: true,
+            // }),
             columnHelper.accessor("store", {
                 header: "Store",
                 cell: (info) => <span className="text-gray-600">{info.getValue()?.name || 'N/A'}</span>,

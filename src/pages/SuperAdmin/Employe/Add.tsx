@@ -226,7 +226,7 @@ const AddEmploye: React.FC = () => {
                                     ))}
                                 </select>
                             </div>
-                            <div>
+                            {/* <div>
                                 <label htmlFor="isActive" className="block text-sm font-medium text-gray-700 mb-1">
                                     Status
                                 </label>
@@ -240,7 +240,7 @@ const AddEmploye: React.FC = () => {
                                     <option value="true">Active</option>
                                     <option value="false">Inactive</option>
                                 </select>
-                            </div>
+                            </div> */}
 
                         </div>
                         <div className="mt-8 flex justify-end space-x-3">

@@ -324,14 +324,14 @@ const MeatCenterDisplay: React.FC = () => {
         header: () => <div className="text-center w-full">Actions</div>,
         cell: ({ row }) => (
           <div className="flex justify-center gap-2">
-            <button
+            {/* <button
               onClick={() => handleView(row.original)}
               className="p-2 rounded-lg bg-green-50 text-green-600 hover:bg-green-100 transition-colors flex items-center"
               aria-label={`View ${row.original.name}`}
               title="View"
             >
               <VisibilityIcon fontSize="small" />
-            </button>
+            </button> */}
             <button
               onClick={() => handleEdit(row.original)}
               className="p-2 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors flex items-center"

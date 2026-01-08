@@ -307,7 +307,7 @@ const MeatCenterView: React.FC = () => {
       try {
         setLoading(true)
         const response: AxiosResponse<any> = await callApi({
-          url: `/employee/assign/${id}`, // Updated to new endpoint; adjust prefix if needed (e.g., /admin/employee/assign/${id})
+          url: `/admin/meat-centers/${id}`, // Updated to new endpoint; adjust prefix if needed (e.g., /admin/employee/assign/${id})
           method: "GET",
         })
 
