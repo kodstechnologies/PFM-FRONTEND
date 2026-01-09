@@ -1,3 +1,4 @@
+
 // import React, { useState, useEffect } from 'react'
 // import { useParams, useNavigate } from 'react-router-dom'
 // import ArrowBackIcon from '@mui/icons-material/ArrowBack'
@@ -13,6 +14,13 @@
 // import type { AxiosResponse } from "axios"
 // import { toast } from "react-toastify"
 
+// type Store = {
+//     _id: string;
+//     name: string;
+//     location: string;
+//     phone: string;
+// };
+
 // type Employee = {
 //     _id: string;
 //     firstName: string;
@@ -22,13 +30,8 @@
 //     isActive: boolean;
 //     createdAt: string;
 //     updatedAt: string;
-//     employeeId: string;
-//     storeId?: string;
-// };
-
-// type Store = {
-//     _id: string;
-//     name: string;
+//     EmployeeeId: string;
+//     store?: Store;
 // };
 
 // interface ApiResponse<T> {
@@ -91,7 +94,7 @@
 //                     phone: employee.phone,
 //                     role: employee.role,
 //                     isActive: employee.isActive,
-//                     storeId: employee.storeId || '',
+//                     storeId: employee.store?._id || '',
 //                 })
 //             } catch (error: unknown) {
 //                 const errorMessage = error instanceof Error ? error.message : "Failed to fetch employee details"
@@ -212,6 +215,20 @@
 //             ...stores.map(store => ({ value: store._id, label: store.name }))
 //         ];
 
+//     const readonlyItems = [
+//         { label: "Employee ID", value: data.EmployeeeId },
+//         { label: "Created At", value: new Date(data.createdAt).toLocaleDateString() },
+//         { label: "Last Updated", value: new Date(data.updatedAt).toLocaleDateString() },
+//     ];
+
+//     if (data.store) {
+//         readonlyItems.push(
+//             { label: "Store Name", value: data.store.name },
+//             { label: "Store Location", value: data.store.location },
+//             { label: "Store Phone", value: data.store.phone }
+//         );
+//     }
+
 //     return (
 //         <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 px-4 py-8 sm:px-6 lg:px-8">
 //             <div className="max-w-2xl mx-auto">
@@ -240,7 +257,7 @@
 //                         <div className="space-y-4">
 //                             <InputField
 //                                 icon={<PersonIcon />}
-//                                 label="First Name *"
+//                                 label="First Name"
 //                                 id="firstName"
 //                                 name="firstName"
 //                                 type="text"
@@ -250,7 +267,7 @@
 //                             />
 //                             <InputField
 //                                 icon={<PersonIcon />}
-//                                 label="Last Name *"
+//                                 label="Last Name"
 //                                 id="lastName"
 //                                 name="lastName"
 //                                 type="text"
@@ -260,7 +277,7 @@
 //                             />
 //                             <InputField
 //                                 icon={<PhoneIcon />}
-//                                 label="Phone *"
+//                                 label="Phone"
 //                                 id="phone"
 //                                 name="phone"
 //                                 type="tel"
@@ -270,7 +287,7 @@
 //                             />
 //                             <SelectField
 //                                 icon={<WorkIcon />}
-//                                 label="Role *"
+//                                 label="Role"
 //                                 id="role"
 //                                 name="role"
 //                                 value={formData.role}
@@ -283,7 +300,7 @@
 //                             />
 //                             <SelectField
 //                                 icon={<StoreIcon />}
-//                                 label="Store *"
+//                                 label="Store"
 //                                 id="storeId"
 //                                 name="storeId"
 //                                 value={formData.storeId}
@@ -292,7 +309,7 @@
 //                                 disabled={storeLoading}
 //                                 options={storeOptions}
 //                             />
-//                             <SelectField
+//                             {/* <SelectField
 //                                 icon={<PowerSettingsNewIcon />}
 //                                 label="Status"
 //                                 id="isActive"
@@ -304,8 +321,12 @@
 //                                     { value: "false", label: "Inactive" }
 //                                 ]}
 //                                 statusColor={statusColor}
-//                             />
-
+//                             /> */}
+//                             {/* <ReadOnlySection
+//                                 icon={<AssignmentIcon />}
+//                                 title="Read-Only Information"
+//                                 items={readonlyItems}
+//                             /> */}
 //                         </div>
 //                         <div className="mt-8 flex justify-end space-x-3">
 //                             <button
@@ -465,6 +486,11 @@ type Employee = {
     updatedAt: string;
     EmployeeeId: string;
     store?: Store;
+    documentStatus: {
+        idProof: string;
+        addressProof: string;
+        panProof: string;
+    };
 };
 
 interface ApiResponse<T> {
@@ -490,6 +516,11 @@ const EditEmployee: React.FC = () => {
         role: '',
         isActive: true,
         storeId: '',
+        documentStatus: {
+            idProof: 'pending',
+            addressProof: 'pending',
+            panProof: 'pending',
+        },
     })
 
     const roleOptions = [
@@ -498,6 +529,13 @@ const EditEmployee: React.FC = () => {
         { value: "BUTCHER", label: "Butcher" },
         { value: "SALESMAN", label: "Salesman" },
         { value: "CLEANER", label: "Cleaner" },
+    ]
+
+    const documentStatusOptions = [
+        { value: "", label: "Select Status" },
+        { value: "verified", label: "Verified" },
+        { value: "pending", label: "Pending" },
+        { value: "rejected", label: "Rejected" },
     ]
 
     useEffect(() => {
@@ -528,6 +566,11 @@ const EditEmployee: React.FC = () => {
                     role: employee.role,
                     isActive: employee.isActive,
                     storeId: employee.store?._id || '',
+                    documentStatus: {
+                        idProof: employee.documentStatus.idProof,
+                        addressProof: employee.documentStatus.addressProof,
+                        panProof: employee.documentStatus.panProof,
+                    },
                 })
             } catch (error: unknown) {
                 const errorMessage = error instanceof Error ? error.message : "Failed to fetch employee details"
@@ -572,10 +615,21 @@ const EditEmployee: React.FC = () => {
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target
-        setFormData(prev => ({
-            ...prev,
-            [name]: name === 'isActive' ? value === 'true' : value,
-        }))
+        if (name.startsWith('documentStatus.')) {
+            const field = name.split('.')[1] as keyof typeof formData.documentStatus
+            setFormData(prev => ({
+                ...prev,
+                documentStatus: {
+                    ...prev.documentStatus,
+                    [field]: value,
+                },
+            }))
+        } else {
+            setFormData(prev => ({
+                ...prev,
+                [name]: name === 'isActive' ? value === 'true' : value,
+            }))
+        }
     }
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -584,10 +638,14 @@ const EditEmployee: React.FC = () => {
 
         try {
             setIsSubmitting(true)
+            const submitData = {
+                ...formData,
+                documentStatus: formData.documentStatus, // Ensure it's included
+            }
             const response: AxiosResponse<ApiResponse<Employee>> = await callApi({
                 url: `/employee/${id}`,
                 method: "PATCH",
-                data: formData,
+                data: submitData,
             })
 
             if (!response.data.success) {
@@ -742,7 +800,7 @@ const EditEmployee: React.FC = () => {
                                 disabled={storeLoading}
                                 options={storeOptions}
                             />
-                            {/* <SelectField
+                            <SelectField
                                 icon={<PowerSettingsNewIcon />}
                                 label="Status"
                                 id="isActive"
@@ -754,12 +812,44 @@ const EditEmployee: React.FC = () => {
                                     { value: "false", label: "Inactive" }
                                 ]}
                                 statusColor={statusColor}
-                            /> */}
-                            {/* <ReadOnlySection
-                                icon={<AssignmentIcon />}
-                                title="Read-Only Information"
-                                items={readonlyItems}
-                            /> */}
+                            />
+                            {/* Document Status Section */}
+                            <div className="border-t pt-6">
+                                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
+                                    <AssignmentIcon className="text-2xl" />
+                                    <span>Document Status</span>
+                                </h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <SelectField
+                                        icon={<AssignmentIcon />}
+                                        label="ID Proof"
+                                        id="documentStatus.idProof"
+                                        name="documentStatus.idProof"
+                                        value={formData.documentStatus.idProof}
+                                        onChange={handleInputChange}
+                                        options={documentStatusOptions}
+                                    />
+                                    <SelectField
+                                        icon={<AssignmentIcon />}
+                                        label="Address Proof"
+                                        id="documentStatus.addressProof"
+                                        name="documentStatus.addressProof"
+                                        value={formData.documentStatus.addressProof}
+                                        onChange={handleInputChange}
+                                        options={documentStatusOptions}
+                                    />
+                                    <SelectField
+                                        icon={<AssignmentIcon />}
+                                        label="PAN Proof"
+                                        id="documentStatus.panProof"
+                                        name="documentStatus.panProof"
+                                        value={formData.documentStatus.panProof}
+                                        onChange={handleInputChange}
+                                        options={documentStatusOptions}
+                                    />
+                                </div>
+                            </div>
+
                         </div>
                         <div className="mt-8 flex justify-end space-x-3">
                             <button
@@ -804,15 +894,20 @@ const InputField: React.FC<InputFieldProps> = ({ icon, label, id, name, type, va
             <span>{label}</span>
             {required && <span className="text-red-500">*</span>}
         </label>
-        <input
-            type={type}
-            id={id}
-            name={name}
-            value={value}
-            onChange={onChange}
-            required={required}
-            className="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-300"
-        />
+        <div className="relative">
+            <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                {icon}
+            </span>
+            <input
+                type={type}
+                id={id}
+                name={name}
+                value={value}
+                onChange={onChange}
+                required={required}
+                className="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-300"
+            />
+        </div>
     </div>
 );
 
@@ -837,21 +932,26 @@ const SelectField: React.FC<SelectFieldProps> = ({ icon, label, id, name, value,
             <span>{label}</span>
             {required && <span className="text-red-500">*</span>}
         </label>
-        <select
-            id={id}
-            name={name}
-            value={value}
-            onChange={onChange}
-            required={required}
-            disabled={disabled}
-            className={`w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-300 disabled:opacity-50 ${statusColor || ''}`}
-        >
-            {options.map((option) => (
-                <option key={option.value} value={option.value}>
-                    {option.label}
-                </option>
-            ))}
-        </select>
+        <div className="relative">
+            <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                {icon}
+            </span>
+            <select
+                id={id}
+                name={name}
+                value={value}
+                onChange={onChange}
+                required={required}
+                disabled={disabled}
+                className={`w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-300 disabled:opacity-50 ${statusColor || ''}`}
+            >
+                {options.map((option) => (
+                    <option key={option.value} value={option.value}>
+                        {option.label}
+                    </option>
+                ))}
+            </select>
+        </div>
     </div>
 );
 

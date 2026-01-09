@@ -272,21 +272,22 @@ const PrintQR: React.FC = () => {
 
           {/* Logo */}
           <h2 className="text-4xl font-extrabold text-center uppercase tracking-wide">
-            PRIYA FARM MANDIS
+            PRIYA FRESH MEATS
           </h2>
           {/* Store Name */}
           <h3 className="text-2xl font-extrabold text-center uppercase tracking-wide">
-            Store Name: {order?.store?.name ?? "Store"}
+            Store Name:  {order?.store?.name ?? "Store"}
           </h3>
 
           {/* Order ID */}
-          <p className="text-lg font-bold font-mono text-gray-800">
-            Order ID: #{order.orderId}
+          <p className="text-xl text-center font-bold font-mono text-gray-800">
+            Order ID: # <span className="text-xl font-bold">{order.orderId}
+            </span>
           </p>
 
           {/* Customer */}
-          <div className="w-full text-left">
-            <p className="text-lg font-bold text-gray-800">
+          <div className="w-full text-xl text-center">
+            <p className="text-2xl font-bold text-gray-800">
               Customer Name:
               <span className="ml-2 font-extrabold">
                 {order?.customer?.name}
@@ -296,8 +297,8 @@ const PrintQR: React.FC = () => {
 
           {/* Manager */}
           {order?.manager?.EmployeeeId && (
-            <div className="w-full text-left">
-              <p className="text-lg font-bold text-gray-800">
+            <div className="w-full text-2xl text-center">
+              <p className="text-2xl font-bold text-gray-800">
                 Store Manager:
                 <span className="ml-2 font-extrabold">
                   {order.manager.EmployeeeId}
@@ -315,12 +316,12 @@ const PrintQR: React.FC = () => {
           <div className="w-full border-t-2 border-dashed border-black my-2" />
 
           {/* Items Header */}
-          <h4 className="text-xl font-extrabold tracking-wide mb-2">
+          <h4 className="text-4xl font-extrabold tracking-wide mb-2">
             ORDER ITEMS
           </h4>
 
           {/* Items */}
-          <div className="w-full space-y-2">
+          <div className="w-full  space-y-2">
             {order?.items?.map((item, index) => {
               const totalQty = formatTotalQuantity(
                 item.quantity,
@@ -335,10 +336,10 @@ const PrintQR: React.FC = () => {
                   key={index}
                   className="flex justify-between items-center px-3 py-2 border-b border-gray-300"
                 >
-                  <span className="text-lg font-bold">
+                  <span className="text-2xl font-bold">
                     {item.name}
                   </span>
-                  <span className="text-lg font-extrabold">
+                  <span className="text-2xl font-extrabold">
                     {totalQty}
                   </span>
                 </div>
