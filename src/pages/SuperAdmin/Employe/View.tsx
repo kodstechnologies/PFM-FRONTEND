@@ -1469,24 +1469,24 @@ const ViewEmploye: React.FC = () => {
                 size: 140,
                 enableSorting: false,
             }),
-            columnHelper.accessor("isActive", {
-                header: () => (
-                    <div className="flex items-center gap-2">
-                        <PowerSettingsNewIcon fontSize="small" className="text-gray-500" />
-                        <span>Status</span>
-                    </div>
-                ),
-                cell: (info) => (
-                    <span className={`inline-flex px-2.5 py-1 text-xs font-semibold rounded-full shadow-sm ${info.getValue()
-                            ? 'bg-green-100 text-green-800 border-green-200'
-                            : 'bg-red-100 text-red-800 border-red-200'
-                        } border`}>
-                        {info.getValue() ? 'Active' : 'Inactive'}
-                    </span>
-                ),
-                size: 120,
-                enableSorting: true,
-            }),
+            // columnHelper.accessor("isActive", {
+            //     header: () => (
+            //         <div className="flex items-center gap-2">
+            //             <PowerSettingsNewIcon fontSize="small" className="text-gray-500" />
+            //             <span>Status</span>
+            //         </div>
+            //     ),
+            //     cell: (info) => (
+            //         <span className={`inline-flex px-2.5 py-1 text-xs font-semibold rounded-full shadow-sm ${info.getValue()
+            //             ? 'bg-green-100 text-green-800 border-green-200'
+            //             : 'bg-red-100 text-red-800 border-red-200'
+            //             } border`}>
+            //             {info.getValue() ? 'Active' : 'Inactive'}
+            //         </span>
+            //     ),
+            //     size: 120,
+            //     enableSorting: true,
+            // }),
             columnHelper.accessor("store", {
                 header: () => (
                     <div className="flex items-center gap-2">
@@ -1503,44 +1503,44 @@ const ViewEmploye: React.FC = () => {
                 size: 200,
                 enableSorting: true,
             }),
-            columnHelper.accessor("createdAt", {
-                header: () => (
-                    <div className="flex items-center gap-2">
-                        <AccessTimeIcon fontSize="small" className="text-gray-500" />
-                        <span>Created</span>
-                    </div>
-                ),
-                cell: (info) => (
-                    <span className="text-gray-600 text-sm">
-                        {new Date(info.getValue()).toLocaleDateString('en-US', {
-                            year: 'numeric',
-                            month: 'short',
-                            day: 'numeric'
-                        })}
-                    </span>
-                ),
-                size: 140,
-                enableSorting: true,
-            }),
-            columnHelper.accessor("updatedAt", {
-                header: () => (
-                    <div className="flex items-center gap-2">
-                        <AccessTimeIcon fontSize="small" className="text-gray-500" />
-                        <span>Updated</span>
-                    </div>
-                ),
-                cell: (info) => (
-                    <span className="text-gray-600 text-sm">
-                        {new Date(info.getValue()).toLocaleDateString('en-US', {
-                            year: 'numeric',
-                            month: 'short',
-                            day: 'numeric'
-                        })}
-                    </span>
-                ),
-                size: 140,
-                enableSorting: true,
-            }),
+            // columnHelper.accessor("createdAt", {
+            //     header: () => (
+            //         <div className="flex items-center gap-2">
+            //             <AccessTimeIcon fontSize="small" className="text-gray-500" />
+            //             <span>Created</span>
+            //         </div>
+            //     ),
+            //     cell: (info) => (
+            //         <span className="text-gray-600 text-sm">
+            //             {new Date(info.getValue()).toLocaleDateString('en-US', {
+            //                 year: 'numeric',
+            //                 month: 'short',
+            //                 day: 'numeric'
+            //             })}
+            //         </span>
+            //     ),
+            //     size: 140,
+            //     enableSorting: true,
+            // }),
+            // columnHelper.accessor("updatedAt", {
+            //     header: () => (
+            //         <div className="flex items-center gap-2">
+            //             <AccessTimeIcon fontSize="small" className="text-gray-500" />
+            //             <span>Updated</span>
+            //         </div>
+            //     ),
+            //     cell: (info) => (
+            //         <span className="text-gray-600 text-sm">
+            //             {new Date(info.getValue()).toLocaleDateString('en-US', {
+            //                 year: 'numeric',
+            //                 month: 'short',
+            //                 day: 'numeric'
+            //             })}
+            //         </span>
+            //     ),
+            //     size: 140,
+            //     enableSorting: true,
+            // }),
             {
                 id: "actions",
                 header: () => <div className="text-center w-full">Actions</div>,
@@ -1736,8 +1736,8 @@ const ViewEmploye: React.FC = () => {
                                     <button
                                         key={i}
                                         className={`px-3 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${pagination.pageIndex === i
-                                                ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md"
-                                                : "text-gray-600 hover:text-blue-600 hover:bg-blue-50"
+                                            ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md"
+                                            : "text-gray-600 hover:text-blue-600 hover:bg-blue-50"
                                             }`}
                                         onClick={() => table.setPageIndex(i)}
                                     >

@@ -394,7 +394,7 @@ const SubCategoriesAdd: React.FC = () => {
                                 <option value="kg">kg</option>
                                 <option value="gram">grams</option>
                                 <option value="pieces">pieces</option>
-                                <option value="liters">liters</option>
+                                {/* <option value="liters">liters</option> */}
                             </select>
                             {errors.unit && (
                                 <p className="mt-1 text-xs text-red-600" role="alert">
