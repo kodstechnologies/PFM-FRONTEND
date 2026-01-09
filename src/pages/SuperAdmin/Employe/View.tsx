@@ -1322,7 +1322,7 @@ const ViewEmploye: React.FC = () => {
         if (window.confirm(`Are you sure you want to delete ${row.firstName} ${row.lastName}?`)) {
             try {
                 const response: AxiosResponse<ApiResponse<unknown>> = await callApi({
-                    url: `/employe/${row._id}`,
+                    url: `/employee/${row._id}`,
                     method: "DELETE",
                 })
 
