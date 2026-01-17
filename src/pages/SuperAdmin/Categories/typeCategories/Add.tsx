@@ -332,9 +332,9 @@ const TypeCategoriesAdd: React.FC = () => {
     useEffect(() => {
         if (fileWatch && fileWatch.length > 0) {
             const file = fileWatch[0];
-            if (file.size > 5 * 1024 * 1024) {
+            if (file.size > 1 * 1024 * 1024) {
                 // 5MB limit
-                toast.error('Image size must be less than 5MB', {
+                toast.error('Image size must be less than 1MB', {
                     toastId: 'image-size-error',
                     position: 'top-right',
                     autoClose: 3000,
