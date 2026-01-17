@@ -21,7 +21,7 @@ interface ApiResponse<T> {
 
 interface SubCategory {
     _id: string;
-    name: string;
+    // name: string;
     type: string[];
     quality: string;
     unit: string;
@@ -45,7 +45,7 @@ interface SubCategory {
 
 interface FormInputs {
     subCategoryName: string;
-    type: string;
+    // type: string;
     quality: string;
     description: string;
     unit: string;
@@ -76,7 +76,7 @@ const SubCategoriesAdd: React.FC = () => {
     } = useForm<FormInputs>({
         defaultValues: {
             subCategoryName: '',
-            type: '',
+            // type: '',
             quality: '',
             description: '',
             unit: 'kg',
@@ -97,8 +97,8 @@ const SubCategoriesAdd: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const location = useLocation();
     const [preview, setPreview] = useState<string | null>(null);
-    const [types, setTypes] = useState<string[]>([]);
-    const [inputValue, setInputValue] = useState<string>('');
+    // const [types, setTypes] = useState<string[]>([]);
+    // const [inputValue, setInputValue] = useState<string>('');
     const typeId = id || (location.state as { typeId?: string })?.typeId;
 
     // Watch file changes and set preview
@@ -135,28 +135,28 @@ const SubCategoriesAdd: React.FC = () => {
     }, [fileWatch, setValue]);
 
     // Handle adding a type
-    const handleAddType = () => {
-        if (inputValue.trim()) {
-            setTypes((prev) => [...prev, inputValue.trim()]);
-            setInputValue('');
-            setValue('type', '');
-        }
-    };
+    // const handleAddType = () => {
+    //     if (inputValue.trim()) {
+    //         setTypes((prev) => [...prev, inputValue.trim()]);
+    //         setInputValue('');
+    //         setValue('type', '');
+    //     }
+    // };
 
     // Handle removing a type
-    const handleRemoveType = (typeToRemove: string) => {
-        setTypes((prev) => prev.filter((type) => type !== typeToRemove));
-    };
+    // const handleRemoveType = (typeToRemove: string) => {
+    //     setTypes((prev) => prev.filter((type) => type !== typeToRemove));
+    // };
 
     const onSubmit: SubmitHandler<FormInputs> = async (data) => {
-        if (types.length === 0) {
-            toast.error('Please add at least one type', {
-                toastId: 'add-sub-category-error',
-                position: 'top-right',
-                autoClose: 3000,
-            });
-            return;
-        }
+        // if (types.length === 0) {
+        //     toast.error('Please add at least one type', {
+        //         toastId: 'add-sub-category-error',
+        //         position: 'top-right',
+        //         autoClose: 3000,
+        //     });
+        //     return;
+        // }
 
         if (!typeId) {
             toast.error('No category ID provided.', {
@@ -175,10 +175,13 @@ const SubCategoriesAdd: React.FC = () => {
             if (!token) {
                 throw new Error('No authentication token found. Please log in.');
             }
+            const types = ['default'];
 
             const formData = new FormData();
             formData.append('name', data.subCategoryName);
             formData.append('type', JSON.stringify(types));
+
+            // formData.append('type', JSON.stringify(types));
             formData.append('quality', data.quality);
             formData.append('description', data.description);
             formData.append('unit', data.unit);
@@ -221,7 +224,7 @@ const SubCategoriesAdd: React.FC = () => {
                 onClose: () => navigate(`/sub/categories/${typeId}`, { state: { typeId: typeId } }),
             });
             reset();
-            setTypes([]);
+            // setTypes([]);
             setPreview(null);
         } catch (error: unknown) {
             const errorMessage = error instanceof Error ? error.message : 'Failed to add subcategory';
@@ -307,7 +310,7 @@ const SubCategoriesAdd: React.FC = () => {
                         </div>
 
                         {/* Types */}
-                        <div className={types.length === 0 ? 'border border-red-300 rounded p-2' : ''}>
+                        {/* <div className={types.length === 0 ? 'border border-red-300 rounded p-2' : ''}>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
                                 Types *
                             </label>
@@ -348,7 +351,7 @@ const SubCategoriesAdd: React.FC = () => {
                                     </span>
                                 ))}
                             </div>
-                        </div>
+                        </div> */}
 
                         {/* Quality */}
                         <div>
@@ -693,7 +696,9 @@ const SubCategoriesAdd: React.FC = () => {
                         <div className="flex justify-center pt-4">
                             <button
                                 type="submit"
-                                disabled={isSubmitting || !watch('subCategoryName').trim() || types.length === 0}
+                                // disabled={isSubmitting || !watch('subCategoryName').trim() || types.length === 0}
+                                disabled={isSubmitting || !watch('subCategoryName').trim()}
+
                                 className="bg-gradient-to-r from-rose-500 to-red-400 hover:from-rose-600 hover:to-red-500 disabled:opacity-50 disabled:cursor-not-allowed px-6 py-2 rounded text-white font-semibold transition flex items-center gap-2"
                             >
                                 {isSubmitting ? 'Adding...' : 'Add Subcategory'}

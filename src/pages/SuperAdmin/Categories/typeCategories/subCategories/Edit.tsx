@@ -491,7 +491,7 @@ const SubCategoriesEdit: React.FC = () => {
                             )}
                         </div>
                         {/* Types */}
-                        <div>
+                        {/* <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
                                 Types *
                             </label>
@@ -529,7 +529,7 @@ const SubCategoriesEdit: React.FC = () => {
                                     </span>
                                 ))}
                             </div>
-                        </div>
+                        </div> */}
                         {/* Quality */}
                         <div>
                             <label
