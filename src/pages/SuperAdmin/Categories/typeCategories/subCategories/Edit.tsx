@@ -251,7 +251,8 @@ const SubCategoriesEdit: React.FC = () => {
                     toastId: 'image-size-error',
                     position: 'top-right',
                     autoClose: 3000,
-                });
+                }
+                );
                 setValue('subCategoryImage', null);
                 setPreview(null);
                 return;
