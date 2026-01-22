@@ -50,6 +50,7 @@ const SubCategoriesDisplay: React.FC = () => {
     const { id: paramId } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const location = useLocation();
+    console.log("🚀 ~ SubCategoriesDisplay ~ location:", location)
     const typeId = location.state?.typeId || paramId;
     const categoryId = location.state?.categoryId;
 
@@ -213,6 +214,7 @@ const SubCategoriesDisplay: React.FC = () => {
             }
         }
     };
+    console.log("🚀 ~ openAdd ~ typeId:", typeId)
 
     const openAdd = () => {
         navigate(`/sub/categories/add/${typeId}`, {
@@ -283,7 +285,10 @@ const SubCategoriesDisplay: React.FC = () => {
                     <div className="flex flex-col sm:flex-row md:items-center items-end sm:justify-between gap-5">
                         <div className="flex items-center gap-4">
                             <button
-                                onClick={() => navigate(`/type/categories/${categoryId}`, { state: { id: categoryId } })}
+                                onClick={() => navigate(`/type/categories/${categoryId}`, {
+                                    state: { id: categoryId, typeId }
+
+                                })}
                                 className="flex items-center gap-2 text-gray-600 hover:text-gray-800 transition-colors"
                             >
                                 <ArrowBackIcon fontSize="small" />

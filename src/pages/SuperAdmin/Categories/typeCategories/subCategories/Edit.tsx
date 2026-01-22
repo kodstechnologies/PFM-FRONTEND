@@ -95,6 +95,8 @@ const normalizeTypeTokens = (raw: any): string[] => {
     }
 };
 
+
+
 const SubCategoriesEdit: React.FC = () => {
     const {
         register,
@@ -132,6 +134,7 @@ const SubCategoriesEdit: React.FC = () => {
     console.log("✅ subCategoryId:", subCategoryId);
 
     const location = useLocation();
+    console.log("🚀 ~ SubCategoriesEdit ~ location:", location)
     const [preview, setPreview] = useState<string | null>(null);
     const [types, setTypes] = useState<string[]>([]);
     const [inputValue, setInputValue] = useState<string>('');

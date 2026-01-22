@@ -98,11 +98,12 @@ const SubCategoriesAdd: React.FC = () => {
     const navigate = useNavigate();
     const { id } = useParams<{ id: string }>();
     const location = useLocation();
+    console.log("🚀 ~ SubCategoriesAdd ~ location:", location)
     const [preview, setPreview] = useState<string | null>(null);
     // const [types, setTypes] = useState<string[]>([]);
     // const [inputValue, setInputValue] = useState<string>('');
     const typeId = id || (location.state as { typeId?: string })?.typeId;
-
+    const categoryId = location.state?.categoryId;
     // Watch file changes and set preview
     const fileWatch = watch('subCategoryImage');
     useEffect(() => {
@@ -253,6 +254,7 @@ const SubCategoriesAdd: React.FC = () => {
         }
     };
 
+    console.log("🚀 ~ SubCategoriesAdd ~ typeId:", typeId)
     return (
         <>
             <ToastContainer
@@ -275,7 +277,10 @@ const SubCategoriesAdd: React.FC = () => {
                         <h2 className="text-2xl font-bold text-gray-800">Add Subcategory</h2>
                         <NavigateBtn
                             to={`/sub/categories/${typeId}`}
-                            state={{ typeId: typeId }}
+                            state={{
+                                typeId: typeId,
+                                categoryId
+                            }}
                             label={
                                 <>
                                     <span className="hidden sm:flex items-center gap-1">
