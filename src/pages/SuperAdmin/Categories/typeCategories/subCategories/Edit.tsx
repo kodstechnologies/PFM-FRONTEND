@@ -34,6 +34,7 @@ interface SubCategory {
     img?: string;
     price?: number;
     discount?: number;
+    productCount?: number;
     discountPrice?: number;
     bestSellers?: boolean;
     weight?: string;
@@ -60,6 +61,7 @@ interface FormInputs {
     subCategoryImage: FileList | null;
     price: string;
     discount: string;
+    productCount: string;
     isCommingSoon: boolean;
     bestSellers: boolean;
     available: boolean;
@@ -117,6 +119,7 @@ const SubCategoriesEdit: React.FC = () => {
             subCategoryImage: null,
             price: '',
             discount: '',
+            productCount: '',
             isCommingSoon: false,
             bestSellers: false,
             available: true,
@@ -218,6 +221,7 @@ const SubCategoriesEdit: React.FC = () => {
             setValue('protein', fetchedProduct.protein?.toString() || '');
             setValue('description', fetchedProduct.description || '');
             setValue('price', fetchedProduct.price?.toString() || '');
+            setValue('productCount', fetchedProduct.productCount?.toString() || '');
             setValue('discount', fetchedProduct.discount?.toString() || '');
             setValue('isCommingSoon', fetchedProduct.isCommingSoon || false);
             setValue('bestSellers', fetchedProduct.bestSellers || false);
@@ -350,7 +354,13 @@ const SubCategoriesEdit: React.FC = () => {
             formData.append('description', data.description);
             formData.append('price', data.price);
             formData.append('discount', data.discount);
-            formData.append('isCommingSoon', data.isCommingSoon.toString());
+            formData.append('productCount', data.productCount);
+            // formData.append('isCommingSoon', data.isCommingSoon.toString());
+            formData.append(
+                'isCommingSoon',
+                data.isCommingSoon ? 'true' : 'false'
+            );
+
             formData.append('bestSellers', data.bestSellers.toString());
             formData.append('available', data.available.toString());
             if (data.subCategoryImage && data.subCategoryImage.length > 0) {
@@ -599,7 +609,7 @@ const SubCategoriesEdit: React.FC = () => {
                             <input
                                 id="quantity"
                                 type="number"
-                                step={1}
+                                step="0.1"
                                 min={watchedUnit?.toLowerCase().includes('piece') ? 1 : 0}
                                 {...register('quantity', {
                                     required: 'Quantity is required',
@@ -631,6 +641,35 @@ const SubCategoriesEdit: React.FC = () => {
                                 </p>
                             )}
                         </div>
+                        {/* Product Count */}
+                        <div>
+                            <label
+                                htmlFor="productCount"
+                                className="block text-sm font-medium text-gray-700 mb-1"
+                            >
+                                Product Count *
+                            </label>
+                            <input
+                                id="productCount"
+                                type="number"
+                                min="0"
+                                // step="0.1"
+                                {...register('productCount', {
+                                    required: 'Product count is required',
+                                    min: { value: 0, message: 'Product count must be at least 0' },
+                                })}
+                                className={`block w-full px-4 py-2 border rounded-lg shadow-sm sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 transition ${errors.productCount ? 'border-red-400' : 'border-gray-300'
+                                    }`}
+                                placeholder="Enter available stock (e.g., 50)"
+                                aria-invalid={errors.productCount ? 'true' : 'false'}
+                            />
+                            {errors.productCount && (
+                                <p className="mt-1 text-xs text-red-600" role="alert">
+                                    {errors.productCount.message}
+                                </p>
+                            )}
+                        </div>
+
                         {/* Serves */}
                         <div>
                             <label
@@ -642,6 +681,7 @@ const SubCategoriesEdit: React.FC = () => {
                             <input
                                 id="serves"
                                 type="number"
+                                step="0.1"
                                 {...register('serves', {
                                     required: 'Serves is required',
                                     min: { value: 1, message: 'Serves must be at least 1' },
@@ -667,6 +707,7 @@ const SubCategoriesEdit: React.FC = () => {
                             <input
                                 id="totalEnergy"
                                 type="number"
+                                step="0.1"
                                 {...register('totalEnergy', {
                                     required: 'Total energy is required',
                                     min: { value: 0, message: 'Total energy must be at least 0' },
@@ -692,6 +733,7 @@ const SubCategoriesEdit: React.FC = () => {
                             <input
                                 id="carbohydrate"
                                 type="number"
+                                step="0.1"
                                 {...register('carbohydrate', {
                                     required: 'Carbohydrate is required',
                                     min: { value: 0, message: 'Carbohydrate must be at least 0' },
@@ -717,6 +759,7 @@ const SubCategoriesEdit: React.FC = () => {
                             <input
                                 id="fat"
                                 type="number"
+                                step="0.1"
                                 {...register('fat', {
                                     required: 'Fat is required',
                                     min: { value: 0, message: 'Fat must be at least 0' },
@@ -742,6 +785,7 @@ const SubCategoriesEdit: React.FC = () => {
                             <input
                                 id="protein"
                                 type="number"
+                                step="0.1"
                                 {...register('protein', {
                                     required: 'Protein is required',
                                     min: { value: 0, message: 'Protein must be at least 0' },
@@ -837,11 +881,19 @@ const SubCategoriesEdit: React.FC = () => {
                             <label className="block text-sm font-medium text-gray-700 mb-1">
                                 Coming Soon
                             </label>
-                            <input
+                            {/* <input
                                 type="checkbox"
                                 {...register('isCommingSoon')}
                                 className="rounded border-gray-300 text-blue-600 shadow-sm focus:ring-blue-500"
+                            /> */}
+                            <input
+                                type="checkbox"
+                                {...register('isCommingSoon')}
+                                checked={watch('isCommingSoon')}
+                                onChange={(e) => setValue('isCommingSoon', e.target.checked)}
+                                className="rounded border-gray-300 text-blue-600 shadow-sm focus:ring-blue-500"
                             />
+
                         </div>
                         {/* Best Sellers */}
                         <div>

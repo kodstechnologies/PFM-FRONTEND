@@ -59,6 +59,7 @@ interface FormInputs {
     price: string;
     discount: string;
     isCommingSoon?: boolean; // Optional for now
+    productCount: string;
 }
 
 interface UserData {
@@ -89,6 +90,7 @@ const SubCategoriesAdd: React.FC = () => {
             subCategoryImage: null,
             price: '',
             discount: '',
+            productCount: '',
             isCommingSoon: false,
         },
     });
@@ -178,6 +180,8 @@ const SubCategoriesAdd: React.FC = () => {
             const types = ['default'];
 
             const formData = new FormData();
+            formData.append('productCount', data.productCount);
+
             formData.append('name', data.subCategoryName);
             formData.append('type', JSON.stringify(types));
 
@@ -308,6 +312,7 @@ const SubCategoriesAdd: React.FC = () => {
                                 </p>
                             )}
                         </div>
+
 
                         {/* Types */}
                         {/* <div className={types.length === 0 ? 'border border-red-300 rounded p-2' : ''}>
@@ -460,7 +465,33 @@ const SubCategoriesAdd: React.FC = () => {
                                 </p>
                             )}
                         </div>
-
+                        {/* Product Count */}
+                        <div>
+                            <label
+                                htmlFor="productCount"
+                                className="block text-sm font-medium text-gray-700 mb-1"
+                            >
+                                Product Count *
+                            </label>
+                            <input
+                                id="productCount"
+                                type="number"
+                                min="0"
+                                {...register('productCount', {
+                                    required: 'Product count is required',
+                                    min: { value: 0, message: 'Product count must be at least 0' },
+                                })}
+                                className={`block w-full px-4 py-2 border rounded-lg shadow-sm sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 transition ${errors.productCount ? 'border-red-400' : 'border-gray-300'
+                                    }`}
+                                placeholder="Enter available stock (e.g., 50)"
+                                aria-invalid={errors.productCount ? 'true' : 'false'}
+                            />
+                            {errors.productCount && (
+                                <p className="mt-1 text-xs text-red-600" role="alert">
+                                    {errors.productCount.message}
+                                </p>
+                            )}
+                        </div>
                         {/* Total Energy */}
                         <div>
                             <label
@@ -473,6 +504,7 @@ const SubCategoriesAdd: React.FC = () => {
                                 id="totalEnergy"
                                 type="number"
                                 min="0"
+                                step="0.1"
                                 {...register('totalEnergy', {
                                     required: 'Total energy is required',
                                     min: { value: 0, message: 'Total energy must be at least 0' },
@@ -500,6 +532,7 @@ const SubCategoriesAdd: React.FC = () => {
                                 id="carbohydrate"
                                 type="number"
                                 min="0"
+                                step="0.1"
                                 {...register('carbohydrate', {
                                     required: 'Carbohydrate is required',
                                     min: { value: 0, message: 'Carbohydrate must be at least 0' },
@@ -527,6 +560,7 @@ const SubCategoriesAdd: React.FC = () => {
                                 id="fat"
                                 type="number"
                                 min="0"
+                                step="0.1"
                                 {...register('fat', {
                                     required: 'Fat is required',
                                     min: { value: 0, message: 'Fat must be at least 0' },
@@ -554,6 +588,7 @@ const SubCategoriesAdd: React.FC = () => {
                                 id="protein"
                                 type="number"
                                 min="0"
+                                step="0.1"
                                 {...register('protein', {
                                     required: 'Protein is required',
                                     min: { value: 0, message: 'Protein must be at least 0' },
