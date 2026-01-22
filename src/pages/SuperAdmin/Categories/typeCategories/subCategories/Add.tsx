@@ -205,6 +205,12 @@ const SubCategoriesAdd: React.FC = () => {
             if (data.subCategoryImage && data.subCategoryImage.length > 0) {
                 formData.append('img', data.subCategoryImage[0]);
             }
+            // ✅ ADD THIS
+            formData.append(
+                'isCommingSoon',
+                data.isCommingSoon ? 'true' : 'false'
+            );
+
             formData.append('price', data.price);
             formData.append('discount', data.discount);
             // isCommingSoon defaults to false in backend if not sent
