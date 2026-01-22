@@ -896,7 +896,7 @@ const SubCategoriesEdit: React.FC = () => {
 
                         </div>
                         {/* Best Sellers */}
-                        <div>
+                        {/* <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
                                 Best Sellers
                             </label>
@@ -905,7 +905,7 @@ const SubCategoriesEdit: React.FC = () => {
                                 {...register('bestSellers')}
                                 className="rounded border-gray-300 text-blue-600 shadow-sm focus:ring-blue-500"
                             />
-                        </div>
+                        </div> */}
                         {/* Available */}
                         {/* <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
