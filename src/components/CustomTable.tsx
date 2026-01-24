@@ -22,12 +22,12 @@ interface CustomTableProps {
 
 const PAGE_SIZES = [10, 20, 30, 50, 100];
 
-const CustomTable = ({ 
-    pageHeader, 
-    data, 
-    columns, 
-    defaultSort = { columnAccessor: 'id', direction: 'desc' }, 
-    pageSizeOptions = PAGE_SIZES, 
+const CustomTable = ({
+    pageHeader,
+    data,
+    columns,
+    defaultSort = { columnAccessor: 'id', direction: 'desc' },
+    pageSizeOptions = PAGE_SIZES,
     isRtl = false,
     onSearchChange,
     onColumnVisibilityChange,
@@ -40,8 +40,8 @@ const CustomTable = ({
     const [hiddenColumns, setHiddenColumns] = useState<string[]>([]);
 
     const toggleColumnVisibility = (col: string) => {
-        const newHiddenColumns = hiddenColumns.includes(col) 
-            ? hiddenColumns.filter((c) => c !== col) 
+        const newHiddenColumns = hiddenColumns.includes(col)
+            ? hiddenColumns.filter((c) => c !== col)
             : [...hiddenColumns, col];
         setHiddenColumns(newHiddenColumns);
         onColumnVisibilityChange?.(newHiddenColumns);
@@ -78,7 +78,7 @@ const CustomTable = ({
 
         // Use external searchTerm if provided, otherwise use internal search state
         const currentSearch = searchTerm || search;
-        
+
         // Helper to extract a searchable string from any field
         const getFieldString = (row: any, accessor: string): string => {
             const resolvePath = (obj: any, path: string) =>
@@ -116,7 +116,7 @@ const CustomTable = ({
 
             return String(value).toLowerCase();
         };
-        
+
         if (currentSearch.trim()) {
             const keyword = currentSearch.toLowerCase();
             filtered = filtered.filter((item) =>
@@ -131,7 +131,7 @@ const CustomTable = ({
         filtered.sort((a, b) => {
             const aValue = a[sortStatus.columnAccessor];
             const bValue = b[sortStatus.columnAccessor];
-            
+
             if (aValue < bValue) return sortStatus.direction === 'asc' ? -1 : 1;
             if (aValue > bValue) return sortStatus.direction === 'asc' ? 1 : -1;
             return 0;
@@ -161,16 +161,16 @@ const CustomTable = ({
     return (
         <div className="rounded-lg shadow-lg w-full overflow-hidden">
             {/* Table */}
-            <div className="overflow-x-auto">
+
+            {/* <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                         <tr>
                             {visibleColumns.map((column, index) => (
-                                <th 
+                                <th
                                     key={index}
-                                    className={`px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider ${
-                                        column.sortable ? 'cursor-pointer hover:bg-gray-100' : ''
-                                    }`}
+                                    className={`px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider ${column.sortable ? 'cursor-pointer hover:bg-gray-100' : ''
+                                        }`}
                                     onClick={() => column.sortable && handleSort(column.accessor)}
                                 >
                                     <div className="flex items-center">
@@ -197,17 +197,78 @@ const CustomTable = ({
                         ))}
                     </tbody>
                 </table>
+            </div> */}
+            <div className="overflow-x-auto rounded-xl border border-gray-200 shadow-sm">
+                <table className="min-w-full table-fixed divide-y divide-gray-200">
+
+                    {/* HEADER */}
+                    <thead className="bg-gray-50 sticky top-0 z-10">
+                        <tr>
+                            {visibleColumns.map((column, index) => (
+                                <th
+                                    key={index}
+                                    onClick={() => column.sortable && handleSort(column.accessor)}
+                                    className={`px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider 
+              ${column.sortable ? 'cursor-pointer hover:bg-gray-100' : ''}`}
+                                >
+                                    <div className="flex items-center gap-1">
+                                        <span className="truncate">{column.title}</span>
+                                        {column.sortable && (
+                                            <svg
+                                                className="w-4 h-4 text-gray-400"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth="2"
+                                                    d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"
+                                                />
+                                            </svg>
+                                        )}
+                                    </div>
+                                </th>
+                            ))}
+                        </tr>
+                    </thead>
+
+                    {/* BODY */}
+                    <tbody className="bg-white divide-y divide-gray-100">
+                        {paginatedData.map((row, index) => (
+                            <tr
+                                key={index}
+                                className="hover:bg-gray-50 transition-colors duration-150 align-top"
+                            >
+                                {visibleColumns.map((column, colIndex) => (
+                                    <td
+                                        key={colIndex}
+                                        className="px-6 py-4 text-sm text-gray-800 break-words align-top"
+                                    >
+                                        <div className="max-w-full">
+                                            {column.render
+                                                ? column.render(row, index)
+                                                : row[column.accessor] ?? '—'}
+                                        </div>
+                                    </td>
+                                ))}
+                            </tr>
+                        ))}
+                    </tbody>
+
+                </table>
             </div>
 
             {/* Beautiful Pagination */}
             <div className="flex items-center justify-between mt-6 bg-gradient-to-r from-red-50 to-pink-50 rounded-lg p-4 border border-red-100">
                 <div className="text-sm text-gray-700 font-medium">
-                    {pageSize === filteredAndSortedData.length 
+                    {pageSize === filteredAndSortedData.length
                         ? `Showing all ${filteredAndSortedData.length} results`
                         : `Showing ${((page - 1) * pageSize) + 1} to ${Math.min(page * pageSize, filteredAndSortedData.length)} of ${filteredAndSortedData.length} results`
                     }
                 </div>
-                
+
                 <div className="flex items-center space-x-2">
                     {/* Page Size Selector */}
                     <div className="flex items-center space-x-2">
@@ -243,7 +304,7 @@ const CustomTable = ({
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
                                 </svg>
                             </button>
-                            
+
                             <button
                                 onClick={() => setPage(page - 1)}
                                 disabled={page === 1}
@@ -271,11 +332,10 @@ const CustomTable = ({
                                     <button
                                         key={pageNum}
                                         onClick={() => setPage(pageNum)}
-                                        className={`px-3 py-2 rounded-md text-sm font-medium ${
-                                            page === pageNum
-                                                ? 'bg-red-600 text-white border border-red-600'
-                                                : 'border border-red-200 bg-white text-red-600 hover:bg-red-50'
-                                        }`}
+                                        className={`px-3 py-2 rounded-md text-sm font-medium ${page === pageNum
+                                            ? 'bg-red-600 text-white border border-red-600'
+                                            : 'border border-red-200 bg-white text-red-600 hover:bg-red-50'
+                                            }`}
                                     >
                                         {pageNum}
                                     </button>
@@ -291,7 +351,7 @@ const CustomTable = ({
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                                 </svg>
                             </button>
-                            
+
                             <button
                                 onClick={() => setPage(totalPages)}
                                 disabled={page === totalPages}
