@@ -9,6 +9,7 @@ import DisplayEmploye from '../pages/SuperAdmin/Employe/Display';
 import TimeDisplay from '../pages/SuperAdmin/Time/TimeDisplay';
 import TextDisplay from '../pages/SuperAdmin/Text/TextDisplay';
 import AddMarquee from '../pages/SuperAdmin/Text/AddMarquee';
+import DeliveryCharges from '../pages/SuperAdmin/DeliveryCharges/DeliveryCharges';
 import AddTime from '../pages/SuperAdmin/Time/AddTime';
 
 // Lazy-loaded components
@@ -244,6 +245,12 @@ export const superAdminRoutes: AppRoute[] = [
   {
     path: '/add/text',
     element: <AddMarquee />,
+    layout: 'default',
+    role: 'super-admin',
+  },
+  {
+    path: '/deliveryCharges',
+    element: <DeliveryCharges />,
     layout: 'default',
     role: 'super-admin',
   },

@@ -55,6 +55,7 @@ interface ProductDetails {
     description: string;
     weight?: string;
     pieces?: string;
+    productCount?: number;
     serves: number;
     totalEnergy: number;
     carbohydrate: number;
@@ -533,7 +534,7 @@ const FullDetails: React.FC = () => {
                                 <strong>Weight:</strong> {product.weight || 'N/A'} {product.unit === 'gram' ? 'g' : product.unit === 'kg' ? 'kg' : ''}
                             </Typography>
                             <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                                <strong>Pieces:</strong> {product.pieces || 'N/A'}
+                                <strong>Pieces:</strong> {product.productCount || '1'}
                             </Typography>
                             <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                                 <strong>Serves:</strong> {product.serves} people

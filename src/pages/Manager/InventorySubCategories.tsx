@@ -644,6 +644,7 @@ interface Product {
     type: any;
     weight: string;
     pieces: string;
+    productCount: number;
     serves: number;
     totalEnergy: number;
     carbohydrate: number;
@@ -1180,7 +1181,7 @@ const InventorySubCategories: React.FC = () => {
                                                 <div>
                                                     <Typography variant="body2" className="font-semibold">Pieces</Typography>
                                                     <Typography variant="body2" color="textSecondary">
-                                                        {selectedProduct.pieces || '-'}
+                                                        {selectedProduct.productCount || '-'}
                                                     </Typography>
                                                 </div>
                                             </div>
