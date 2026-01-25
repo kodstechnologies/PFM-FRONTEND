@@ -11,6 +11,7 @@ import TextDisplay from '../pages/SuperAdmin/Text/TextDisplay';
 import AddMarquee from '../pages/SuperAdmin/Text/AddMarquee';
 import DeliveryCharges from '../pages/SuperAdmin/DeliveryCharges/DeliveryCharges';
 import AddTime from '../pages/SuperAdmin/Time/AddTime';
+import UserDetails from '../pages/SuperAdmin/usersDetails/View';
 
 // Lazy-loaded components
 const SuperAdminDashboard = lazy(() => import('../pages/SuperAdmin/Dashboard'));
@@ -251,6 +252,13 @@ export const superAdminRoutes: AppRoute[] = [
   {
     path: '/deliveryCharges',
     element: <DeliveryCharges />,
+    layout: 'default',
+    role: 'super-admin',
+  },
+  // users =====
+  {
+    path: '/users',
+    element: <UserDetails />,
     layout: 'default',
     role: 'super-admin',
   },

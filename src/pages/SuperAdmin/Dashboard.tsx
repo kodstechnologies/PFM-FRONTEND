@@ -11,6 +11,8 @@ import ScheduleIcon from '@mui/icons-material/Schedule';
 import CurrencyRupeeIcon from '@mui/icons-material/CurrencyRupee';
 import { callApi } from '../../util/admin_api';
 import SalesByCategoryChart from '../../components/pieChart/CustomPieChart';
+import { useNavigate } from "react-router-dom";
+
 
 interface CardValues {
   totalRevenue: string;
@@ -54,6 +56,7 @@ const SuperAdminDashboard: React.FC = () => {
   const [data, setData] = useState<DashboardData | null>(null);
   // console.log("🚀 ~ SuperAdminDashboard ~ data:", data.totalCategories)
 
+  const navigate = useNavigate();
 
   const cardValues: CardValues = {
     totalRevenue: data ? `₹${data.orders.totalRevenue.toLocaleString()}` : '--',
@@ -115,6 +118,11 @@ const SuperAdminDashboard: React.FC = () => {
       description: 'vs last month'
     }
   ];
+  const handleActivityClick = (activity: RecentActivity) => {
+    if (activity.type === "user") {
+      navigate("/users");
+    }
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -382,6 +390,7 @@ const SuperAdminDashboard: React.FC = () => {
                   >
                     {/* Top: Icon */}
                     <div
+                      onClick={() => handleActivityClick(activity)}
                       className={`w-12 h-12 rounded-full flex items-center justify-center mb-3 shadow-md
               ${idx % 3 === 0
                           ? 'bg-pink-100 text-red-500'
